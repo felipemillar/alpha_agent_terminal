@@ -135,3 +135,14 @@ El dashboard puede emitir tres (3) tipos de solicitudes distintas a través de `
     - Transcripciones de Earnings Calls (Llamadas de ganancias trimestrales)
 
 * **Acción Operativa:** Explicar el porqué fundamental del movimiento citando las fuentes anteriores. Luego, obligatoriamente invocar `src/generate_analysis.py` para generar los gráficos de la anomalía y finalmente inyectar el análisis HTML en el archivo JSON.
+
+---
+
+## Regla: Control de Versiones Manual y Exclusivo (Prohibido Git Push Autónomo)
+
+**CRÍTICO PARA LA GOBERNANZA DEL CÓDIGO:** Con el fin de evitar que el repositorio remoto en GitHub sea actualizado de forma automática por bots o agentes de IA, el agente:
+
+1. **TIENE ESTRICTAMENTE PROHIBIDO** ejecutar de forma autónoma cualquier comando de Git que modifique o actualice el estado del repositorio remoto (incluyendo `git push`, `git pull`, `git fetch`, `git merge`, o alteración de tags remotos).
+2. **EXCEPCIÓN ÚNICA:** El agente solo podrá ejecutar un comando que afecte a GitHub si el usuario lo solicita explícita y textualmente en su mensaje de instrucción (ej. "sube los cambios a git", "haz push", "actualiza el repo remoto").
+3. **COMPORTAMIENTO ESPERADO:** Al completar cualquier refactorización o cambio de código local, el agente debe limitarse a confirmar los cambios de forma local y dejar la sincronización remota bajo el control del usuario.
+
