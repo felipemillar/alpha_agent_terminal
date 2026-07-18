@@ -38,8 +38,10 @@ class ExtractedFile(BaseModel):
 
 class ExtractorResponse(BaseModel):
     status: str = Field(..., description="'success' o 'error'")
+    error_type: Optional[str] = Field(None, description="Código de error para integraciones (ej. AUTH_REQUIRED)")
     files: List[ExtractedFile] = Field(default_factory=list, description="Archivos generados")
     error_message: Optional[str] = Field(None, description="Mensaje de error")
+
 
 logger = get_logger(__name__)
 
@@ -134,7 +136,11 @@ def main():
     if not adapter.connect():
         logger.critical("No se pudo establecer conexión. Abortando.")
         if args.json:
-            print(ExtractorResponse(status="error", error_message="Fallo al conectar con TradingView").model_dump_json())
+            print(ExtractorResponse(
+                status="error",
+                error_type="AUTH_REQUIRED",
+                error_message="Fallo al conectar con TradingView: No se encontró sesión activa de TradingView."
+            ).model_dump_json())
         sys.exit(1)
 
     extracted_files = []

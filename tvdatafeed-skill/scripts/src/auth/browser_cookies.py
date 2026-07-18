@@ -43,9 +43,9 @@ def _is_headless_environment() -> bool:
 def get_sessionid_from_browser() -> str | None:
     """
     Intenta extraer la cookie 'sessionid' de TradingView desde los navegadores
-    instalados en el sistema local.
+    instalados en el sistema local usando rookiepy.
 
-    Orden de búsqueda: Chrome → Safari → Firefox.
+    Orden de búsqueda: Firefox → Edge → Brave → Chrome → Opera → Vivaldi → Safari → Chromium
 
     Returns:
         El valor de la cookie sessionid, o None si no se encuentra.
@@ -56,29 +56,39 @@ def get_sessionid_from_browser() -> str | None:
         return None
 
     try:
-        import browser_cookie3
+        import rookiepy
     except ImportError:
-        logger.warning("La librería browser-cookie3 no está instalada. "
-                       "Instalar con: pip install browser-cookie3")
+        logger.warning("La librería rookiepy no está instalada. "
+                       "Instalar con: pip install rookiepy")
         return None
 
     browsers = [
-        ("Chrome", browser_cookie3.chrome),
-        ("Safari", browser_cookie3.safari),
-        ("Firefox", browser_cookie3.firefox),
+        ("Firefox", rookiepy.firefox),
+        ("Edge", rookiepy.edge),
+        ("Brave", rookiepy.brave),
+        ("Chrome", rookiepy.chrome),
+        ("Opera", rookiepy.opera),
+        ("Vivaldi", rookiepy.vivaldi),
+        ("Safari", rookiepy.safari),
+        ("Chromium", rookiepy.chromium),
     ]
 
     logger.info("Buscando sesión activa de TradingView en navegadores locales...")
 
-    for name, get_cookies in browsers:
+    for name, load_cookies in browsers:
         try:
-            cj = get_cookies(domain_name="tradingview.com")
-            for cookie in cj:
-                if "tradingview.com" in cookie.domain and cookie.name == "sessionid":
-                    value = cookie.value
-                    if value and _validate_sessionid(value):
+            # rookiepy acepta dominios para filtrar
+            cookies = load_cookies(domains=["tradingview.com"])
+            for cookie in cookies:
+                # rookiepy devuelve diccionarios con keys 'name', 'value', 'domain'
+                c_name = cookie.get("name")
+                c_value = cookie.get("value")
+                c_domain = cookie.get("domain", "")
+                
+                if c_name == "sessionid" and "tradingview.com" in c_domain:
+                    if c_value and _validate_sessionid(c_value):
                         logger.info("sessionid extraído con éxito desde %s.", name)
-                        return value
+                        return c_value
         except Exception as err:
             err_type = type(err).__name__
             logger.debug(
@@ -88,6 +98,7 @@ def get_sessionid_from_browser() -> str | None:
 
     logger.warning("No se encontró ninguna sesión activa de TradingView en los navegadores.")
     return None
+
 
 
 def _validate_sessionid(sessionid: str) -> bool:
