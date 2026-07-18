@@ -1,0 +1,8 @@
+# Alpha Agent Terminal — Dependencias
+# Generado con pip freeze para reproducibilidad exacta.
+
+pandas==3.0.3
+numpy==2.5.1
+google-generativeai==0.8.6
+google-genai==2.12.1
+python-dotenv==1.2.2

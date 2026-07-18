@@ -1,0 +1,3 @@
+# Este archivo preserva la carpeta bridge/ en Git.
+# Los archivos JSON del bridge se generan en runtime por el servidor
+# y están excluidos del repositorio vía .gitignore.

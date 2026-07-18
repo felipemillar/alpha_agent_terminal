@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plotly Heatmap & 3D Analytics — 9 Ejemplos Reales</title>
+  <!-- Google Fonts & Plotly.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Georgia&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  
+  <style>
+    :root {
+      --primary-color: #4a6984; /* QRT Steel Blue */
+      --secondary-color: #883030; /* QRT Crimson */
+      --dark-color: #1a1a1a;
+      --light-color: #f7f7f7;
+      --border-color: #dddddd;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--light-color);
+      color: #333333;
+      padding: 30px;
+      line-height: 1.5;
+    }
+
+    /* QRT Header */
+    header {
+      border-bottom: 2px solid var(--dark-color);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .brand-title {
+      font-family: 'Georgia', serif;
+      font-size: 2.2rem;
+      font-weight: normal;
+      letter-spacing: -0.5px;
+      color: var(--dark-color);
+    }
+    
+    .brand-subtitle {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #666666;
+      margin-top: 5px;
+      letter-spacing: 1px;
+    }
+    
+    .meta-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #eaeaea;
+      padding: 5px 10px;
+      letter-spacing: 0.5px;
+      color: var(--dark-color);
+    }
+
+    /* Grid Layout */
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+    
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 480px;
+      transition: border-color 0.2s ease;
+    }
+    
+    .card:hover {
+      border-color: var(--primary-color);
+    }
+    
+    .card-header {
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .card-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+    
+    .card-title {
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      font-weight: normal;
+      color: var(--dark-color);
+    }
+    
+    .card-desc {
+      font-size: 0.75rem;
+      color: #666666;
+      margin-top: 4px;
+    }
+    
+    .chart-box {
+      flex-grow: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+    
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      margin-top: 60px;
+      font-size: 0.7rem;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    a.back-btn {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    a.back-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1 class="brand-title">Plotly Heatmap & 3D Showroom</h1>
+      <p class="brand-subtitle">9 Ejemplos Interactivos Reales de Visualización Cuantitativa</p>
+    </div>
+    <div>
+      <span class="meta-tag">QRT ANALYTICS PLATFORM v3.1</span>
+      <span style="margin-left: 10px;"><a href="/" class="back-btn">← Volver al Dashboard</a></span>
+    </div>
+  </header>
+
+  <div class="examples-grid">
+    
+    <!-- EJEMPLO 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 01 — 2D HEATMAP</div>
+        <h3 class="card-title">Matriz Régimen de Volatilidad × Día de la Semana</h3>
+        <p class="card-desc">Cruza el régimen de volatilidad con las tasas de llenado (SDFP) promedio de gaps.</p>
+      </div>
+      <div id="ejemplo-01" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 02 — ANNOTATED MATRIX</div>
+        <h3 class="card-title">Matriz Completa Régimen/Estado × Día (Con n=)</h3>
+        <p class="card-desc">Cruza combinaciones de volatilidad y estado del ciclo con volumen de muestras.</p>
+      </div>
+      <div id="ejemplo-02" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 03 — CORRELATION MATRIX</div>
+        <h3 class="card-title">Correlación de Variables Cuantitativas</h3>
+        <p class="card-desc">Estudio de correlación lineal entre métricas clave de gaps y ATR móvil.</p>
+      </div>
+      <div id="ejemplo-03" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 4 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 04 — 3D SURFACE PLOT</div>
+        <h3 class="card-title">Superficie 3D: Volatilidad × Tamaño × SDFP</h3>
+        <p class="card-desc">Visualiza en tres dimensiones el comportamiento continuo de la tasa de llenado.</p>
+      </div>
+      <div id="ejemplo-04" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 5 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 05 — 3D SCATTER BUBBLE</div>
+        <h3 class="card-title">Dispersión 3D de Eventos de Gaps</h3>
+        <p class="card-desc">Distribución tridimensional con volumen mapeado en el tamaño de las burbujas.</p>
+      </div>
+      <div id="ejemplo-05" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 6 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 06 — 2D DENSITY HEATMAP</div>
+        <h3 class="card-title">Densidad Bidimensional de Gaps (Histogram Contour)</h3>
+        <p class="card-desc">Visualiza las zonas de mayor concentración de eventos de gaps en el mercado.</p>
+      </div>
+      <div id="ejemplo-06" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 7 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 07 — CALENDARIO MENSUAL</div>
+        <h3 class="card-title">Heatmap de Estacionalidad Mensual e Histórica</h3>
+        <p class="card-desc">Mapea la volatilidad promedio histórica por año y mes para detectar ciclos temporales.</p>
+      </div>
+      <div id="ejemplo-07" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 8 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 08 — HOURLY GAP FILL</div>
+        <h3 class="card-title">Matriz Horaria × Día de la Semana</h3>
+        <p class="card-desc">Análisis intradiario de llenado de gaps en base a la hora de ocurrencia del evento.</p>
+      </div>
+      <div id="ejemplo-08" class="chart-box"></div>
+    </div>
+
+    <!-- EJEMPLO 9 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">EJEMPLO 09 — DIVERGING NET DRIFT</div>
+        <h3 class="card-title">Heatmap Divergente de Drift Neto</h3>
+        <p class="card-desc">Muestra los retornos promedio con una escala divergente (Carmesí-Blanco-Azul Acero).</p>
+      </div>
+      <div id="ejemplo-09" class="chart-box"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div>QRT QUANT LABS — ARCHITECTURE AND RESEARCH</div>
+    <div>SANTIAGO DE CHILE & NEW YORK NY — 2026</div>
+  </footer>
+
+  <script>
+    // Configuración base de tipografía
+    const baseFont = { family: 'Inter, sans-serif', color: '#444444', size: 9 };
+    const titleFont = { family: 'Georgia, serif', color: '#1a1a1a', size: 12 };
+
+    // --- EJEMPLO 1: Matriz Régimen de Volatilidad × Día de la Semana ---
+    const data01 = [
+      {
+        z: [[85.4, 82.1, 79.8, 81.3, 86.7], [72.3, 68.4, 71.2, 69.5, 74.1], [58.9, 52.3, 49.1, 55.4, 47.8]],
+        x: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+        y: ['BAJO', 'MEDIO', 'ALTO'],
+        type: 'heatmap',
+        colorscale: 'Blues',
+        reversescale: true,
+        showscale: true,
+        xgap: 1,
+        ygap: 1
+      }
+    ];
+    const layout01 = {
+      template: 'plotly_white',
+      margin: { l: 60, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { ticks: '' },
+      yaxis: { ticks: '' }
+    };
+    Plotly.newPlot('ejemplo-01', data01, layout01, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 2: Matriz Completa Régimen/Estado × Día (Con n=) ---
+    const zValues02 = [
+      [89.1, 85.2, 83.4, 87.2, 88.0],
+      [78.4, 74.1, 72.8, 75.0, 81.2],
+      [75.0, 71.3, 69.4, 73.1, 74.8],
+      [64.2, 59.8, 55.1, 61.2, 60.9],
+      [61.0, 58.2, 52.4, 57.0, 55.3],
+      [42.1, 38.0, 31.5, 36.4, 33.1]
+    ];
+    const nValues02 = [
+      [45, 38, 41, 44, 39],
+      [22, 19, 25, 23, 20],
+      [58, 62, 55, 60, 57],
+      [31, 28, 34, 29, 30],
+      [28, 25, 29, 27, 24],
+      [14, 18, 12, 16, 11]
+    ];
+    const textValues02 = zValues02.map((row, i) => 
+      row.map((val, j) => `<b>${val}%</b><br><span style="font-size:7px;">n=${nValues02[i][j]}</span>`)
+    );
+
+    const data02 = [
+      {
+        z: zValues02,
+        x: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+        y: ['BAJO · CON', 'BAJO · EXP', 'MED · CON', 'MED · EXP', 'ALTO · CON', 'ALTO · EXP'],
+        type: 'heatmap',
+        colorscale: 'Viridis',
+        showscale: false,
+        xgap: 2,
+        ygap: 2
+      }
+    ];
+    const layout02 = {
+      template: 'plotly_white',
+      margin: { l: 90, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      annotations: [],
+      xaxis: { ticks: '' },
+      yaxis: { ticks: '' }
+    };
+    // Generar anotaciones personalizadas con HTML para Plotly
+    for (let i = 0; i < data02[0].y.length; i++) {
+      for (let j = 0; j < data02[0].x.length; j++) {
+        layout02.annotations.push({
+          x: data02[0].x[j],
+          y: data02[0].y[i],
+          text: textValues02[i][j],
+          showarrow: false,
+          font: { family: 'Inter', size: 9, color: zValues02[i][j] > 60 ? '#ffffff' : '#333333' }
+        });
+      }
+    }
+    Plotly.newPlot('ejemplo-02', data02, layout02, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 3: Correlación de Variables Cuantitativas ---
+    const data03 = [
+      {
+        z: [
+          [1.00, -0.12, 0.45, 0.52, -0.05, 0.23],
+          [-0.12, 1.00, 0.08, -0.15, 0.62, 0.11],
+          [0.45, 0.08, 1.00, 0.88, 0.02, 0.35],
+          [0.52, -0.15, 0.88, 1.00, -0.07, 0.41],
+          [-0.05, 0.62, 0.02, -0.07, 1.00, -0.02],
+          [0.23, 0.11, 0.35, 0.41, -0.02, 1.00]
+        ],
+        x: ['Open', 'Volume', 'ATR', 'NATR', 'Return', 'Gap_ATR'],
+        y: ['Open', 'Volume', 'ATR', 'NATR', 'Return', 'Gap_ATR'],
+        type: 'heatmap',
+        colorscale: 'RdBu',
+        zmin: -1.0,
+        zmax: 1.0,
+        showscale: true,
+        xgap: 1,
+        ygap: 1
+      }
+    ];
+    const layout03 = {
+      template: 'plotly_white',
+      margin: { l: 65, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { ticks: '' },
+      yaxis: { ticks: '' }
+    };
+    Plotly.newPlot('ejemplo-03', data03, layout03, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 4: Superficie 3D: Volatilidad × Tamaño × SDFP ---
+    const steps = 25;
+    const xValues04 = Array.from({length: steps}, (_, i) => -2 + (i / (steps-1)) * 4); // Gap size de -2 a +2 ATR
+    const yValues04 = Array.from({length: steps}, (_, i) => 0.5 + (i / (steps-1)) * 2.5); // NATR de 0.5 a 3.0
+    const zValues04 = [];
+    
+    for (let i = 0; i < steps; i++) {
+      const row = [];
+      const y = yValues04[i];
+      for (let j = 0; j < steps; j++) {
+        const x = xValues04[j];
+        // SDFP decrece al aumentar tamaño del gap (x) y al aumentar volatilidad (y)
+        const val = 100 * Math.exp(-(x*x)/(1.5 + 0.5*y)) * Math.exp(-(y-0.5)/3.0);
+        row.push(val);
+      }
+      zValues04.push(row);
+    }
+
+    const data04 = [
+      {
+        z: zValues04,
+        x: xValues04,
+        y: yValues04,
+        type: 'surface',
+        colorscale: 'Jet',
+        showscale: false
+      }
+    ];
+    const layout04 = {
+      template: 'plotly_white',
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+      font: baseFont,
+      scene: {
+        xaxis: { title: 'Gap (ATR)', titlefont: { size: 8 } },
+        yaxis: { title: 'NATR (%)', titlefont: { size: 8 } },
+        zaxis: { title: 'SDFP (%)', titlefont: { size: 8 } },
+        camera: {
+          eye: { x: 1.6, y: 1.6, z: 1.2 }
+        }
+      }
+    };
+    Plotly.newPlot('ejemplo-04', data04, layout04, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 5: Dispersión 3D de Eventos de Gaps ---
+    const numPoints = 120;
+    const xScatter = Array.from({length: numPoints}, () => -2 + Math.random() * 4);
+    const yScatter = Array.from({length: numPoints}, () => 0.5 + Math.random() * 2.5);
+    const zScatter = xScatter.map((x, idx) => {
+      const y = yScatter[idx];
+      return -1.5 + (x * 0.4) + (y * 0.3) + (Math.random() - 0.5); // Retorno
+    });
+    const markerSizes = zScatter.map(z => Math.max(3, Math.abs(z) * 6));
+    const markerColors = zScatter;
+
+    const data05 = [
+      {
+        x: xScatter,
+        y: yScatter,
+        z: zScatter,
+        mode: 'markers',
+        type: 'scatter3d',
+        marker: {
+          size: markerSizes,
+          color: markerColors,
+          colorscale: 'Viridis',
+          opacity: 0.8
+        },
+        hovertemplate: 'Gap: %{x:.2f} ATR<br>NATR: %{y:.2f}%<br>Retorno: %{z:.2f}%<extra></extra>'
+      }
+    ];
+    const layout05 = {
+      template: 'plotly_white',
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+      font: baseFont,
+      scene: {
+        xaxis: { title: 'Gap Size' },
+        yaxis: { title: 'NATR' },
+        zaxis: { title: 'Drift (%)' },
+        camera: {
+          eye: { x: 1.3, y: 1.3, z: 1.3 }
+        }
+      }
+    };
+    Plotly.newPlot('ejemplo-05', data05, layout05, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 6: 2D DENSITY HEATMAP (Contorno de Densidad) ---
+    const densityX = [];
+    const densityY = [];
+    for(let i=0; i<400; i++) {
+      densityX.push(Math.random() * Math.random() * (Math.random() > 0.5 ? 1 : -1));
+      densityY.push(1.0 + Math.random() * Math.random() * 1.5);
+    }
+    const data06 = [
+      {
+        x: densityX,
+        y: densityY,
+        type: 'histogram2dcontour',
+        colorscale: 'YlOrRd',
+        showscale: false,
+        ncontours: 15
+      }
+    ];
+    const layout06 = {
+      template: 'plotly_white',
+      margin: { l: 45, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { title: 'Gap Size (ATR)' },
+      yaxis: { title: 'NATR (%)' }
+    };
+    Plotly.newPlot('ejemplo-06', data06, layout06, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 7: Calendario Estacional por Año y Mes ---
+    const years = ['2021', '2022', '2023', '2024', '2025'];
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const zSeasonal = [
+      [1.15, 1.25, 1.35, 1.10, 0.95, 0.85, 0.75, 0.80, 1.12, 1.28, 1.30, 1.18],
+      [1.45, 1.62, 1.58, 1.35, 1.20, 1.15, 1.05, 1.10, 1.38, 1.48, 1.55, 1.42],
+      [1.25, 1.18, 1.30, 1.22, 1.10, 0.98, 0.90, 0.95, 1.15, 1.22, 1.28, 1.20],
+      [0.98, 1.05, 1.12, 0.95, 0.88, 0.82, 0.78, 0.81, 1.02, 1.15, 1.18, 1.08],
+      [1.08, 1.15, 1.22, 1.18, 1.02, 0.94, 0.88, 0.92, 1.18, 1.32, 1.28, 1.15]
+    ];
+    const data07 = [
+      {
+        z: zSeasonal,
+        x: months,
+        y: years,
+        type: 'heatmap',
+        colorscale: 'Hot',
+        reversescale: true,
+        showscale: true,
+        xgap: 1,
+        ygap: 1
+      }
+    ];
+    const layout07 = {
+      template: 'plotly_white',
+      margin: { l: 45, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { ticks: '' },
+      yaxis: { ticks: '' }
+    };
+    Plotly.newPlot('ejemplo-07', data07, layout07, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 8: Matriz Horaria × Día de la Semana (Intradiario) ---
+    const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+    const zHourly = [
+      [82, 75, 68, 62, 58, 60, 65, 72], // Lun
+      [78, 72, 65, 59, 52, 55, 62, 68], // Mar
+      [80, 74, 66, 60, 55, 58, 64, 70], // Mié
+      [75, 69, 62, 55, 50, 52, 60, 66], // Jue
+      [85, 80, 72, 68, 62, 65, 70, 78]  // Vie
+    ];
+    const data08 = [
+      {
+        z: zHourly,
+        x: hours,
+        y: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+        type: 'heatmap',
+        colorscale: 'Electric',
+        showscale: true,
+        xgap: 1,
+        ygap: 1
+      }
+    ];
+    const layout08 = {
+      template: 'plotly_white',
+      margin: { l: 45, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { ticks: '', title: 'Hora del Evento' },
+      yaxis: { ticks: '' }
+    };
+    Plotly.newPlot('ejemplo-08', data08, layout08, { responsive: true, displayModeBar: false });
+
+    // --- EJEMPLO 9: Heatmap Divergente de Drift Neto ---
+    const data09 = [
+      {
+        z: [
+          [-0.35, -0.22, 0.05, 0.12, 0.45],
+          [-0.58, -0.41, -0.12, 0.08, 0.28],
+          [-0.85, -0.68, -0.42, -0.15, 0.02]
+        ],
+        x: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+        y: ['BAJO', 'MEDIO', 'ALTO'],
+        type: 'heatmap',
+        colorscale: 'RdBu',
+        zmin: -1.0,
+        zmax: 1.0,
+        showscale: true,
+        xgap: 1,
+        ygap: 1
+      }
+    ];
+    const layout09 = {
+      template: 'plotly_white',
+      margin: { l: 45, r: 15, t: 15, b: 35 },
+      font: baseFont,
+      xaxis: { ticks: '' },
+      yaxis: { ticks: '' }
+    };
+    Plotly.newPlot('ejemplo-09', data09, layout09, { responsive: true, displayModeBar: false });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,3784 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Alpha Agent Terminal</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Georgia:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: #333333;
+      margin: 0;
+      padding: 30px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 35px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 10px 40px rgba(0, 0, 0, 0.04);
+      border-radius: 6px !important;
+      border: 1px solid #eaecef;
+    }
+
+    /* Cabecera */
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .header-titles h1 {
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      font-weight: 300;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+      margin: 0 0 5px 0;
+      text-transform: uppercase;
+    }
+
+    .header-titles h1 strong {
+      font-weight: 700;
+      color: #005cff; /* QRT Electric Blue */
+    }
+
+    .header-titles h3 {
+      font-family: 'Inter', sans-serif;
+      color: #888888;
+      font-weight: 500;
+      font-size: 0.85rem;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Header Info */
+    .dashboard-header-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    /* Pop-up Agentico (Minimalist Paper) */
+    .agent-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 9998;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .agent-backdrop.visible {
+      display: block;
+      opacity: 1;
+    }
+    
+    .agent-modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.98);
+      background: #ffffff;
+      border: 1px solid #dddddd;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 4px !important;
+      padding: 30px;
+      width: 700px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .agent-modal.visible {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .agent-modal-header {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .agent-modal-stats {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888888;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eaecef;
+    }
+    .agent-modal-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333333;
+      margin-bottom: 25px;
+    }
+    .agent-modal-close {
+      background: #1a1a1a;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 4px !important;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 0.7rem;
+      transition: background 0.2s;
+    }
+    .agent-modal-close:hover {
+      background: #333333;
+    }
+
+    /* ═══ Surface Analysis Side Panel ═══ */
+    .surface-panel-wrapper {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      transition: grid-template-columns 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .surface-panel-wrapper.panel-open {
+      grid-template-columns: 1fr 340px;
+      gap: 12px;
+    }
+    .surface-side-panel {
+      display: none;
+      opacity: 0;
+      overflow-y: auto;
+      max-height: 560px;
+      background: #ffffff;
+      border: 1px solid #eaecef;
+      border-radius: 4px !important;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.35s ease;
+    }
+    .surface-panel-wrapper.panel-open .surface-side-panel {
+      display: block;
+      opacity: 1;
+    }
+    .surface-side-panel .panel-title-side {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .surface-side-panel .panel-title-side .close-side {
+      cursor: pointer;
+      font-size: 1rem;
+      color: #888;
+      background: none;
+      border: none;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .surface-side-panel .panel-title-side .close-side:hover {
+      color: #1a1a1a;
+    }
+    .surface-side-panel .side-body {
+      font-size: 12px;
+      line-height: 1.55;
+      color: #444;
+    }
+    .surface-side-panel .side-body h3, .surface-side-panel .side-body h4 {
+      font-size: 12px;
+      margin: 10px 0 5px 0;
+      color: #1a1a1a;
+    }
+    .surface-side-panel .side-body ul {
+      padding-left: 16px;
+      margin: 4px 0;
+    }
+    .surface-side-panel .side-body li {
+      margin-bottom: 4px;
+    }
+    .surface-side-panel .side-body table {
+      width: 100%;
+      font-size: 10px;
+    }
+
+    /* Zone Tags */
+    .zone-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 3px !important;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: 3px 2px;
+      border: 2px solid transparent;
+      user-select: none;
+    }
+    .zone-tag:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .zone-tag.active {
+      border-color: #1a1a1a;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+    .zone-tag-hot    { background: #fee2e2; color: #991b1b; }
+    .zone-tag-cold   { background: #dbeafe; color: #1e40af; }
+    .zone-tag-peak   { background: #fef9c3; color: #854d0e; }
+    .zone-tag-valley { background: #f3f4f6; color: #374151; }
+    .zone-tag-ridge  { background: #dcfce7; color: #166534; }
+    .zone-tag-reset  { background: #f1f5f9; color: #475569; }
+
+    /* Zone Tags Container */
+    .zone-tags-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      margin: 8px 0;
+      padding: 8px 0;
+      border-top: 1px solid #eaecef;
+      border-bottom: 1px solid #eaecef;
+    }
+
+    /* Verdict Box Layer 1 & 2 styles */
+    .verdict-box {
+      border-left: 4px solid #eaecef;
+      background: #f8fafc;
+      padding: 10px 12px;
+      margin: 10px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .verdict-box.favorable {
+      border-left-color: #10b981;
+      background: #f0fdf4;
+    }
+    .verdict-box.moderado {
+      border-left-color: #eab308;
+      background: #fefce8;
+    }
+    .verdict-box.desfavorable {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+    .verdict-label {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    .verdict-label.favorable { color: #15803d; }
+    .verdict-label.moderado { color: #a16207; }
+    .verdict-label.desfavorable { color: #b91c1c; }
+    .verdict-text {
+      font-size: 11.5px;
+      color: #334155;
+      line-height: 1.45;
+    }
+    .action-row {
+      display: flex;
+      gap: 15px;
+      margin-top: 8px;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 8px;
+    }
+    .action-col {
+      flex: 1;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+    .action-col b {
+      display: block;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      font-size: 9.5px;
+      letter-spacing: 0.5px;
+    }
+    .action-col.do b { color: #16a34a; }
+    .action-col.dont b { color: #dc2626; }
+    .narrative-section {
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+    .narrative-item {
+      margin-bottom: 10px;
+      font-size: 11.5px;
+    }
+    .narrative-item h5 {
+      margin: 0 0 3px 0;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #1e293b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .narrative-item p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.45;
+    }
+    .reference-toggle-btn {
+      display: block;
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      color: #64748b;
+      padding: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      text-align: center;
+      cursor: pointer;
+      margin: 15px 0 10px 0;
+      transition: all 0.2s ease;
+    }
+    .reference-toggle-btn:hover {
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .reference-content {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Confluence and Noise Filtering */
+    .confluence-section {
+      margin-top: 15px;
+      border-top: 1px solid #eaecef;
+      padding-top: 12px;
+    }
+    .confluence-section h4 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .confluence-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .confluence-card.strong {
+      border-left: 3px solid #10b981;
+    }
+    .confluence-card.noise {
+      border-left: 3px solid #f97316;
+    }
+    .confluence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .confluence-title {
+      font-weight: 700;
+      font-size: 10.5px;
+      color: #1e293b;
+    }
+    .confluence-badge {
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 4px;
+      border-radius: 2px;
+      line-height: 1;
+    }
+    .confluence-badge.strong {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .confluence-badge.noise {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+    .confluence-desc {
+      font-size: 10px;
+      color: #475569;
+      line-height: 1.35;
+    }
+
+
+    /* Mini Cross-Section Chart */
+    #surface-cross-section {
+      width: 100%;
+      height: 140px;
+      margin-top: 8px;
+      border: 1px solid #eaecef;
+      border-radius: 3px !important;
+      background: #fafbfc;
+    }
+
+    /* Barra de Progreso */
+    .agent-progress-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 4px;
+      background: transparent;
+      z-index: 10000;
+      display: none;
+    }
+    .agent-progress-bar {
+      height: 100%;
+      background: #005cff;
+      width: 0%;
+      transition: width 2s cubic-bezier(0.1, 0.8, 0.3, 1);
+    }
+
+    /* Controles */
+    .controls-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .controls-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .select-styled {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px !important;
+      background-color: #ffffff;
+      color: #303133;
+      width: 220px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .select-styled:hover {
+      border-color: #005cff;
+    }
+
+    .select-styled:focus {
+      outline: none;
+      border-color: #005cff;
+      box-shadow: 0 0 0 2px rgba(0, 92, 255, 0.1);
+    }
+
+    /* Semáforo & Métricas Cabecera */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .semaforo-card {
+      padding: 15px 20px;
+      border: 1px solid #eaecef;
+      border-left: 6px solid #cccccc;
+      border-radius: 4px !important;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .semaforo-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .semaforo-desc {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #444444;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .semaforo-desc strong {
+      font-weight: 600;
+      color: #1a1a1a;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .metric-card {
+      background-color: #ffffff;
+      border: 1px solid #eaecef;
+      border-top: 3px solid #cbd5e1; /* Neutral top border, can highlight on hover or status */
+      padding: 15px 18px;
+      border-radius: 4px !important;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-top-color 0.15s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-top-color: #005cff;
+    }
+
+    .metric-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888888;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+
+    /* Cuadrícula Bloomberg 2x2 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .grid-panel {
+      background-color: #ffffff;
+      border: 1px solid #eaecef;
+      border-radius: 4px !important;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.2s ease;
+      min-width: 0;
+    }
+
+    .grid-panel:hover {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .panel-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .chart-container {
+      height: 380px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    /* Pestañas (Tabs) */
+    .tab-container {
+      display: flex;
+      gap: 2px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tab-button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 5px 10px;
+      border: 1px solid #eaecef;
+      background-color: #f8fafc;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 4px !important;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+
+    .tab-button:hover {
+      color: #0f172a;
+      border-color: #cbd5e1;
+      background-color: #f1f5f9;
+    }
+
+    .tab-button.active {
+      background-color: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    /* Pestañas de Navegación de Escritorio Principal */
+    .main-nav-tabs {
+      display: flex;
+      gap: 30px;
+      border-bottom: 1px solid #eaecef;
+      margin-bottom: 25px;
+      padding-bottom: 0px;
+    }
+
+    .main-nav-tab-button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 12px 4px;
+      border: none;
+      background: transparent;
+      color: #888888;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      outline: none;
+    }
+
+    .main-nav-tab-button:hover {
+      color: #1a1a1a;
+    }
+
+    .main-nav-tab-button.active {
+      color: #005cff; /* QRT Electric Blue */
+    }
+
+    .main-nav-tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: #005cff;
+    }
+
+    /* Command Strip para Gaps Desk */
+    .command-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 12px 20px;
+      border: 1px solid #eaecef;
+      border-bottom: none;
+      background: #ffffff;
+      border-radius: 4px 4px 0 0 !important;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* KPI Strip para Gaps Desk */
+    .kpi-strip {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 25px;
+      border: 1px solid #eaecef;
+      background: #ffffff;
+      border-radius: 0 0 4px 4px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+      overflow: visible;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Cuadrante 4: Mini-tarjetas estadísticas de racha */
+    .streak-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .streak-stat-card {
+      background-color: #ffffff;
+      border: 1px solid #eaecef;
+      border-radius: 4px !important;
+      padding: 10px 8px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+      transition: all 0.15s ease;
+    }
+
+    .streak-stat-card:hover {
+      box-shadow: 0 3px 8px rgba(0,0,0,0.03);
+      border-color: #cbd5e1;
+    }
+
+    .streak-stat-label {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      color: #888888;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .streak-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .info-box {
+      background-color: #ffffff;
+      border: 1px solid #eaecef;
+      padding: 12px 18px;
+      border-radius: 4px !important;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .loading-overlay {
+      display: none;
+      color: #005cff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* KPI Tooltip Popover */
+    .kpi-cell {
+      flex: 1;
+      text-align: center;
+      padding: 12px 10px;
+      border-right: 1px solid #eaecef;
+      position: relative;
+      cursor: help;
+      transition: background-color 0.15s ease;
+    }
+    .kpi-cell:last-child {
+      border-right: none;
+    }
+    .kpi-cell:hover {
+      background-color: #f8fafc !important;
+    }
+    .kpi-cell .kpi-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      min-width: 220px;
+      max-width: 280px;
+      background: #1a1a1a;
+      color: #f0f0f0;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 400;
+      line-height: 1.45;
+      padding: 10px 13px;
+      border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 9999;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      text-transform: none;
+      letter-spacing: 0;
+      text-align: left;
+      white-space: normal;
+    }
+    .kpi-cell .kpi-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #1a1a1a;
+    }
+    .kpi-cell:hover .kpi-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .kpi-tooltip strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .select-styled.select-compact {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      width: auto;
+      min-width: 90px;
+      height: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Agent Progress Bar -->
+  <div class="agent-progress-container" id="agent-progress-container">
+    <div class="agent-progress-bar" id="agent-progress-bar"></div>
+  </div>
+
+  <!-- Agent Pop-up Modal -->
+  <div class="agent-backdrop" id="agent-backdrop"></div>
+  <div class="agent-modal" id="agent-modal">
+    <div class="agent-modal-header">
+      <span>QRT-AI AGENT ANALYSIS</span>
+    </div>
+    <div class="agent-modal-stats" id="agent-modal-stats">
+      <!-- Estadísticas aquí -->
+    </div>
+    <div class="agent-modal-body" id="agent-modal-body">
+      <!-- Texto de la IA aquí -->
+    </div>
+    <!-- Contenedores de Gráficos del Agente -->
+    <div id="agent-modal-charts" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 25px;">
+      <div id="modal-chart-5m" style="width: 100%; height: 260px; display: none; background: #f7f7f7; border: 1px solid #dddddd; border-radius: 0px;"></div>
+      <div id="modal-chart-usdclp" style="width: 100%; height: 260px; display: none; background: #f7f7f7; border: 1px solid #dddddd; border-radius: 0px;"></div>
+    </div>
+    <div style="text-align: right; display: flex; justify-content: space-between; border-top: 1px solid #eaecef; padding-top: 15px;">
+      <button class="agent-modal-close" style="background: #eaeaea; color: #1a1a1a;" onclick="syncAntigravity()">Leer respuesta de Antigravity</button>
+      <button class="agent-modal-close" style="background: #1a1a1a; color: #ffffff;" onclick="closeAgentModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Cabecera de Comando -->
+    <div class="header-section">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="/qrt_logo_light.png" alt="QRT Logo" style="height: 48px; width: auto; object-fit: contain;">
+        <div style="width: 2px; height: 35px; background-color: #eaeaea; margin: 0 5px;"></div>
+        <div class="header-titles">
+          <h1>ALPHA AGENT TERMINAL</h1>
+          <h3>STATISTICAL RESEARCH DESK</h3>
+        </div>
+      </div>
+      <div class="controls-container">
+        <span class="controls-label">TICKER:</span>
+        <select id="asset-selector" class="select-styled" onchange="cargarDatosActivo(this.value)">
+          <option value="">INITIALIZING FEED...</option>
+        </select>
+        <span id="loading-spinner" class="loading-overlay">SYNCING...</span>
+      </div>
+    </div>
+
+    <!-- Desk Navigation Tabs -->
+    <div class="main-nav-tabs">
+      <button id="btn-desk-volatilidad" class="main-nav-tab-button active" onclick="cambiarEscritorio('volatilidad')">Volatility Analysis</button>
+      <button id="btn-desk-gaps" class="main-nav-tab-button" onclick="cambiarEscritorio('gaps')">Opening Gaps</button>
+    </div>
+
+    <!-- DESK 1: VOLATILITY DESK -->
+    <div id="desk-volatilidad">
+      <!-- Resumen y Semáforo QRT -->
+      <div class="summary-bar">
+      <div id="semaforo" class="semaforo-card">
+        <div id="semaforo-title" class="semaforo-title">
+          STATE: PENDING
+        </div>
+        <div id="semaforo-desc" class="semaforo-desc">
+          Awaiting telemetry...
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label" id="label-fecha">LATEST FIX</div>
+          <div id="metric-cierre" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ATR(14)</div>
+          <div id="metric-atr" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">NATR(%)</div>
+          <div id="metric-natr" class="metric-value">-%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">VOLATILITY BIAS</div>
+          <div id="metric-estado" class="metric-value">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuadrícula 2x2 (Bloomberg Light) -->
+    <div class="dashboard-grid">
+      <!-- C1: Evolución Temporal del ATR -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">VOLATILITY TIMELINE</h4>
+          <div class="tab-container">
+            <button id="tab-nominal" class="tab-button active" onclick="cambiarMetricaATR('nominal')">NOM</button>
+            <button id="tab-porcentual" class="tab-button" onclick="cambiarMetricaATR('porcentual')">NORM (%)</button>
+          </div>
+        </div>
+        <div id="grafico-atr" class="chart-container"></div>
+      </div>
+
+      <!-- C2: Dispersión Retorno vs NATR -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">RETURN DISPERSION</h4>
+          <div class="tab-container" style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-analizar-clicks" class="tab-button" style="background-color: #28a745; color: white; display: none; border-color: #28a745;" onclick="analizarPuntosClickeados()">Analizar Selección (0)</button>
+            <button id="tab-disp-direccional" class="tab-button active" onclick="cambiarModoDispersion('direccional')">DIR</button>
+            <button id="tab-disp-absoluto" class="tab-button" onclick="cambiarModoDispersion('absoluto')">ABS (|X|)</button>
+          </div>
+        </div>
+        <div id="grafico-dispersion" class="chart-container"></div>
+      </div>
+
+      <!-- C3: Histograma de Distribución de Volatilidad -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">VOLATILITY DISTRIBUTION HISTOGRAM</h4>
+        </div>
+        <div id="grafico-autocorr" class="chart-container" style="height: 330px;"></div>
+      </div>
+
+      <!-- C4: Análisis de Rachas por Régimen -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">REGIME PERSISTENCE</h4>
+          <div class="tab-container">
+            <button id="tab-streak-bajo" class="tab-button active" onclick="cambiarRegimenStreak('BAJO')">LOW</button>
+            <button id="tab-streak-medio" class="tab-button" onclick="cambiarRegimenStreak('MEDIO')">MID</button>
+            <button id="tab-streak-alto" class="tab-button" onclick="cambiarRegimenStreak('ALTO')">HIGH</button>
+          </div>
+        </div>
+        
+        <!-- Stats de Racha -->
+        <div class="streak-stats-grid">
+          <div class="streak-stat-card">
+            <div class="streak-stat-label">N_OBS</div>
+            <div id="streak-total" class="streak-stat-value">-</div>
+          </div>
+          <div class="streak-stat-card">
+            <div class="streak-stat-label">MEDIAN(d)</div>
+            <div id="streak-median" class="streak-stat-value">-</div>
+          </div>
+          <div class="streak-stat-card">
+            <div class="streak-stat-label">MAX(d)</div>
+            <div id="streak-max" class="streak-stat-value">-</div>
+          </div>
+          <div class="streak-stat-card">
+            <div class="streak-stat-label">HIT_RATIO</div>
+            <div id="streak-pct-pos" class="streak-stat-value">-%</div>
+          </div>
+        </div>
+        
+        <div id="grafico-streaks" class="chart-container" style="height: 300px;"></div>
+      </div>
+    </div>
+    </div> <!-- FIN desk-volatilidad -->
+
+    <!-- DESK 2: OPENING GAPS DESK -->
+    <div id="desk-gaps" style="display: none;">
+
+      <!-- ═══════════ NIVEL 1: CONTROL STRIP (Filtros + Ref Horaria) ═══════════ -->
+      <div class="command-strip">
+        
+        <!-- Bloque Izquierdo: Filtros -->
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">RÉG</span>
+            <select id="gap-filter-regime" class="select-styled select-compact" onchange="onGapFilterChange()">
+              <option value="ALL">TODOS</option>
+              <option value="BAJO">BAJO</option>
+              <option value="MEDIO">MEDIO</option>
+              <option value="ALTO">ALTO</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">EST</span>
+            <select id="gap-filter-state" class="select-styled select-compact" onchange="onGapFilterChange()">
+              <option value="ALL">TODOS</option>
+              <option value="EXPANSIÓN">EXPANSIÓN</option>
+              <option value="CONTRACCIÓN">CONTRACCIÓN</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">DIR</span>
+            <select id="gap-filter-direction" class="select-styled select-compact" onchange="onGapFilterChange()">
+              <option value="ALL">TODOS</option>
+              <option value="UP">ALCISTAS</option>
+              <option value="DOWN">BAJISTAS</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">OBJ DE REVERSIÓN</span>
+            <select id="gap-fill-target" class="select-styled select-compact" style="min-width: 190px;" onchange="onGapTargetChange()">
+              <option value="1.00">CIERRE COMPLETO (100%)</option>
+              <option value="0.75">CUBRIR AL MENOS 75%</option>
+              <option value="0.50">CUBRIR AL MENOS 50% (HALF-GAP)</option>
+            </select>
+          </div>
+          <button id="btn-analizar-celda" class="tab-button" style="background-color: #005cff; color: white; border-color: #005cff; display: none; font-size: 0.75rem; padding: 6px 12px; font-family: 'Inter', sans-serif; transition: all 0.2s ease; font-weight: 600;" onclick="analizarCeldaActiva()">Analizar Celda Activa (0)</button>
+        </div>
+
+        <div id="gap-reference-hours" style="display: block; padding: 8px 12px; border-left: 3px solid #005cff; font-size: 0.7rem; color: #64748b; background: #f8fafc; line-height: 1.4; width: 380px; height: 60px; min-height: 60px; max-height: 60px; box-sizing: border-box; flex-shrink: 0; border-radius: 0 4px 4px 0; overflow: hidden;">
+          Cargando referencia horaria...
+        </div>
+      </div>
+
+      <!-- ═══════════ NIVEL 1B: KPI STRIP (7 KPIs de ancho completo) ═══════════ -->
+      <div class="kpi-strip">
+        <!-- KPI 1: Total -->
+        <div class="kpi-cell">
+          <div class="kpi-tooltip"><strong>Total Gaps</strong> — Número total de gaps de apertura detectados.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">TOTAL</div>
+          <div id="gap-metric-total" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-</div>
+        </div>
+        <!-- KPI 2: SDFP -->
+        <div class="kpi-cell">
+          <div class="kpi-tooltip"><strong>Same-Day Fill Probability</strong> — Porcentaje de gaps que alcanzaron el objetivo de reversión.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">SDFP</div>
+          <div id="gap-metric-sdfp" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-%</div>
+        </div>
+        <!-- KPI 3: Avg Size -->
+        <div class="kpi-cell">
+          <div class="kpi-tooltip"><strong>Avg Gap Size (ATR)</strong> — Tamaño promedio del gap en ATR(14).</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">AVG SIZE</div>
+          <div id="gap-metric-avg-size" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-</div>
+        </div>
+        <!-- KPI 4: Filled -->
+        <div class="kpi-cell">
+          <div class="kpi-tooltip"><strong>Filled Gaps</strong> — Cantidad de gaps que alcanzaron el objetivo.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">FILLED</div>
+          <div id="gap-metric-filled" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-</div>
+        </div>
+        <!-- KPI 5: Fill Depth -->
+        <div class="kpi-cell" style="background: #fafafa;">
+          <div class="kpi-tooltip"><strong>Avg Fill Depth</strong> — Profundidad promedio de retracement.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">DEPTH</div>
+          <div id="gap-metric-fill-depth" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-%</div>
+        </div>
+        <!-- KPI 6: Net Drift -->
+        <div class="kpi-cell" style="background: #fafafa;">
+          <div class="kpi-tooltip"><strong>Avg Net Drift</strong> — Movimiento neto promedio del precio al cierre.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">DRIFT</div>
+          <div id="gap-metric-net-drift" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-</div>
+        </div>
+        <!-- KPI 7: ICR -->
+        <div class="kpi-cell" style="background: #fafafa;">
+          <div class="kpi-tooltip"><strong>Intraday Capture Ratio</strong> — Ratio de captura intradía del gap.</div>
+          <div style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888888; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">ICR</div>
+          <div id="gap-metric-icr" style="font-size: 0.95rem; font-weight: 700; color: #1a1a1a;">-</div>
+        </div>
+      </div>
+
+      <!-- ═══════════ WORKSPACE GRID (Perfect 2-Column Alignment) ═══════════ -->
+      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 20px; margin-bottom: 25px;">
+        
+        <!-- COLUMNA IZQUIERDA (Análisis Principal, Matriz Granular y 3D) -->
+        <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+          
+          <!-- Panel 1: Scatter Plot -->
+          <div class="grid-panel">
+            <div class="panel-header">
+              <h4 class="panel-title">GAP SIZE vs VOLATILITY SCATTER</h4>
+              <div class="tab-container" style="display: flex; gap: 8px;">
+                 <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Azul: Llenados | Carmesí: Abiertos | Escala Fija</span>
+              </div>
+            </div>
+            <div id="grafico-gaps-scatter" class="chart-container" style="height: 280px;"></div>
+          </div>
+
+          <!-- Panel 2: Heatmap 2 (Completo / Granular) -->
+          <div class="grid-panel">
+            <div class="panel-header">
+              <h4 class="panel-title">REGIME × STATE × WEEKDAY — SDFP MATRIX</h4>
+              <div class="tab-container" style="display: flex; gap: 8px;">
+                 <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Bordes punteados = n < 5</span>
+              </div>
+            </div>
+            <div id="grafico-gaps-heatmap-full" class="chart-container" style="height: 280px;"></div>
+          </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA (Matrices Compactas de Tasa de Llenado) -->
+        <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+
+          <!-- Panel 1: Heatmap 1 (Regime) -->
+          <div class="grid-panel">
+            <div class="panel-header">
+              <h4 class="panel-title">FILL RATE: REGIME × WEEKDAY</h4>
+              <div class="tab-container" style="display: flex; gap: 8px;">
+                 <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Clic en celda para filtrar</span>
+              </div>
+            </div>
+            <div id="grafico-gaps-heatmap-regime" class="chart-container" style="height: 280px;"></div>
+          </div>
+
+          <!-- Panel 2: Heatmap 3 (Size) -->
+          <div class="grid-panel">
+            <div class="panel-header">
+              <h4 class="panel-title">FILL RATE: GAP SIZE × WEEKDAY</h4>
+              <div class="tab-container" style="display: flex; gap: 8px;">
+                 <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Tamaño del gap en ATR(14)</span>
+              </div>
+            </div>
+            <div id="grafico-gaps-heatmap-size" class="chart-container" style="height: 280px;"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ═══════════ 3D PROBABILITY SURFACE (Full Width) ═══════════ -->
+      <div class="grid-panel" style="margin-bottom: 25px;">
+        <div class="panel-header">
+          <h4 class="panel-title">3D PROBABILITY SURFACE</h4>
+          <div class="tab-container" style="display: flex; align-items: center; gap: 10px;">
+             <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Girar con ratón</span>
+             <button class="tab-button select-compact" id="btn-interpretar-3d" style="font-size: 0.65rem; background-color: #005cff; color: white; border-color: #005cff; font-family: 'Inter', sans-serif; font-weight: 600; padding: 4px 8px; margin: 0; line-height: 1; border-radius: 3px !important; cursor: pointer;" onclick="interpretarSuperficie3D()">Interpretar</button>
+          </div>
+        </div>
+        <div class="surface-panel-wrapper" id="surface-panel-wrapper">
+          <div id="grafico-gaps-3d" class="chart-container" style="height: 550px;"></div>
+          <div class="surface-side-panel" id="surface-side-panel">
+            <div class="panel-title-side">
+              <span>SURFACE ANALYSIS</span>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="tab-button select-compact" style="font-size: 0.6rem; padding: 2px 6px; margin: 0; background-color: #f1f5f9; color: #1e293b; border-color: #dee2e6; cursor: pointer;" onclick="syncAntigravity()">Sincronizar</button>
+                <button class="close-side" onclick="closeSurfaceSidePanel()" title="Cerrar panel">&times;</button>
+              </div>
+            </div>
+            <div class="zone-tags-bar" id="surface-zone-tags">
+              <!-- Zone tags se inyectan dinámicamente -->
+            </div>
+            <div class="side-body" id="surface-side-body">
+              <!-- Contenido del análisis AI -->
+            </div>
+            <div id="surface-cross-section"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="info-box" style="margin-top: 15px;">
+        [SYSTEM] Gap analytics database compiled. Historical statistics filtered by asset ATR bounds.
+      </div>
+    </div>
+
+    <div class="info-box">
+      [SYSTEM] Engine sync active. Transition telemetry routed to local state.
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin + "/api";
+
+    let globalChartData = null;
+    let globalAssetName = "";
+    let globalMetricaActual = "nominal"; 
+    let globalModoDispersion = "direccional"; 
+    let globalRegimenStreak = "BAJO";
+    let clickedPointsList = [];
+    let activeDesk = "volatilidad"; 
+    let globalMarkovData = null;
+    let globalStreaksData = null;
+    let globalGapsData = null;
+    let globalCurrentATR = 0;
+    let globalSelectedWeekday = null;
+    let globalScatterRangeX = null;
+    let globalScatterRangeY = null;
+    let globalSelectedFilter = null; // { weekday, regime, state, sizeBucket: { min, max }, sizeBucketLabel, source }
+    let globalMinFillTarget = 1.00; // Cierre de gap objetivo (1.00 = 100%, 0.50 = 50%, etc.)
+    let globalFilteredGapsPoints = [];
+    let global3DSurfaceXGrid = null;
+    let global3DSurfaceYGrid = null;
+    let global3DSurfaceZMatrix = null;
+    let globalSurfaceZones = null;  // Zonas interactivas del análisis de superficie
+    let globalActiveZoneId = null;  // Zona actualmente iluminada
+
+    function getTextColorForValue(val) {
+        if (val === null) return '#1e293b';
+        // En la escala Viridis, los valores altos (amarillo brillante) necesitan texto oscuro.
+        // Los valores medios y bajos (azul/púrpura oscuro y verde esmeralda) necesitan texto blanco.
+        return val >= 75.0 ? '#1e293b' : '#ffffff';
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const response = await fetch(`${API_BASE}/assets`);
+        if (!response.ok) throw new Error("Feed error.");
+        const assets = await response.json();
+
+        const selector = document.getElementById("asset-selector");
+        selector.innerHTML = ""; 
+
+        let defaultAsset = "";
+        assets.forEach(asset => {
+          const option = document.createElement("option");
+          option.value = asset.name;
+          option.textContent = asset.name.replace("_PEPPERSTONE", "").replace("_OANDA", "").replace("_NASDAQ", "");
+          selector.appendChild(option);
+
+          if (asset.name.includes("XAUUSD") && asset.name.includes("PEPPERSTONE")) {
+            defaultAsset = asset.name;
+          }
+        });
+
+        if (!defaultAsset && assets.length > 0) {
+          defaultAsset = assets[0].name;
+        }
+
+        if (defaultAsset) {
+          selector.value = defaultAsset;
+          cargarDatosActivo(defaultAsset);
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("semaforo-desc").innerHTML = `SYS_ERR: Kernel connection refused (port ${window.location.port || '80'}).`;
+      }
+    });
+
+    async function cargarDatosActivo(assetName) {
+      if (!assetName) return;
+
+      // Limpiar selección de clics previos
+      clickedPointsList = [];
+      const btn = document.getElementById("btn-analizar-clicks");
+      if (btn) {
+          btn.style.display = "none";
+          btn.textContent = "Analizar Selección (0)";
+      }
+
+      const spinner = document.getElementById("loading-spinner");
+      spinner.style.display = "inline";
+
+      try {
+        const [volRes, markovRes, streaksRes, gapsRes] = await Promise.all([
+          fetch(`${API_BASE}/volatility?asset=${assetName}`).then(r => r.json()),
+          fetch(`${API_BASE}/markov?asset=${assetName}`).then(r => r.json()),
+          fetch(`${API_BASE}/streaks?asset=${assetName}&regime=${globalRegimenStreak}`).then(r => r.json()),
+          fetch(`${API_BASE}/gaps?asset=${assetName}`).then(r => r.json())
+        ]);
+
+        globalChartData = volRes.chart_data;
+        globalAssetName = assetName;
+        globalMarkovData = markovRes;
+        globalStreaksData = streaksRes;
+        globalGapsData = gapsRes;
+        globalCurrentATR = volRes.metrics.current_atr;
+        
+        // Calcular rangos globales absolutos para escala fija del Scatter Plot de Gaps
+        if (globalGapsData && globalGapsData.points && globalGapsData.points.length > 0) {
+          const gapSizes = globalGapsData.points.map(p => p.gap_size_atr);
+          const natrs = globalGapsData.points.map(p => p.natr);
+          const minX = Math.min(...gapSizes);
+          const maxX = Math.max(...gapSizes);
+          const minY = Math.min(...natrs);
+          const maxY = Math.max(...natrs);
+          const padX = (maxX - minX) * 0.05 || 0.1;
+          const padY = (maxY - minY) * 0.05 || 0.1;
+          
+          globalScatterRangeX = [minX - padX, maxX + padX];
+          globalScatterRangeY = [minY * 0.95, maxY * 1.05];
+        } else {
+          globalScatterRangeX = null;
+          globalScatterRangeY = null;
+        }
+        globalSelectedWeekday = null;
+        globalSelectedFilter = null;
+
+        const metrics = volRes.metrics;
+        const semaforo = document.getElementById("semaforo");
+        semaforo.style.borderLeftColor = metrics.hex_color;
+
+        document.getElementById("semaforo-title").textContent = `STATE: ${metrics.regime}`;
+        document.getElementById("semaforo-title").style.color = metrics.hex_color;
+        document.getElementById("semaforo-desc").innerHTML = `
+          <strong>ALERT:</strong> ${metrics.alert}<br>
+          <strong>EXECUTION MANDATE:</strong> ${metrics.action}
+        `;
+
+        document.getElementById("label-fecha").textContent = `FIX: ${metrics.last_date}`;
+        document.getElementById("metric-cierre").textContent = metrics.current_price;
+        document.getElementById("metric-atr").textContent = metrics.current_atr;
+        document.getElementById("metric-natr").textContent = `${metrics.current_natr}%`;
+
+        const estadoElem = document.getElementById("metric-estado");
+        if (estadoElem) {
+          estadoElem.textContent = metrics.volatility_state;
+          if (metrics.volatility_state === "EXPANSIÓN") {
+            estadoElem.style.color = "#883030";
+          } else {
+            estadoElem.style.color = "#4a6984";
+          }
+        }
+
+        // Rellenar calculadora pre-market si está presente en el DOM
+        const calcCierre = document.getElementById("calc-cierre");
+        const calcApertura = document.getElementById("calc-apertura");
+        const calcResultado = document.getElementById("calc-resultado");
+        if (calcCierre && calcApertura && calcResultado) {
+          calcCierre.value = metrics.current_price;
+          calcApertura.value = "";
+          calcResultado.innerHTML = 
+            `Ingrese la Apertura estimada para proyectar la probabilidad. <br>` +
+            `<b>ATR(14) Actual:</b> ${metrics.current_atr}`;
+        }
+
+        // Actualizar referencia de huso horario y sesiones
+        const refElem = document.getElementById("gap-reference-hours");
+        if (refElem) {
+          if (assetName.includes("USDCLP")) {
+            // Mercado interbancario chileno
+            refElem.innerHTML = `<b>REF:</b> Huso Horario de Santiago (CLT)<br>` +
+                                `• Cierre Anterior: <b>13:40 CLT</b> | Apertura: <b>09:00 CLT</b><br>` +
+                                `<span style="font-size: 0.6rem; color: #888;">Sesión interbancaria CLP — Bolsa Electrónica de Chile</span>`;
+          } else if (assetName.includes("NASDAQ") || assetName.includes("AMEX") || assetName.includes("NYSE")) {
+            // Acciones y ETFs listados en bolsas estadounidenses
+            refElem.innerHTML = `<b>REF:</b> Huso Horario de Nueva York (EST/EDT)<br>` +
+                                `• Cierre Anterior: <b>16:00 NY</b> | Apertura: <b>09:30 NY</b><br>` +
+                                `<span style="font-size: 0.6rem; color: #888;">Sesión regular NYSE/NASDAQ — Pre-market 04:00, After-hours hasta 20:00</span>`;
+          } else {
+            // Forex, Commodities, Crypto (mercados continuos)
+            refElem.innerHTML = `<b>REF:</b> Huso Horario de Nueva York (EST/EDT)<br>` +
+                                `• Cierre Anterior: <b>17:00 NY</b> | Apertura: <b>18:00 NY</b><br>` +
+                                `<span style="font-size: 0.6rem; color: #888;">Mercado continuo 24h — Sesión FX/Commodities/Crypto</span>`;
+          }
+        }
+
+        // Resetear selectores de filtros y renderizar
+        document.getElementById("gap-filter-regime").value = "ALL";
+        document.getElementById("gap-filter-state").value = "ALL";
+        const dirFilter = document.getElementById("gap-filter-direction");
+        if (dirFilter) dirFilter.value = "ALL";
+        globalSelectedWeekday = null;
+        globalSelectedFilter = null;
+        window.filtrarYRenderizarGaps();
+
+        renderizarGraficoATR(globalChartData, globalMetricaActual);
+        renderizarGraficoDispersion(globalChartData, globalModoDispersion);
+        renderizarHistogramaVolatilidad(globalChartData);
+        renderizarScatterRachas(streaksRes);
+
+      } catch (err) {
+        console.error(err);
+        alert("Telemetry sync failed. Verify local engine.");
+      } finally {
+        spinner.style.display = "none";
+      }
+    }
+
+    function cambiarMetricaATR(tipo) {
+      if (!globalChartData) return;
+      globalMetricaActual = tipo;
+
+      const tabNominal = document.getElementById("tab-nominal");
+      const tabPorcentual = document.getElementById("tab-porcentual");
+
+      if (tipo === "nominal") {
+        tabNominal.classList.add("active");
+        tabPorcentual.classList.remove("active");
+      } else {
+        tabNominal.classList.remove("active");
+        tabPorcentual.classList.add("active");
+      }
+
+      renderizarGraficoATR(globalChartData, tipo);
+    }
+
+    function cambiarModoDispersion(modo) {
+      if (!globalChartData) return;
+      globalModoDispersion = modo;
+
+      const tabDireccional = document.getElementById("tab-disp-direccional");
+      const tabAbsoluto = document.getElementById("tab-disp-absoluto");
+
+      if (modo === "direccional") {
+        tabDireccional.classList.add("active");
+        tabAbsoluto.classList.remove("active");
+      } else {
+        tabDireccional.classList.remove("active");
+        tabAbsoluto.classList.add("active");
+      }
+
+      renderizarGraficoDispersion(globalChartData, modo);
+    }
+
+    async function cambiarRegimenStreak(regime) {
+      if (!globalAssetName) return;
+      globalRegimenStreak = regime;
+
+      const regimes = ["BAJO", "MEDIO", "ALTO"];
+      regimes.forEach(r => {
+        const btn = document.getElementById(`tab-streak-${r.toLowerCase()}`);
+        if (r === regime) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+
+      try {
+        const streaksData = await fetch(`${API_BASE}/streaks?asset=${globalAssetName}&regime=${regime}`).then(r => r.json());
+        renderizarScatterRachas(streaksData);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderizarGraficoATR(chartData, metrica) {
+      const seriesY = metrica === "porcentual" ? chartData.natr : chartData.atr;
+      const hoverTemplateY = metrica === "porcentual" ? "%{y:.3f}%" : "%{y:.4f}";
+
+      const traceLine = {
+        x: chartData.dates,
+        y: seriesY,
+        mode: 'lines',
+        name: metrica === "porcentual" ? 'NATR' : 'ATR',
+        line: { color: '#e0e0e0', width: 1.2 },
+        hoverinfo: 'skip'
+      };
+
+      const regMap = {
+        "BAJO": { x: [], y: [], close: [], color: "#a4b7c1" },
+        "MEDIO": { x: [], y: [], close: [], color: "#4a6984" },
+        "ALTO": { x: [], y: [], close: [], color: "#883030" }
+      };
+
+      for (let i = 0; i < chartData.dates.length; i++) {
+        const reg = chartData.regimes[i];
+        if (regMap[reg]) {
+          regMap[reg].x.push(chartData.dates[i]);
+          regMap[reg].y.push(seriesY[i]);
+          regMap[reg].close.push(chartData.close[i]);
+        }
+      }
+
+      const traces = [traceLine];
+      for (const [regName, regData] of Object.entries(regMap)) {
+        if (regData.x.length > 0) {
+          traces.push({
+            x: regData.x,
+            y: regData.y,
+            mode: 'markers',
+            name: `${regName}`,
+            marker: {
+              color: regData.color,
+              size: 4,
+              opacity: 0.8,
+              line: { color: 'white', width: 0.3 }
+            },
+            text: regData.close,
+            hovertemplate: `T: %{x}<br>V: ${hoverTemplateY}<br>Px: %{text:.2f}<extra></extra>`
+          });
+        }
+      }
+
+      const layout = {
+        xaxis: { gridcolor: '#f1f2f4' },
+        yaxis: { gridcolor: '#f1f2f4' },
+        template: 'plotly_white',
+        height: 330,
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 10 },
+        hovermode: 'closest',
+        margin: { l: 45, r: 15, t: 15, b: 30 },
+        legend: { orientation: 'h', y: 1.15, x: 1, xanchor: 'right' }
+      };
+
+      Plotly.newPlot('grafico-atr', traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function renderizarGraficoDispersion(chartData, modo = "direccional") {
+      const regMap = {
+        "BAJO": { x: [], y: [], dates: [], color: "#a4b7c1" },
+        "MEDIO": { x: [], y: [], dates: [], color: "#4a6984" },
+        "ALTO": { x: [], y: [], dates: [], color: "#883030" }
+      };
+
+      for (let i = 0; i < chartData.dates.length; i++) {
+        const reg = chartData.regimes[i];
+        if (regMap[reg]) {
+          const valX = modo === "absoluto" ? Math.abs(chartData.return[i]) : chartData.return[i];
+          regMap[reg].x.push(valX);
+          regMap[reg].y.push(chartData.natr[i]);
+          regMap[reg].dates.push(chartData.dates[i]);
+        }
+      }
+
+      const traces = [];
+      for (const [regName, regData] of Object.entries(regMap)) {
+        if (regData.x.length > 0) {
+          traces.push({
+            x: regData.x,
+            y: regData.y,
+            mode: 'markers',
+            name: `${regName}`,
+            marker: {
+              color: regData.color,
+              size: 5,
+              opacity: 0.35,
+              line: { width: 0.4, color: 'white' }
+            },
+            text: regData.dates,
+            hovertemplate: `T: %{text}<br>${modo === "absoluto" ? "ABS:" : "DIR:"} %{x:.2f}%<br>NATR: %{y:.2f}%<extra></extra>`
+          });
+        }
+      }
+
+      let rangeX;
+      if (modo === "absoluto") {
+        const maxAbsRet = Math.max(...chartData.return.map(Math.abs));
+        rangeX = [0, maxAbsRet * 1.05];
+      } else {
+        const minRet = Math.min(...chartData.return);
+        const maxRet = Math.max(...chartData.return);
+        const padX = (maxRet - minRet) * 0.05;
+        rangeX = [minRet - padX, maxRet + padX];
+      }
+
+      const minNatr = Math.min(...chartData.natr);
+      const maxNatr = Math.max(...chartData.natr);
+      const padY = (maxNatr - minNatr) * 0.05;
+      const rangeY = [minNatr - padY, maxNatr + padY];
+
+      const layout = {
+        dragmode: 'lasso',
+        xaxis: { 
+          gridcolor: '#f1f2f4', 
+          zerolinecolor: '#d1d5da', 
+          zerolinewidth: 1,
+          range: rangeX
+        },
+        yaxis: { 
+          gridcolor: '#f1f2f4',
+          range: rangeY
+        },
+        template: 'plotly_white',
+        height: 330,
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 10 },
+        hovermode: 'closest',
+        margin: { l: 45, r: 15, t: 15, b: 35 },
+        legend: { orientation: 'h', y: 1.15, x: 1, xanchor: 'right' }
+      };
+
+      Plotly.newPlot('grafico-dispersion', traces, layout, { responsive: true, displayModeBar: true });
+
+      const myPlot = document.getElementById('grafico-dispersion');
+      
+      myPlot.removeAllListeners('plotly_selected');
+      myPlot.removeAllListeners('plotly_deselect');
+
+      myPlot.on('plotly_selected', async function(eventData) {
+        if(!eventData || !eventData.points) return;
+        const points = eventData.points.map(p => ({
+            date: p.text,
+            x: p.x,
+            y: p.y,
+            regime: p.data.name
+        }));
+        
+        if(points.length === 0) return;
+        
+        document.getElementById("loading-spinner").style.display = "inline";
+        document.getElementById("loading-spinner").textContent = "AGENT THINKING...";
+        
+        // Iniciar barra de estado
+        const progressContainer = document.getElementById("agent-progress-container");
+        const progressBar = document.getElementById("agent-progress-bar");
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        setTimeout(() => { progressBar.style.width = "85%"; }, 50);
+        
+        try {
+          const response = await fetch(`${API_BASE}/agent/analyze`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ asset: globalAssetName, points: points })
+          });
+          
+          if(response.ok) {
+            const data = await response.json();
+            progressBar.style.width = "100%"; // Terminar progreso
+            
+            // Renderizar la cajita en el gráfico (opcional pero lo dejamos para contexto)
+            Plotly.relayout('grafico-dispersion', {
+                'shapes': [data.shape],
+                'annotations': [data.annotation]
+            });
+            
+            // Poblar y mostrar Pop-Up Modal
+            document.getElementById("agent-modal-stats").innerHTML = 
+              `<b>Observaciones:</b> ${data.cluster_size} días &nbsp;|&nbsp; ` + 
+              `<b>Retorno Medio:</b> ${data.avg_ret}% &nbsp;|&nbsp; ` +
+              `<b>Volatilidad Media (NATR):</b> ${data.avg_natr}%`;
+            
+            // Reemplazar saltos de linea puros por tags br para html
+            let rawText = data.ai_raw_text || "";
+            document.getElementById("agent-modal-body").innerHTML = rawText.replace(/\n/g, '<br>');
+            
+            setTimeout(() => {
+                document.getElementById("agent-backdrop").classList.add("visible");
+                document.getElementById("agent-modal").classList.add("visible");
+                progressContainer.style.display = "none";
+            }, 300); // Pequeño delay para que la barra llegue al 100% visualmente
+          }
+        } catch(e) {
+            console.error("Error contactando al Agente", e);
+            progressBar.style.background = "#dc3545"; // Rojo error
+            setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
+        } finally {
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("loading-spinner").textContent = "SYNCING...";
+        }
+      });
+      
+      myPlot.on('plotly_deselect', function() {
+        Plotly.relayout('grafico-dispersion', {
+            'shapes': [],
+            'annotations': []
+        });
+      });
+
+      myPlot.removeAllListeners('plotly_click');
+      myPlot.on('plotly_click', function(data) {
+        if(!data || !data.points || data.points.length === 0) return;
+        const p = data.points[0];
+        const pt = {
+            date: p.text,
+            x: p.x,
+            y: p.y,
+            regime: p.data.name
+        };
+        
+        // Toggle de puntos seleccionados
+        const existsIdx = clickedPointsList.findIndex(item => item.date === pt.date);
+        if (existsIdx > -1) {
+            clickedPointsList.splice(existsIdx, 1);
+        } else {
+            clickedPointsList.push(pt);
+        }
+        
+        // Actualizar botón de análisis
+        const btn = document.getElementById("btn-analizar-clicks");
+        if (clickedPointsList.length > 0) {
+            btn.style.display = "inline-block";
+            btn.textContent = `Analizar Selección (${clickedPointsList.length})`;
+        } else {
+            btn.style.display = "none";
+        }
+        
+        // Calcular radio dinámico para los círculos de resaltado
+        const rangeX = myPlot.layout.xaxis.range;
+        const rangeY = myPlot.layout.yaxis.range;
+        const widthX = Math.abs(rangeX[1] - rangeX[0]);
+        const widthY = Math.abs(rangeY[1] - rangeY[0]);
+        
+        const radiusX = widthX * 0.015;
+        const radiusY = widthY * 0.015;
+        
+        const shapes = clickedPointsList.map(item => ({
+            type: 'circle',
+            xref: 'x', yref: 'y',
+            x0: item.x - radiusX, y0: item.y - radiusY,
+            x1: item.x + radiusX, y1: item.y + radiusY,
+            line: { color: 'rgba(107, 142, 35, 1)', width: 1.5 },
+            fillcolor: 'rgba(107, 142, 35, 0.25)'
+        }));
+        
+        Plotly.relayout(myPlot, { shapes: shapes });
+      });
+    }
+
+    function renderizarHistogramaVolatilidad(data) {
+      const plotDiv = document.getElementById('grafico-autocorr');
+      if (!plotDiv || !data || !data.natr || data.natr.length === 0) return;
+
+      const natr = data.natr;
+      const n = natr.length;
+      
+      // Momentos estadísticos básicos
+      const mean = natr.reduce((a, b) => a + b, 0) / n;
+      const sorted = [...natr].sort((a, b) => a - b);
+      const median = n % 2 !== 0 ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+      const variance = natr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
+      const stdDev = Math.sqrt(variance);
+
+      // Separar NATR por régimen de volatilidad histórico
+      const natrBajo = [];
+      const natrMedio = [];
+      const natrAlto = [];
+      for (let i = 0; i < n; i++) {
+        const val = natr[i];
+        const reg = data.regimes[i];
+        if (reg === "BAJO") natrBajo.push(val);
+        else if (reg === "MEDIO") natrMedio.push(val);
+        else if (reg === "ALTO") natrAlto.push(val);
+      }
+
+      // Traces de los tres regímenes (colores Viridis unificados)
+      const traceBajo = {
+        x: natrBajo,
+        type: 'histogram',
+        nbinsx: 35,
+        name: 'Rég. BAJO',
+        marker: { color: '#440154', line: { color: '#ffffff', width: 0.4 } },
+        opacity: 0.85,
+        hovertemplate: 'NATR% (Bajo): <b>%{x:.2f}%</b><br>Días: <b>%{y}</b><extra></extra>'
+      };
+
+      const traceMedio = {
+        x: natrMedio,
+        type: 'histogram',
+        nbinsx: 35,
+        name: 'Rég. MEDIO',
+        marker: { color: '#21918c', line: { color: '#ffffff', width: 0.4 } },
+        opacity: 0.85,
+        hovertemplate: 'NATR% (Medio): <b>%{x:.2f}%</b><br>Días: <b>%{y}</b><extra></extra>'
+      };
+
+      const traceAlto = {
+        x: natrAlto,
+        type: 'histogram',
+        nbinsx: 35,
+        name: 'Rég. ALTO',
+        marker: { color: '#fde725', line: { color: '#ffffff', width: 0.4 } },
+        opacity: 0.85,
+        hovertemplate: 'NATR% (Alto): <b>%{x:.2f}%</b><br>Días: <b>%{y}</b><extra></extra>'
+      };
+
+      // Trazado de la curva de probabilidad acumulada (CDF)
+      const cdfX = [];
+      const cdfY = [];
+      for (let i = 0; i < n; i++) {
+        cdfX.push(sorted[i]);
+        cdfY.push((i / (n - 1)) * 100);
+      }
+
+      const traceCDF = {
+        x: cdfX,
+        y: cdfY,
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#1e293b', width: 1.5, shape: 'spline' },
+        name: 'CDF Acumulada',
+        yaxis: 'y2',
+        hovertemplate: 'NATR%: <b>%{x:.2f}%</b><br>Percentil CDF: <b>%{y:.1f}%</b><extra></extra>'
+      };
+
+      // Volatilidad y Percentil actual de hoy
+      const currentNatr = natr[n - 1];
+      const countLess = natr.filter(v => v <= currentNatr).length;
+      const currentPercentile = (countLess / n * 100).toFixed(1);
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 45, r: 45, t: 40, b: 35 },
+        height: 330,
+        barmode: 'stack',
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+          x: 0.5, y: 1.12,
+          xanchor: 'center', yanchor: 'bottom',
+          font: { size: 8, family: 'Inter' },
+          traceorder: 'normal'
+        },
+        xaxis: { 
+          title: { text: 'NATR (%)', font: { size: 9, family: 'Inter' } },
+          tickfont: { family: 'Inter', size: 9 },
+          gridcolor: 'rgba(0,0,0,0)'
+        },
+        yaxis: { 
+          title: { text: 'Frecuencia (Días)', font: { size: 9, family: 'Inter' } },
+          tickfont: { family: 'Inter', size: 9 },
+          gridcolor: '#f1f2f4'
+        },
+        yaxis2: {
+          title: { text: 'Probabilidad Acumulada (%)', font: { size: 9, family: 'Inter' } },
+          tickfont: { family: 'Inter', size: 9 },
+          gridcolor: 'rgba(0,0,0,0)',
+          overlaying: 'y',
+          side: 'right',
+          range: [0, 100]
+        },
+        shapes: [
+          {
+            type: 'line',
+            xref: 'x', yref: 'paper',
+            x0: currentNatr, x1: currentNatr,
+            y0: 0, y1: 1,
+            line: { color: '#dc2626', width: 1.5, dash: 'dash' }
+          }
+        ],
+        annotations: [
+          {
+            x: currentNatr,
+            y: 0.85,
+            yref: 'paper',
+            text: `<b>NATR de Hoy:</b> ${currentNatr.toFixed(2)}%<br><b>Percentil:</b> ${currentPercentile}%`,
+            showarrow: true,
+            arrowhead: 2,
+            arrowsize: 1,
+            arrowwidth: 1.5,
+            arrowcolor: '#dc2626',
+            ax: 55, ay: -25,
+            bgcolor: 'rgba(255,255,255,0.95)',
+            bordercolor: '#dc2626',
+            borderwidth: 1,
+            borderpad: 4,
+            font: { size: 8, color: '#dc2626', family: 'Inter' }
+          },
+          {
+            xref: 'paper', yref: 'paper',
+            x: 0.95, y: 0.05,
+            xanchor: 'right', yanchor: 'bottom',
+            text: `<b>Media:</b> ${mean.toFixed(2)}% | <b>Desv. Est.:</b> ${stdDev.toFixed(2)}%`,
+            showarrow: false,
+            bgcolor: 'rgba(255,255,255,0.9)',
+            bordercolor: '#eaeaea',
+            borderwidth: 1,
+            borderpad: 4,
+            font: { size: 8, color: '#1e293b', family: 'Inter' }
+          }
+        ]
+      };
+
+      Plotly.newPlot('grafico-autocorr', [traceBajo, traceMedio, traceAlto, traceCDF], layout, { responsive: true, displayModeBar: false });
+    }
+
+    function renderizarScatterRachas(data) {
+      document.getElementById("streak-total").textContent = data.summary.total_streaks;
+      document.getElementById("streak-median").textContent = data.summary.median_duration;
+      document.getElementById("streak-max").textContent = data.summary.max_duration;
+      document.getElementById("streak-pct-pos").textContent = `${data.summary.pct_positive}%`;
+
+      const streaks = data.streaks;
+
+      if (streaks.length === 0) {
+        Plotly.newPlot('grafico-streaks', [], {
+          title: "NO DATA",
+          height: 250
+        });
+        return;
+      }
+
+      const xVals = streaks.map(s => s.duration);
+      const yVals = streaks.map(s => s.change);
+      const colors = yVals.map(v => v >= 0 ? '#4a6984' : '#883030');
+      const sizes = streaks.map(s => Math.min(18, Math.max(6, (s.upswing - s.downswing) * 1.5)));
+
+      const tracePoints = {
+        x: xVals,
+        y: yVals,
+        mode: 'markers',
+        name: 'STREAKS',
+        marker: {
+          color: colors,
+          size: sizes,
+          opacity: 0.5,
+          line: { width: 0.5, color: '#ffffff' }
+        },
+        text: streaks.map(s => `${s.start_date} → ${s.end_date}`),
+        customdata: streaks.map(s => [s.upswing, s.downswing]),
+        hovertemplate: '<b>%{text}</b><br>' +
+                       'DUR: %{x}d<br>' +
+                       'RET: %{y:.2f}%<br>' +
+                       'MAX_UP: +%{customdata[0]:.2f}%<br>' +
+                       'MAX_DWN: %{customdata[1]:.2f}%<extra></extra>'
+      };
+
+      const traces = [tracePoints];
+      if (xVals.length > 2) {
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        const N = xVals.length;
+        for (let i = 0; i < N; i++) {
+          sumX += xVals[i];
+          sumY += yVals[i];
+          sumXY += xVals[i] * yVals[i];
+          sumXX += xVals[i] * xVals[i];
+        }
+        
+        const slope = (N * sumXY - sumX * sumY) / (N * sumXX - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / N;
+
+        const minX = Math.min(...xVals);
+        const maxX = Math.max(...xVals);
+        const regX = [minX, maxX];
+        const regY = [slope * minX + intercept, slope * maxX + intercept];
+
+        traces.push({
+          x: regX,
+          y: regY,
+          mode: 'lines',
+          name: 'OLS TEND',
+          line: { color: '#0366d6', width: 1.5, dash: 'dash' },
+          hovertemplate: `M: ${slope.toFixed(3)}<extra></extra>`
+        });
+      }
+
+      const layout = {
+        xaxis: { gridcolor: '#f1f2f4' },
+        yaxis: { gridcolor: '#f1f2f4', zerolinecolor: '#d1d5da', zerolinewidth: 1 },
+        template: 'plotly_white',
+        height: 250,
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        hovermode: 'closest',
+        margin: { l: 40, r: 15, t: 10, b: 30 },
+        showlegend: false
+      };
+
+      Plotly.newPlot('grafico-streaks', traces, layout, { responsive: true, displayModeBar: false });
+    }
+    
+    // Función global para cerrar el Modal Agentico
+    window.closeAgentModal = function() {
+        document.getElementById("agent-backdrop").classList.remove("visible");
+        document.getElementById("agent-modal").classList.remove("visible");
+        
+        // Limpiar seleccion clickeada
+        clickedPointsList = [];
+        const btn = document.getElementById("btn-analizar-clicks");
+        if (btn) {
+            btn.style.display = "none";
+            btn.textContent = "Analizar Selección (0)";
+        }
+        
+        // Limpiar seleccion de plotly
+        const myPlot = document.getElementById('grafico-dispersion');
+        if (myPlot) {
+            Plotly.relayout(myPlot, {
+                'shapes': [],
+                'annotations': []
+            });
+        }
+    }
+    
+    // Función global para leer la respuesta de Antigravity
+    window.syncAntigravity = async function() {
+        const modalBody = document.getElementById("agent-modal-body");
+        const sideBody = document.getElementById("surface-side-body");
+        const wrapper = document.getElementById("surface-panel-wrapper");
+        const isSidePanelOpen = wrapper && wrapper.classList.contains("panel-open");
+
+        if (isSidePanelOpen && sideBody) {
+            sideBody.innerHTML = "<i>Sincronizando con el IDE...</i>";
+        }
+        if (modalBody) {
+            modalBody.innerHTML = "<i>Sincronizando con el IDE...</i>";
+        }
+        
+        // Esconder gráficos de manera inicial
+        document.getElementById("modal-chart-5m").style.display = "none";
+        document.getElementById("modal-chart-usdclp").style.display = "none";
+        
+        try {
+            const response = await fetch(`${API_BASE}/agent/read_bridge?t=${Date.now()}`);
+            if(response.ok) {
+                const data = await response.json();
+                let rawText = data.ai_raw_text || "Aún no hay respuesta.";
+                const processedText = rawText.replace(/\n/g, '<br>');
+
+                if (isSidePanelOpen && sideBody) {
+                    sideBody.innerHTML = processedText;
+                }
+                if (modalBody) {
+                    modalBody.innerHTML = processedText;
+                }
+                
+                // Renderizar gráfico de 5m (Intradía o Superpuesto)
+                if (data.chart_5m && data.chart_5m.x) {
+                    const el5m = document.getElementById("modal-chart-5m");
+                    el5m.style.display = "block";
+                    let traces = [];
+                    
+                    if (data.chart_5m.is_cluster && data.chart_5m.individual_days) {
+                        // Modo Cluster: Graficar cada día en gris traslúcido
+                        Object.keys(data.chart_5m.individual_days).forEach(date => {
+                            traces.push({
+                                x: data.chart_5m.x,
+                                y: data.chart_5m.individual_days[date],
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: date,
+                                line: { color: 'rgba(107, 142, 35, 0.2)', width: 1.5 },
+                                showlegend: false
+                            });
+                        });
+                        // Graficar el promedio en verde grueso
+                        traces.push({
+                            x: data.chart_5m.x,
+                            y: data.chart_5m.average,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: 'Promedio Cluster',
+                            line: { color: '#6b8e23', width: 3.5 }
+                        });
+                    } else if (data.chart_5m.y) {
+                        // Modo Individual
+                        traces.push({
+                            x: data.chart_5m.x,
+                            y: data.chart_5m.y,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: '5m Intradía',
+                            line: { color: '#6b8e23', width: 2 }
+                        });
+                    }
+                    
+                    const layout5m = {
+                        title: { text: data.chart_5m.is_cluster ? 'Retorno Intradía Normalizado (Base 100)' : 'Movimiento Intradía Estimado (5 Minutos)', font: { size: 12, family: 'Inter', color: '#333' } },
+                        margin: { t: 40, b: 30, l: 50, r: 20 },
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        xaxis: { showgrid: true, gridcolor: '#eaecef', font: { size: 9, family: 'Inter' } },
+                        yaxis: { showgrid: true, gridcolor: '#eaecef', font: { size: 9, family: 'Inter' }, ticksuffix: data.chart_5m.is_cluster ? '%' : '' }
+                    };
+                    Plotly.newPlot(el5m, traces, layout5m, { responsive: true, displayModeBar: false });
+                }
+                
+                // Renderizar gráfico comparativo USDCLP (Ventana o Event Study)
+                if (data.chart_usdclp && data.chart_usdclp.x) {
+                    const elUsdClp = document.getElementById("modal-chart-usdclp");
+                    elUsdClp.style.display = "block";
+                    let traces = [];
+                    
+                    if (data.chart_usdclp.is_cluster && data.chart_usdclp.individual_days) {
+                        // Modo Cluster: Graficar cada día en gris traslúcido
+                        Object.keys(data.chart_usdclp.individual_days).forEach(date => {
+                            traces.push({
+                                x: data.chart_usdclp.x,
+                                y: data.chart_usdclp.individual_days[date],
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: date,
+                                line: { color: 'rgba(44, 62, 80, 0.2)', width: 1.5 },
+                                showlegend: false
+                            });
+                        });
+                        // Graficar el promedio en azul oscuro grueso
+                        traces.push({
+                            x: data.chart_usdclp.x,
+                            y: data.chart_usdclp.average,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: 'Promedio Evento',
+                            line: { color: '#2c3e50', width: 3.5 }
+                        });
+                    } else if (data.chart_usdclp.y) {
+                        // Modo Individual
+                        traces.push({
+                            x: data.chart_usdclp.x,
+                            y: data.chart_usdclp.y,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: 'USD/CLP',
+                            line: { color: '#2c3e50', width: 2 }
+                        });
+                    }
+                    
+                    const layoutUsd = {
+                        title: { text: data.chart_usdclp.is_cluster ? 'Estudio del Evento USD/CLP (t=0 Normalizado a 100)' : 'Comportamiento USD/CLP (Ventana de 30 Días)', font: { size: 12, family: 'Inter', color: '#333' } },
+                        margin: { t: 40, b: 30, l: 50, r: 20 },
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        xaxis: { 
+                            showgrid: true, 
+                            gridcolor: '#eaecef', 
+                            font: { size: 9, family: 'Inter' },
+                            title: data.chart_usdclp.is_cluster ? 'Días Operativos Relativos (t=0)' : ''
+                        },
+                        yaxis: { showgrid: true, gridcolor: '#eaecef', font: { size: 9, family: 'Inter' } }
+                    };
+                    Plotly.newPlot(elUsdClp, traces, layoutUsd, { responsive: true, displayModeBar: false });
+                }
+            }
+        } catch(e) {
+            if (isSidePanelOpen && sideBody) {
+                sideBody.innerHTML = `<span style="color:red">Error sincronizando: ${e}</span>`;
+            }
+            if (modalBody) {
+                modalBody.innerHTML = `<span style="color:red">Error sincronizando: ${e}</span>`;
+            }
+        }
+    };
+    // ═══════════════════════════════════════════════════════════════════
+    // INTERACTIVE SURFACE ANALYSIS: Side Panel + Zone Highlights + Pins
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Compute zones from the current surface data
+    function computeSurfaceZones(xGrid, yGrid, zMatrix) {
+        const zones = [];
+        let maxVal = -Infinity, minVal = Infinity;
+        let maxI = 0, maxJ = 0, minI = 0, minJ = 0;
+
+        // Find peak and valley
+        for (let i = 0; i < zMatrix.length; i++) {
+            for (let j = 0; j < zMatrix[i].length; j++) {
+                if (zMatrix[i][j] > maxVal) { maxVal = zMatrix[i][j]; maxI = i; maxJ = j; }
+                if (zMatrix[i][j] < minVal) { minVal = zMatrix[i][j]; minI = i; minJ = j; }
+            }
+        }
+
+        // Hot zone: SDFP > 70%
+        let hotXMin = Infinity, hotXMax = -Infinity, hotYMin = Infinity, hotYMax = -Infinity;
+        let hotCount = 0;
+        for (let i = 0; i < zMatrix.length; i++) {
+            for (let j = 0; j < zMatrix[i].length; j++) {
+                if (zMatrix[i][j] > 70) {
+                    hotXMin = Math.min(hotXMin, xGrid[j]);
+                    hotXMax = Math.max(hotXMax, xGrid[j]);
+                    hotYMin = Math.min(hotYMin, yGrid[i]);
+                    hotYMax = Math.max(hotYMax, yGrid[i]);
+                    hotCount++;
+                }
+            }
+        }
+        if (hotCount > 0) {
+            zones.push({
+                id: 'hot', label: 'Zona Caliente (>70%)', cssClass: 'zone-tag-hot',
+                xMin: hotXMin, xMax: hotXMax, yMin: hotYMin, yMax: hotYMax,
+                overlayColor: 'rgba(220,38,38,0.25)',
+                camera: { x: 0.3, y: 2.0, z: 1.0 },
+                crossAxis: 'y', crossValue: yGrid[maxI],
+                desc: `${hotCount} celdas con SDFP >70%`
+            });
+        }
+
+        // Cold zone: SDFP < 15%
+        let coldXMin = Infinity, coldXMax = -Infinity, coldYMin = Infinity, coldYMax = -Infinity;
+        let coldCount = 0;
+        for (let i = 0; i < zMatrix.length; i++) {
+            for (let j = 0; j < zMatrix[i].length; j++) {
+                if (zMatrix[i][j] < 15) {
+                    coldXMin = Math.min(coldXMin, xGrid[j]);
+                    coldXMax = Math.max(coldXMax, xGrid[j]);
+                    coldYMin = Math.min(coldYMin, yGrid[i]);
+                    coldYMax = Math.max(coldYMax, yGrid[i]);
+                    coldCount++;
+                }
+            }
+        }
+        if (coldCount > 0) {
+            zones.push({
+                id: 'cold', label: 'Zona Fría (<15%)', cssClass: 'zone-tag-cold',
+                xMin: coldXMin, xMax: coldXMax, yMin: coldYMin, yMax: coldYMax,
+                overlayColor: 'rgba(37,99,235,0.22)',
+                camera: { x: 2.0, y: 0.5, z: 0.8 },
+                crossAxis: 'y', crossValue: yGrid[minI],
+                desc: `${coldCount} celdas con SDFP <15%`
+            });
+        }
+
+        // Peak
+        zones.push({
+            id: 'peak', label: `Pico (${maxVal.toFixed(1)}%)`, cssClass: 'zone-tag-peak',
+            pointX: xGrid[maxJ], pointY: yGrid[maxI], pointZ: maxVal,
+            camera: { x: 0.1, y: 0.1, z: 2.5 },
+            crossAxis: 'y', crossValue: yGrid[maxI],
+            desc: `Gap=${xGrid[maxJ].toFixed(2)} NATR=${yGrid[maxI].toFixed(2)}%`
+        });
+
+        // Valley
+        zones.push({
+            id: 'valley', label: `Valle (${minVal.toFixed(1)}%)`, cssClass: 'zone-tag-valley',
+            pointX: xGrid[minJ], pointY: yGrid[minI], pointZ: minVal,
+            camera: { x: 2.0, y: 0.5, z: 0.8 },
+            crossAxis: 'y', crossValue: yGrid[minI],
+            desc: `Gap=${xGrid[minJ].toFixed(2)} NATR=${yGrid[minI].toFixed(2)}%`
+        });
+
+        // Ridge (central crest near gap ≈ 0)
+        const midJ = xGrid.findIndex(v => v >= 0) || Math.floor(xGrid.length / 2);
+        const ridgeXMin = xGrid[Math.max(0, midJ - 2)];
+        const ridgeXMax = xGrid[Math.min(xGrid.length - 1, midJ + 2)];
+        zones.push({
+            id: 'ridge', label: 'Cresta Central (Gap≈0)', cssClass: 'zone-tag-ridge',
+            xMin: ridgeXMin, xMax: ridgeXMax, yMin: yGrid[0], yMax: yGrid[yGrid.length - 1],
+            overlayColor: 'rgba(22,163,74,0.22)',
+            camera: { x: 0.0, y: 2.2, z: 0.8 },
+            crossAxis: 'x', crossValue: xGrid[midJ],
+            desc: 'Franja central donde gaps pequeños cierran más'
+        });
+
+        // Reset button
+        zones.push({
+            id: 'reset', label: 'Reset Vista', cssClass: 'zone-tag-reset',
+            camera: { x: 1.5, y: 1.5, z: 1.1 }
+        });
+
+        return zones;
+    }
+
+    // Highlight a zone on the 3D surface
+    function highlightSurfaceZone(zone) {
+        const plotDiv = document.getElementById('grafico-gaps-3d');
+        if (!plotDiv || !global3DSurfaceXGrid || !global3DSurfaceZMatrix) return;
+
+        // Remove previous overlays (traces beyond the first surface)
+        const currentTraces = plotDiv.data ? plotDiv.data.length : 0;
+        if (currentTraces > 1) {
+            const indicesToRemove = [];
+            for (let t = currentTraces - 1; t >= 1; t--) indicesToRemove.push(t);
+            Plotly.deleteTraces(plotDiv, indicesToRemove);
+        }
+
+        if (zone.id === 'reset') {
+            globalActiveZoneId = null;
+            return;
+        }
+
+        const xGrid = global3DSurfaceXGrid;
+        const yGrid = global3DSurfaceYGrid;
+        const zMatrix = global3DSurfaceZMatrix;
+
+        // Zone overlay surface (for hot/cold/ridge)
+        if (zone.xMin !== undefined) {
+            const overlayZ = [];
+            for (let i = 0; i < yGrid.length; i++) {
+                const row = [];
+                for (let j = 0; j < xGrid.length; j++) {
+                    const inX = xGrid[j] >= zone.xMin && xGrid[j] <= zone.xMax;
+                    const inY = yGrid[i] >= zone.yMin && yGrid[i] <= zone.yMax;
+                    let thresholdMet = true;
+                    if (zone.id === 'hot') thresholdMet = zMatrix[i][j] > 70;
+                    if (zone.id === 'cold') thresholdMet = zMatrix[i][j] < 15;
+                    row.push((inX && inY && thresholdMet) ? zMatrix[i][j] + 1.5 : null);
+                }
+                overlayZ.push(row);
+            }
+            Plotly.addTraces(plotDiv, [{
+                z: overlayZ, x: xGrid, y: yGrid,
+                type: 'surface',
+                colorscale: [[0, zone.overlayColor], [1, zone.overlayColor]],
+                showscale: false,
+                opacity: 0.7,
+                hoverinfo: 'skip',
+                name: zone.label
+            }]);
+        }
+
+        // Pin markers (for peak/valley)
+        if (zone.pointX !== undefined) {
+            const markerColor = zone.id === 'peak' ? '#fde725' : '#1a1a1a';
+            const markerSymbol = zone.id === 'peak' ? 'diamond' : 'cross';
+            Plotly.addTraces(plotDiv, [{
+                type: 'scatter3d',
+                x: [zone.pointX], y: [zone.pointY], z: [zone.pointZ],
+                mode: 'markers+text',
+                marker: { size: 7, color: markerColor, symbol: markerSymbol, 
+                          line: { color: '#1a1a1a', width: 1 } },
+                text: [`${zone.pointZ.toFixed(1)}%`],
+                textposition: 'top center',
+                textfont: { size: 9, color: '#1a1a1a', family: 'Inter' },
+                showlegend: false,
+                hoverinfo: 'text',
+                hovertext: `SDFP: ${zone.pointZ.toFixed(1)}%\nGap: ${zone.pointX.toFixed(3)}\nNATR: ${zone.pointY.toFixed(3)}%`
+            }]);
+        }
+    }
+
+    // Rotate the 3D camera with animation
+    function rotateSurfaceCamera(eye) {
+        const plotDiv = document.getElementById('grafico-gaps-3d');
+        if (!plotDiv) return;
+        Plotly.relayout(plotDiv, {
+            'scene.camera.eye': eye
+        });
+    }
+
+    // Render a 2D cross-section mini-chart
+    function renderCrossSection(zone) {
+        const chartDiv = document.getElementById('surface-cross-section');
+        if (!chartDiv || !global3DSurfaceXGrid || !global3DSurfaceZMatrix) return;
+
+        const xGrid = global3DSurfaceXGrid;
+        const yGrid = global3DSurfaceYGrid;
+        const zMatrix = global3DSurfaceZMatrix;
+
+        let xData, yData, titleText;
+
+        if (zone.crossAxis === 'y') {
+            // Fixed NATR → show SDFP vs Gap Size
+            const rowIdx = yGrid.findIndex(v => Math.abs(v - zone.crossValue) < 0.01) 
+                          || yGrid.reduce((best, v, i) => Math.abs(v - zone.crossValue) < Math.abs(yGrid[best] - zone.crossValue) ? i : best, 0);
+            xData = xGrid;
+            yData = zMatrix[rowIdx];
+            titleText = `Corte: NATR = ${zone.crossValue.toFixed(2)}%`;
+        } else {
+            // Fixed Gap → show SDFP vs NATR
+            const colIdx = xGrid.findIndex(v => Math.abs(v - zone.crossValue) < 0.01)
+                          || xGrid.reduce((best, v, i) => Math.abs(v - zone.crossValue) < Math.abs(xGrid[best] - zone.crossValue) ? i : best, 0);
+            xData = yGrid;
+            yData = zMatrix.map(row => row[colIdx]);
+            titleText = `Corte: Gap = ${zone.crossValue.toFixed(2)} ATR`;
+        }
+
+        const trace = {
+            x: xData, y: yData,
+            type: 'scatter',
+            mode: 'lines',
+            fill: 'tozeroy',
+            fillcolor: 'rgba(0,92,255,0.08)',
+            line: { color: '#005cff', width: 2 },
+            hovertemplate: '%{y:.1f}%<extra></extra>'
+        };
+
+        const layout = {
+            title: { text: titleText, font: { size: 9, family: 'Inter', color: '#666' }, x: 0.02, y: 0.95 },
+            margin: { l: 30, r: 8, t: 22, b: 25 },
+            height: 140,
+            font: { family: 'Inter', size: 8, color: '#888' },
+            xaxis: {
+                title: zone.crossAxis === 'y' ? 'Gap (ATR)' : 'NATR (%)',
+                titlefont: { size: 8 },
+                gridcolor: '#f0f0f0',
+                zeroline: true, zerolinecolor: '#ddd'
+            },
+            yaxis: {
+                title: 'SDFP %', titlefont: { size: 8 },
+                range: [0, 100], gridcolor: '#f0f0f0'
+            },
+            plot_bgcolor: '#fafbfc',
+            paper_bgcolor: '#fafbfc',
+            shapes: [{
+                type: 'line', yref: 'y', y0: 70, y1: 70,
+                xref: 'paper', x0: 0, x1: 1,
+                line: { color: 'rgba(220,38,38,0.3)', width: 1, dash: 'dot' }
+            }]
+        };
+
+        Plotly.newPlot(chartDiv, [trace], layout, { responsive: true, displayModeBar: false });
+    }
+
+    // Toggle a zone tag
+    function toggleZone(zoneId) {
+        const zones = globalSurfaceZones;
+        if (!zones) return;
+        const zone = zones.find(z => z.id === zoneId);
+        if (!zone) return;
+
+        // Update active state on tags
+        document.querySelectorAll('.zone-tag').forEach(el => el.classList.remove('active'));
+
+        if (zoneId === 'reset') {
+            globalActiveZoneId = null;
+            highlightSurfaceZone(zone);
+            rotateSurfaceCamera(zone.camera);
+            Plotly.purge(document.getElementById('surface-cross-section'));
+            return;
+        }
+
+        if (globalActiveZoneId === zoneId) {
+            // Deselect
+            globalActiveZoneId = null;
+            highlightSurfaceZone({ id: 'reset' });
+            Plotly.purge(document.getElementById('surface-cross-section'));
+            return;
+        }
+
+        globalActiveZoneId = zoneId;
+        const tagEl = document.querySelector(`.zone-tag[data-zone="${zoneId}"]`);
+        if (tagEl) tagEl.classList.add('active');
+
+        highlightSurfaceZone(zone);
+        if (zone.camera) rotateSurfaceCamera(zone.camera);
+        if (zone.crossAxis) renderCrossSection(zone);
+    }
+
+    // Close the side panel
+    window.closeSurfaceSidePanel = function() {
+        document.getElementById('surface-panel-wrapper').classList.remove('panel-open');
+        globalActiveZoneId = null;
+        // Clean overlays
+        const plotDiv = document.getElementById('grafico-gaps-3d');
+        if (plotDiv && plotDiv.data && plotDiv.data.length > 1) {
+            const indicesToRemove = [];
+            for (let t = plotDiv.data.length - 1; t >= 1; t--) indicesToRemove.push(t);
+            Plotly.deleteTraces(plotDiv, indicesToRemove);
+        }
+        rotateSurfaceCamera({ x: 1.5, y: 1.5, z: 1.1 });
+        // Resize the 3D chart back to full width
+        setTimeout(() => { Plotly.Plots.resize(plotDiv); }, 450);
+    };
+
+    // Toggle technical reference section
+    window.toggleTechnicalReference = function() {
+        const content = document.getElementById('reference-tech-content');
+        const btn = document.getElementById('reference-tech-btn');
+        if (content && btn) {
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                btn.textContent = 'Ver datos técnicos';
+            } else {
+                content.style.display = 'block';
+                btn.textContent = 'Ocultar datos técnicos';
+            }
+        }
+    };
+
+    // Main function: interpret the 3D surface → open side panel
+    window.interpretarSuperficie3D = async function() {
+        if (!global3DSurfaceXGrid || !global3DSurfaceYGrid || !global3DSurfaceZMatrix) return;
+        
+        document.getElementById("loading-spinner").style.display = "inline";
+        document.getElementById("loading-spinner").textContent = "AGENT RECONNING SURFACE...";
+        
+        const progressContainer = document.getElementById("agent-progress-container");
+        const progressBar = document.getElementById("agent-progress-bar");
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        progressBar.style.background = "#005cff";
+        setTimeout(() => { progressBar.style.width = "85%"; }, 50);
+        
+        try {
+          const response = await fetch(`${API_BASE}/gaps/analyze_surface`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                  asset: globalAssetName,
+                  x_grid: global3DSurfaceXGrid,
+                  y_grid: global3DSurfaceYGrid,
+                  z_matrix: global3DSurfaceZMatrix,
+                  min_fill_target: globalMinFillTarget
+              })
+          });
+          
+          if (response.ok) {
+              const resData = await response.json();
+              progressBar.style.width = "100%";
+
+              // Compute interactive zones from the surface data
+              globalSurfaceZones = computeSurfaceZones(global3DSurfaceXGrid, global3DSurfaceYGrid, global3DSurfaceZMatrix);
+              globalActiveZoneId = null;
+
+              // Build zone tags HTML
+              const tagsContainer = document.getElementById('surface-zone-tags');
+              tagsContainer.innerHTML = globalSurfaceZones.map(z => 
+                `<span class="zone-tag ${z.cssClass}" data-zone="${z.id}" onclick="toggleZone('${z.id}')">${z.label}</span>`
+              ).join('');
+
+              // Populate side body with the AI analysis
+              document.getElementById('surface-side-body').innerHTML = resData.ai_raw_text;
+
+              // Open the side panel
+              const wrapper = document.getElementById('surface-panel-wrapper');
+              wrapper.classList.add('panel-open');
+
+              // Resize the 3D chart after the panel opens
+              setTimeout(() => {
+                  const plotDiv = document.getElementById('grafico-gaps-3d');
+                  if (plotDiv) Plotly.Plots.resize(plotDiv);
+                  progressContainer.style.display = "none";
+              }, 450);
+
+              // Add initial pins for peak and valley
+              const peakZone = globalSurfaceZones.find(z => z.id === 'peak');
+              const valleyZone = globalSurfaceZones.find(z => z.id === 'valley');
+              if (peakZone || valleyZone) {
+                  const plotDiv = document.getElementById('grafico-gaps-3d');
+                  const pins = [];
+                  if (peakZone) {
+                      pins.push({
+                          type: 'scatter3d',
+                          x: [peakZone.pointX], y: [peakZone.pointY], z: [peakZone.pointZ],
+                          mode: 'markers',
+                          marker: { size: 5, color: '#fde725', symbol: 'diamond', line: { color: '#333', width: 1 } },
+                          showlegend: false, hoverinfo: 'text',
+                          hovertext: `PICO: ${peakZone.pointZ.toFixed(1)}%`
+                      });
+                  }
+                  if (valleyZone) {
+                      pins.push({
+                          type: 'scatter3d',
+                          x: [valleyZone.pointX], y: [valleyZone.pointY], z: [valleyZone.pointZ],
+                          mode: 'markers',
+                          marker: { size: 5, color: '#1a1a1a', symbol: 'cross', line: { color: '#888', width: 1 } },
+                          showlegend: false, hoverinfo: 'text',
+                          hovertext: `VALLE: ${valleyZone.pointZ.toFixed(1)}%`
+                      });
+                  }
+                  Plotly.addTraces(plotDiv, pins);
+              }
+
+          } else {
+              throw new Error(`API returned status ${response.status}`);
+          }
+        } catch(e) {
+            console.error("Error en análisis de superficie 3D:", e);
+            progressBar.style.background = "#dc3545";
+            setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
+        } finally {
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("loading-spinner").textContent = "SYNCING...";
+        }
+    };
+
+    // Función global para analizar estadísticamente la celda activa del heatmap
+    window.analizarCeldaActiva = async function() {
+        if (!globalSelectedFilter || globalFilteredGapsPoints.length === 0) return;
+        
+        document.getElementById("loading-spinner").style.display = "inline";
+        document.getElementById("loading-spinner").textContent = "AGENT COMPUTING STATS...";
+        
+        const progressContainer = document.getElementById("agent-progress-container");
+        const progressBar = document.getElementById("agent-progress-bar");
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        progressBar.style.background = "#005cff";
+        setTimeout(() => { progressBar.style.width = "85%"; }, 50);
+        
+        try {
+          const dates = globalFilteredGapsPoints.map(p => p.date);
+          const response = await fetch(`${API_BASE}/gaps/analyze_cell`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                  asset: globalAssetName,
+                  dates: dates,
+                  filters: globalSelectedFilter,
+                  min_fill_target: globalMinFillTarget
+              })
+          });
+          
+          if (response.ok) {
+              const resData = await response.json();
+              progressBar.style.width = "100%";
+              
+              document.getElementById("agent-modal-stats").innerHTML = 
+                `<b>Observaciones (n):</b> ${resData.cluster_size} gaps &nbsp;|&nbsp; ` +
+                `<b>Tasa Celda:</b> ${resData.avg_ret}% &nbsp;|&nbsp; ` +
+                `<b>Tasa Global:</b> ${resData.avg_natr}%`;
+                
+              document.getElementById("agent-modal-body").innerHTML = 
+                `${resData.ai_raw_text}`;
+              
+              // Ocultar gráficos del modal que son específicos del Volatility Desk
+              document.getElementById("modal-chart-5m").style.display = "none";
+              document.getElementById("modal-chart-usdclp").style.display = "none";
+              
+              setTimeout(() => {
+                  document.getElementById("agent-backdrop").classList.add("visible");
+                  document.getElementById("agent-modal").classList.add("visible");
+                  progressContainer.style.display = "none";
+              }, 300);
+          } else {
+              throw new Error(`API returned status ${response.status}`);
+          }
+        } catch(e) {
+            console.error("Error en análisis de celda de gaps:", e);
+            progressBar.style.background = "#dc3545";
+            setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
+        } finally {
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("loading-spinner").textContent = "SYNCING...";
+        }
+    };
+
+    // Función global para analizar puntos clickeados uno por uno
+    window.analizarPuntosClickeados = async function() {
+        if(clickedPointsList.length === 0) return;
+        
+        document.getElementById("loading-spinner").style.display = "inline";
+        document.getElementById("loading-spinner").textContent = "AGENT THINKING...";
+        
+        const progressContainer = document.getElementById("agent-progress-container");
+        const progressBar = document.getElementById("agent-progress-bar");
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        setTimeout(() => { progressBar.style.width = "85%"; }, 50);
+        
+        try {
+          const response = await fetch(`${API_BASE}/agent/analyze`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                  asset: globalAssetName,
+                  points: clickedPointsList
+              })
+          });
+          
+          if(response.ok) {
+              const resData = await response.json();
+              progressBar.style.width = "100%";
+              
+              document.getElementById("agent-modal-stats").innerHTML = 
+                `<b>Observaciones:</b> ${resData.cluster_size} días &nbsp;|&nbsp; ` +
+                `<b>Retorno Medio:</b> ${resData.avg_ret}% &nbsp;|&nbsp; ` +
+                `<b>Volatilidad Media (NATR):</b> ${resData.avg_natr}%`;
+                
+              document.getElementById("agent-modal-body").innerHTML = 
+                `<i>${resData.ai_raw_text}</i>`;
+              
+              document.getElementById("modal-chart-5m").style.display = "none";
+              document.getElementById("modal-chart-usdclp").style.display = "none";
+              
+              setTimeout(() => {
+                  document.getElementById("agent-backdrop").classList.add("visible");
+                  document.getElementById("agent-modal").classList.add("visible");
+                  progressContainer.style.display = "none";
+              }, 300);
+          }
+        } catch(e) {
+            console.error("Error en análisis por clics:", e);
+            progressBar.style.background = "#dc3545";
+            setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
+        } finally {
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("loading-spinner").textContent = "SYNCING...";
+        }
+    };
+
+    // Función global para cambiar de escritorio (pestañas principales)
+    window.cambiarEscritorio = function(modo) {
+      activeDesk = modo;
+      const btnVol = document.getElementById("btn-desk-volatilidad");
+      const btnGaps = document.getElementById("btn-desk-gaps");
+      const divVol = document.getElementById("desk-volatilidad");
+      const divGaps = document.getElementById("desk-gaps");
+      
+      if (modo === "volatilidad") {
+        btnVol.classList.add("active");
+        btnGaps.classList.remove("active");
+        divVol.style.display = "block";
+        divGaps.style.display = "none";
+      } else {
+        btnVol.classList.remove("active");
+        btnGaps.classList.add("active");
+        divVol.style.display = "none";
+        divGaps.style.display = "block";
+      }
+      
+      // Re-renderizar los gráficos correspondientes
+      window.renderizarActivo();
+    };
+
+    // Manejador de cambio de filtros dropdown principales
+    window.onGapFilterChange = function() {
+      globalSelectedWeekday = null;
+      globalSelectedFilter = null; // Limpiar selección al cambiar filtros principales
+      window.filtrarYRenderizarGaps();
+    };
+
+    window.onGapTargetChange = function() {
+      const select = document.getElementById("gap-fill-target");
+      if (select) {
+        globalMinFillTarget = parseFloat(select.value);
+      }
+      window.filtrarYRenderizarGaps();
+    };
+
+    // Función para renderizar los gráficos de la pestaña activa o al cambiar filtros
+    window.renderizarActivo = function() {
+      if (activeDesk === "volatilidad") {
+        if (globalChartData) {
+          renderizarGraficoATR(globalChartData, globalMetricaActual);
+          renderizarGraficoDispersion(globalChartData, globalModoDispersion);
+        }
+        if (globalChartData) {
+          renderizarHistogramaVolatilidad(globalChartData);
+        }
+        if (globalStreaksData) {
+          renderizarScatterRachas(globalStreaksData);
+        }
+      } else {
+        window.filtrarYRenderizarGaps();
+      }
+    };
+
+    // Función global para filtrar y renderizar las estadísticas de gaps
+    window.filtrarYRenderizarGaps = function() {
+      if (!globalGapsData || !globalGapsData.points) return;
+      
+      const regimeFilter = document.getElementById("gap-filter-regime").value;
+      const stateFilter = document.getElementById("gap-filter-state").value;
+      const directionFilter = document.getElementById("gap-filter-direction").value;
+      
+      let baseFilteredPoints = globalGapsData.points;
+      
+      // 1. Aplicar filtros generales (regimen, estado y dirección de los dropdowns)
+      if (regimeFilter !== "ALL") {
+        baseFilteredPoints = baseFilteredPoints.filter(p => p.regime === regimeFilter);
+      }
+      
+      if (stateFilter !== "ALL") {
+        baseFilteredPoints = baseFilteredPoints.filter(p => p.state === stateFilter);
+      }
+
+      if (directionFilter !== "ALL") {
+        baseFilteredPoints = baseFilteredPoints.filter(p => p.direction === directionFilter);
+      }
+      
+      // 2. Aplicar filtros secundarios (día de la semana o celda de heatmap activa)
+      let scatterPoints = baseFilteredPoints;
+      
+      if (globalSelectedFilter !== null) {
+        // Filtrar por la celda del heatmap seleccionada (filtro cruzado activo)
+        scatterPoints = baseFilteredPoints.filter(p => {
+          // 1. Filtrar por día
+          const dateObj = new Date(p.date + "T00:00:00");
+          const dayIdx = dateObj.getDay();
+          const mapDays = {1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes'};
+          const isDayMatch = !globalSelectedFilter.weekday || mapDays[dayIdx] === globalSelectedFilter.weekday;
+          
+          // 2. Filtrar por régimen
+          const isRegimeMatch = !globalSelectedFilter.regime || p.regime === globalSelectedFilter.regime;
+          
+          // 3. Filtrar por estado
+          const isStateMatch = !globalSelectedFilter.state || p.state === globalSelectedFilter.state;
+          
+          // 4. Filtrar por tamaño de gap (size bucket)
+          let isSizeMatch = true;
+          if (globalSelectedFilter.sizeBucket) {
+            const absSize = Math.abs(p.gap_size_atr);
+            isSizeMatch = absSize >= globalSelectedFilter.sizeBucket.min && absSize < globalSelectedFilter.sizeBucket.max;
+          }
+          
+          return isDayMatch && isRegimeMatch && isStateMatch && isSizeMatch;
+        });
+      } else if (globalSelectedWeekday !== null) {
+        // Filtrar por barra diaria si está activa
+        scatterPoints = baseFilteredPoints.filter(p => {
+          const dateObj = new Date(p.date + "T00:00:00");
+          const dayIdx = dateObj.getDay();
+          const mapDays = {1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes'};
+          return mapDays[dayIdx] === globalSelectedWeekday;
+        });
+      }
+      
+      const total_gaps = scatterPoints.length;
+      const filled_gaps = scatterPoints.filter(p => p.fill_depth >= globalMinFillTarget).length;
+      const fill_rate = total_gaps > 0 ? (filled_gaps / total_gaps * 100).toFixed(1) : "0.0";
+      const avg_gap_size = total_gaps > 0 ? (scatterPoints.reduce((acc, p) => acc + Math.abs(p.gap_size_atr), 0) / total_gaps).toFixed(3) : "0.000";
+      
+      // KPIs Avanzados
+      const avg_fill_depth = total_gaps > 0 
+        ? (scatterPoints.reduce((acc, p) => acc + p.fill_depth, 0) / total_gaps * 100).toFixed(1)
+        : "0.0";
+      const avg_net_drift = total_gaps > 0 
+        ? (scatterPoints.reduce((acc, p) => acc + p.net_drift, 0) / total_gaps).toFixed(3)
+        : "0.000";
+      const avg_icr = total_gaps > 0 
+        ? (scatterPoints.reduce((acc, p) => acc + p.icr, 0) / total_gaps).toFixed(2)
+        : "0.00";
+      
+      // Actualizar tarjetas de métricas básicas
+      document.getElementById("gap-metric-total").textContent = total_gaps;
+      document.getElementById("gap-metric-sdfp").textContent = `${fill_rate}%`;
+      document.getElementById("gap-metric-avg-size").textContent = `${avg_gap_size} ATR`;
+      document.getElementById("gap-metric-filled").textContent = filled_gaps;
+      
+      // Actualizar tarjetas de métricas avanzadas
+      document.getElementById("gap-metric-fill-depth").textContent = `${avg_fill_depth}%`;
+      const driftEl = document.getElementById("gap-metric-net-drift");
+      const driftVal = parseFloat(avg_net_drift);
+      driftEl.textContent = `${driftVal >= 0 ? '+' : ''}${avg_net_drift} ATR`;
+      driftEl.style.color = driftVal >= 0 ? '#4a6984' : '#883030';
+      const icrEl = document.getElementById("gap-metric-icr");
+      const icrVal = parseFloat(avg_icr);
+      icrEl.textContent = `${icrVal >= 0 ? '+' : ''}${avg_icr}`;
+      icrEl.style.color = icrVal >= 0 ? '#4a6984' : '#883030';
+      
+      // Renderizar gráficos
+      window.renderizarGraficoGaps(scatterPoints);
+      window.renderizarHistogramaFillDepth(scatterPoints);
+      window.renderizarGrafico3DSurface(scatterPoints);
+      
+      // Los heatmaps se calculan dinámicamente aplicando filtros cruzados de los otros heatmaps si están activos,
+      // pero NUNCA se filtran a sí mismos para no borrarse de la pantalla.
+      let regimePoints = baseFilteredPoints;
+      let fullPoints = baseFilteredPoints;
+      let sizePoints = baseFilteredPoints;
+
+      if (globalSelectedFilter !== null) {
+        const filterFunc = (p) => {
+          const dateObj = new Date(p.date + "T00:00:00");
+          const dayIdx = dateObj.getDay();
+          const mapDays = {1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes'};
+          const isDayMatch = !globalSelectedFilter.weekday || mapDays[dayIdx] === globalSelectedFilter.weekday;
+          const isRegimeMatch = !globalSelectedFilter.regime || p.regime === globalSelectedFilter.regime;
+          const isStateMatch = !globalSelectedFilter.state || p.state === globalSelectedFilter.state;
+          let isSizeMatch = true;
+          if (globalSelectedFilter.sizeBucket) {
+            const absSize = Math.abs(p.gap_size_atr);
+            isSizeMatch = absSize >= globalSelectedFilter.sizeBucket.min && absSize < globalSelectedFilter.sizeBucket.max;
+          }
+          return isDayMatch && isRegimeMatch && isStateMatch && isSizeMatch;
+        };
+
+        if (globalSelectedFilter.source !== 'heatmap-regime') {
+          regimePoints = baseFilteredPoints.filter(filterFunc);
+        }
+        if (globalSelectedFilter.source !== 'heatmap-full') {
+          fullPoints = baseFilteredPoints.filter(filterFunc);
+        }
+        if (globalSelectedFilter.source !== 'heatmap-size') {
+          sizePoints = baseFilteredPoints.filter(filterFunc);
+        }
+      }
+
+      window.renderizarHeatmapRegime(regimePoints);
+      window.renderizarHeatmapFull(fullPoints);
+      window.renderizarHeatmapGapSize(sizePoints);
+
+      // Guardar puntos activos de gaps filtrados
+      globalFilteredGapsPoints = scatterPoints;
+
+      // Actualizar botón de análisis estadístico de celda activa
+      const btnAnalyze = document.getElementById("btn-analizar-celda");
+      if (btnAnalyze) {
+        if (globalSelectedFilter !== null) {
+          btnAnalyze.style.display = "inline-block";
+          btnAnalyze.textContent = `Analizar Celda Activa (n = ${scatterPoints.length})`;
+        } else {
+          btnAnalyze.style.display = "none";
+        }
+      }
+    };
+
+    // Función para renderizar el Scatter Plot de Gaps con ejes fijos
+    window.renderizarGraficoGaps = function(points) {
+      if (!points || !document.getElementById('grafico-gaps-scatter')) return;
+      
+      const filledPoints = points.filter(p => p.fill_depth >= globalMinFillTarget);
+      const unfilledPoints = points.filter(p => p.fill_depth < globalMinFillTarget);
+      
+      const traceFilled = {
+        x: filledPoints.map(p => p.gap_size_atr),
+        y: filledPoints.map(p => p.natr),
+        mode: 'markers',
+        name: 'Llenados (SDF)',
+        marker: { color: '#4a6984', size: 5, opacity: 0.75, line: { color: '#ffffff', width: 0.3 } },
+        text: filledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Fill Depth: ${(p.fill_depth * 100).toFixed(1)}% | Drift: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
+        hovertemplate: '%{text}<br>NATR: %{y}%<extra></extra>'
+      };
+      
+      const traceUnfilled = {
+        x: unfilledPoints.map(p => p.gap_size_atr),
+        y: unfilledPoints.map(p => p.natr),
+        mode: 'markers',
+        name: 'No Llenados (Open)',
+        marker: { color: '#883030', size: 5, opacity: 0.75, line: { color: '#ffffff', width: 0.3 } },
+        text: unfilledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Fill Depth: ${(p.fill_depth * 100).toFixed(1)}% | Drift: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
+        hovertemplate: '%{text}<br>NATR: %{y}%<extra></extra>'
+      };
+      
+      const layoutScatter = {
+        xaxis: { 
+          gridcolor: '#f1f2f4',
+          title: { text: 'Tamaño del Gap (ATR)', font: { size: 9, family: 'Inter' } },
+          range: globalScatterRangeX // Usar rango fijo absoluto
+        },
+        yaxis: { 
+          gridcolor: '#f1f2f4',
+          title: { text: 'NATR (%)', font: { size: 9, family: 'Inter' } },
+          range: globalScatterRangeY // Usar rango fijo absoluto
+        },
+        template: 'plotly_white',
+        height: 270,
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 10 },
+        hovermode: 'closest',
+        margin: { l: 45, r: 15, t: 15, b: 35 },
+        legend: { orientation: 'h', y: 1.15, x: 1, xanchor: 'right' }
+      };
+      
+      Plotly.newPlot('grafico-gaps-scatter', [traceFilled, traceUnfilled], layoutScatter, { responsive: true, displayModeBar: false });
+    };
+
+    // Función auxiliar para mapear fecha a día de la semana en español
+    function getDiaSemanaESP(dateStr) {
+      const dateObj = new Date(dateStr + "T00:00:00");
+      const dayIdx = dateObj.getDay();
+      const mapDays = {1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes'};
+      return mapDays[dayIdx] || 'Lunes';
+    }
+
+    // --- HEATMAP 1: Régimen × Día de la Semana (3x5) ---
+    window.renderizarHeatmapRegime = function(points) {
+      const plotDiv = document.getElementById('grafico-gaps-heatmap-regime');
+      if (!points || !plotDiv) return;
+      
+      const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+      const regimes = ['BAJO', 'MEDIO', 'ALTO'];
+      
+      // Calcular la matriz z (SDFP% con fill target) y conteo n
+      const zData = [];
+      const nData = [];
+      
+      regimes.forEach(reg => {
+        const rowZ = [];
+        const rowN = [];
+        weekdays.forEach(day => {
+          const cellPoints = points.filter(p => p.regime === reg && getDiaSemanaESP(p.date) === day);
+          const total = cellPoints.length;
+          rowN.push(total);
+          if (total > 0) {
+            const filled = cellPoints.filter(p => p.fill_depth >= globalMinFillTarget).length;
+            rowZ.push(parseFloat((filled / total * 100).toFixed(1)));
+          } else {
+            rowZ.push(null);
+          }
+        });
+        zData.push(rowZ);
+        nData.push(rowN);
+      });
+
+      // --- Agregar marginales: columna Σ (por fila) y fila Σ (por columna) ---
+      // Columna marginal por fila
+      regimes.forEach((reg, i) => {
+        const rowTotal = nData[i].reduce((a, b) => a + b, 0);
+        let rowRate = null;
+        if (rowTotal > 0) {
+          const regPoints = points.filter(p => p.regime === reg);
+          const rowFilled = regPoints.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          rowRate = parseFloat((rowFilled / rowTotal * 100).toFixed(1));
+        }
+        zData[i].push(rowRate);
+        nData[i].push(rowTotal);
+      });
+      // Fila marginal por columna
+      const colRow = [];
+      const colNRow = [];
+      for (let j = 0; j < weekdays.length; j++) {
+        const colN = nData.reduce((a, row) => a + row[j], 0);
+        let colRate = null;
+        if (colN > 0) {
+          const colPoints = points.filter(p => getDiaSemanaESP(p.date) === weekdays[j]);
+          const colFilled = colPoints.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          colRate = parseFloat((colFilled / colN * 100).toFixed(1));
+        }
+        colRow.push(colRate);
+        colNRow.push(colN);
+      }
+      // Celda esquina: global
+      const globalN = points.length;
+      let globalRate = null;
+      if (globalN > 0) {
+        const globalFilled = points.filter(p => p.fill_depth >= globalMinFillTarget).length;
+        globalRate = parseFloat((globalFilled / globalN * 100).toFixed(1));
+      }
+      colRow.push(globalRate);
+      colNRow.push(globalN);
+      zData.push(colRow);
+      nData.push(colNRow);
+
+      weekdays.push('Σ');
+      regimes.push('Σ');
+
+      // Crear matriz de texto anotada
+      const textAnnotations = zData.map((row, i) => 
+        row.map((val, j) => val !== null ? `${val}%<br><span style="font-size:7px; opacity:0.8;">n=${nData[i][j]}</span>` : 'N/A')
+      );
+
+      // Si hay una celda seleccionada en este heatmap, destacar su borde usando layout.shapes
+      const shapes = [];
+      if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-regime') {
+        const yIdx = regimes.indexOf(globalSelectedFilter.regime);
+        const xIdx = weekdays.indexOf(globalSelectedFilter.weekday);
+        if (yIdx !== -1 && xIdx !== -1) {
+          shapes.push({
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: xIdx - 0.5,
+            x1: xIdx + 0.5,
+            y0: yIdx - 0.5,
+            y1: yIdx + 0.5,
+            line: { color: '#000000', width: 2 }
+          });
+        }
+      }
+      
+      const trace = {
+        z: zData,
+        x: weekdays,
+        y: regimes,
+        type: 'heatmap',
+        colorscale: 'Viridis',
+        zmin: 0,
+        zmax: 100,
+        showscale: false,
+        xgap: 2,
+        ygap: 2,
+        hovertemplate: 'Régimen: %{y}<br>Día: %{x}<br>SDFP: %{z}%<extra></extra>'
+      };
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 55, r: 15, t: 10, b: 25 },
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        xaxis: { ticks: '', showgrid: false },
+        yaxis: { ticks: '', showgrid: false },
+        height: 270,
+        shapes: shapes,
+        annotations: []
+      };
+
+      for (let i = 0; i < regimes.length; i++) {
+        for (let j = 0; j < weekdays.length; j++) {
+          const val = zData[i][j];
+          const isMarginal = (i === regimes.length - 1 || j === weekdays.length - 1);
+          layout.annotations.push({
+            x: weekdays[j],
+            y: regimes[i],
+            text: `<b>${textAnnotations[i][j]}</b>`,
+            showarrow: false,
+            font: { 
+              family: 'Inter', 
+              size: isMarginal ? 9 : 10, 
+              color: getTextColorForValue(val)
+            }
+          });
+        }
+      }
+
+      if (plotDiv.removeAllListeners) {
+        plotDiv.removeAllListeners('plotly_click');
+      }
+
+      Plotly.newPlot(plotDiv, [trace], layout, { responsive: true, displayModeBar: false });
+
+      // Registrar evento de clic para filtro cruzado
+      plotDiv.on('plotly_click', function(data) {
+        if (!data || !data.points || data.points.length === 0) return;
+        const pt = data.points[0];
+        
+        const clickedRegime = pt.y;
+        const clickedWeekday = pt.x;
+        
+        // No permitir hacer clic en celdas marginales Σ para filtrar
+        if (clickedRegime === 'Σ' || clickedWeekday === 'Σ') return;
+        
+        if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-regime' && globalSelectedFilter.regime === clickedRegime && globalSelectedFilter.weekday === clickedWeekday) {
+          globalSelectedFilter = null; // Toggle off
+        } else {
+          globalSelectedFilter = { 
+            weekday: clickedWeekday, 
+            regime: clickedRegime, 
+            state: null, 
+            sizeBucket: null, 
+            sizeBucketLabel: null,
+            source: 'heatmap-regime' 
+          };
+          globalSelectedWeekday = null; // Desactivar filtro de día simple
+        }
+        
+        window.filtrarYRenderizarGaps();
+      });
+    };
+
+    // --- HEATMAP 3: Gap Size × Weekday (SDFP% por bucket de tamaño) ---
+    window.renderizarHeatmapGapSize = function(points) {
+      const plotDiv = document.getElementById('grafico-gaps-heatmap-size');
+      if (!plotDiv || !points || points.length === 0) return;
+
+      const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+      const sizeBuckets = [
+        { label: '< 0.25 ATR', min: 0, max: 0.25 },
+        { label: '0.25 – 0.50', min: 0.25, max: 0.50 },
+        { label: '0.50 – 0.75', min: 0.50, max: 0.75 },
+        { label: '0.75 – 1.00', min: 0.75, max: 1.00 },
+        { label: '> 1.00 ATR', min: 1.00, max: Infinity }
+      ];
+
+      const bucketLabels = sizeBuckets.map(b => b.label);
+      const zData = [];
+      const textAnnotations = [];
+
+      const nData = [];
+      for (let i = 0; i < sizeBuckets.length; i++) {
+        const row = [];
+        const textRow = [];
+        const nRow = [];
+        for (let j = 0; j < weekdays.length; j++) {
+          const matching = points.filter(p => {
+            const absSize = Math.abs(p.gap_size_atr);
+            return getDiaSemanaESP(p.date) === weekdays[j] && absSize >= sizeBuckets[i].min && absSize < sizeBuckets[i].max;
+          });
+          const n = matching.length;
+          nRow.push(n);
+          if (n === 0) {
+            row.push(null);
+            textRow.push('n=0');
+          } else {
+            const fillRate = (matching.filter(p => p.fill_depth >= globalMinFillTarget).length / n * 100).toFixed(0);
+            row.push(parseFloat(fillRate));
+            textRow.push(`${fillRate}%<br>n=${n}`);
+          }
+        }
+        zData.push(row);
+        textAnnotations.push(textRow);
+        nData.push(nRow);
+      }
+
+      // Marginales: columna Σ por fila
+      for (let i = 0; i < sizeBuckets.length; i++) {
+        const rowTotal = nData[i].reduce((a, b) => a + b, 0);
+        let rowRate = null;
+        if (rowTotal > 0) {
+          const bucketPts = points.filter(p => {
+            const absSize = Math.abs(p.gap_size_atr);
+            return absSize >= sizeBuckets[i].min && absSize < sizeBuckets[i].max;
+          });
+          const rowFilled = bucketPts.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          rowRate = parseFloat((rowFilled / rowTotal * 100).toFixed(0));
+        }
+        zData[i].push(rowRate);
+        nData[i].push(rowTotal);
+        textAnnotations[i].push(rowRate !== null ? `${rowRate}%<br>n=${rowTotal}` : 'n=0');
+      }
+      // Fila Σ por columna
+      const colRow = [];
+      const colText = [];
+      const colN = [];
+      for (let j = 0; j < weekdays.length; j++) {
+        const cn = nData.reduce((a, row) => a + row[j], 0);
+        let cr = null;
+        if (cn > 0) {
+          const colPts = points.filter(p => getDiaSemanaESP(p.date) === weekdays[j]);
+          const cf = colPts.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          cr = parseFloat((cf / cn * 100).toFixed(0));
+        }
+        colRow.push(cr);
+        colN.push(cn);
+        colText.push(cr !== null ? `${cr}%<br>n=${cn}` : 'n=0');
+      }
+      // Esquina global
+      const gn = points.length;
+      let gr = null;
+      if (gn > 0) {
+        const gf = points.filter(p => p.fill_depth >= globalMinFillTarget).length;
+        gr = parseFloat((gf / gn * 100).toFixed(0));
+      }
+      colRow.push(gr); colN.push(gn); colText.push(gr !== null ? `${gr}%<br>n=${gn}` : 'n=0');
+      zData.push(colRow); nData.push(colN); textAnnotations.push(colText);
+
+      weekdays.push('Σ');
+      bucketLabels.push('Σ');
+
+      const trace = {
+        z: zData,
+        x: weekdays,
+        y: bucketLabels,
+        type: 'heatmap',
+        colorscale: 'Viridis',
+        zmin: 0,
+        zmax: 100,
+        showscale: true,
+        colorbar: {
+          title: 'SDFP%',
+          titleside: 'top',
+          thickness: 10,
+          len: 0.9,
+          tickfont: { size: 7 },
+          titlefont: { size: 8, family: 'Inter' }
+        },
+        xgap: 2,
+        ygap: 2,
+        hovertemplate: 'Tamaño: %{y}<br>Día: %{x}<br>SDFP: %{z}%<extra></extra>'
+      };
+
+      // Destacar celda seleccionada si el clic provino de este heatmap
+      const shapes = [];
+      if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-size') {
+        const yIdx = bucketLabels.indexOf(globalSelectedFilter.sizeBucketLabel);
+        const xIdx = weekdays.indexOf(globalSelectedFilter.weekday);
+        if (yIdx !== -1 && xIdx !== -1) {
+          shapes.push({
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: xIdx - 0.5,
+            x1: xIdx + 0.5,
+            y0: yIdx - 0.5,
+            y1: yIdx + 0.5,
+            line: { color: '#000000', width: 2 }
+          });
+        }
+      }
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 100, r: 45, t: 10, b: 25 },
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        xaxis: { ticks: '', showgrid: false },
+        yaxis: { ticks: '', showgrid: false },
+        height: 270,
+        shapes: shapes,
+        annotations: []
+      };
+
+      for (let i = 0; i < bucketLabels.length; i++) {
+        for (let j = 0; j < weekdays.length; j++) {
+          const val = zData[i][j];
+          const isMarginal = (i === bucketLabels.length - 1 || j === weekdays.length - 1);
+          layout.annotations.push({
+            x: weekdays[j],
+            y: bucketLabels[i],
+            text: `<b>${textAnnotations[i][j]}</b>`,
+            showarrow: false,
+            font: {
+              family: 'Inter',
+              size: isMarginal ? 9 : 10,
+              color: getTextColorForValue(val)
+            }
+          });
+        }
+      }
+
+      if (plotDiv.removeAllListeners) {
+        plotDiv.removeAllListeners('plotly_click');
+      }
+
+      Plotly.newPlot(plotDiv, [trace], layout, { responsive: true, displayModeBar: false });
+
+      // Registrar evento de clic para filtro cruzado
+      plotDiv.on('plotly_click', function(data) {
+        if (!data || !data.points || data.points.length === 0) return;
+        const pt = data.points[0];
+        
+        const clickedBucketLabel = pt.y;
+        const clickedWeekday = pt.x;
+        
+        // No permitir hacer clic en celdas marginales Σ para filtrar
+        if (clickedBucketLabel === 'Σ' || clickedWeekday === 'Σ') return;
+        
+        const bucketIdx = bucketLabels.indexOf(clickedBucketLabel);
+        if (bucketIdx === -1) return;
+        const bucketLimits = sizeBuckets[bucketIdx];
+        
+        if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-size' && globalSelectedFilter.sizeBucketLabel === clickedBucketLabel && globalSelectedFilter.weekday === clickedWeekday) {
+          globalSelectedFilter = null; // Toggle off
+        } else {
+          globalSelectedFilter = {
+            weekday: clickedWeekday,
+            regime: null,
+            state: null,
+            sizeBucket: { min: bucketLimits.min, max: bucketLimits.max },
+            sizeBucketLabel: clickedBucketLabel,
+            source: 'heatmap-size'
+          };
+          globalSelectedWeekday = null; // Desactivar filtro de día simple
+        }
+        
+        window.filtrarYRenderizarGaps();
+      });
+    };
+
+    // --- HEATMAP 2: Régimen + Estado × Día (6x5 Completo con Confianza - Opción 4) ---
+    window.renderizarHeatmapFull = function(points) {
+      const plotDiv = document.getElementById('grafico-gaps-heatmap-full');
+      if (!points || !plotDiv) return;
+      
+      const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+      // Filas que combinan regímenes y estados
+      const rowLabels = [
+        'BAJO · CONTRACCIÓN',
+        'BAJO · EXPANSIÓN',
+        'MEDIO · CONTRACCIÓN',
+        'MEDIO · EXPANSIÓN',
+        'ALTO · CONTRACCIÓN',
+        'ALTO · EXPANSIÓN'
+      ];
+      
+      const zData = [];
+      const nData = [];
+      
+      rowLabels.forEach(label => {
+        const parts = label.split(' · ');
+        const reg = parts[0];
+        const state = parts[1];
+        
+        const rowZ = [];
+        const rowN = [];
+        
+        weekdays.forEach(day => {
+          const cellPoints = points.filter(p => p.regime === reg && p.state === state && getDiaSemanaESP(p.date) === day);
+          const total = cellPoints.length;
+          rowN.push(total);
+          if (total > 0) {
+            const filled = cellPoints.filter(p => p.fill_depth >= globalMinFillTarget).length;
+            rowZ.push(parseFloat((filled / total * 100).toFixed(1)));
+          } else {
+            rowZ.push(null);
+          }
+        });
+        
+        zData.push(rowZ);
+        nData.push(rowN);
+      });
+
+      // --- Marginales: columna Σ por fila y fila Σ por columna ---
+      rowLabels.forEach((label, i) => {
+        const parts = label.split(' · ');
+        const reg = parts[0];
+        const state = parts[1];
+        const rowTotal = nData[i].reduce((a, b) => a + b, 0);
+        let rowRate = null;
+        if (rowTotal > 0) {
+          const cellPts = points.filter(p => p.regime === reg && p.state === state);
+          const rowFilled = cellPts.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          rowRate = parseFloat((rowFilled / rowTotal * 100).toFixed(1));
+        }
+        zData[i].push(rowRate);
+        nData[i].push(rowTotal);
+      });
+      const colRow = [];
+      const colNRow = [];
+      for (let j = 0; j < weekdays.length; j++) {
+        const cn = nData.reduce((a, row) => a + row[j], 0);
+        let cr = null;
+        if (cn > 0) {
+          const colPts = points.filter(p => getDiaSemanaESP(p.date) === weekdays[j]);
+          const cf = colPts.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          cr = parseFloat((cf / cn * 100).toFixed(1));
+        }
+        colRow.push(cr);
+        colNRow.push(cn);
+      }
+      const gn = points.length;
+      let gr = null;
+      if (gn > 0) {
+        const gf = points.filter(p => p.fill_depth >= globalMinFillTarget).length;
+        gr = parseFloat((gf / gn * 100).toFixed(1));
+      }
+      colRow.push(gr);
+      colNRow.push(gn);
+      zData.push(colRow);
+      nData.push(colNRow);
+
+      weekdays.push('Σ');
+      rowLabels.push('Σ');
+
+      const textAnnotations = zData.map((row, i) => 
+        row.map((val, j) => val !== null ? `<b>${val}%</b><br><span style="font-size:7px; opacity:0.8;">n=${nData[i][j]}</span>` : 'N/A')
+      );
+
+      // Dibujar formas de celdas
+      const shapes = [];
+      
+      // 1. Bordes punteados para celdas con baja confianza estadística (n < 5)
+      for (let i = 0; i < rowLabels.length; i++) {
+        for (let j = 0; j < weekdays.length; j++) {
+          if (nData[i][j] > 0 && nData[i][j] < 5) {
+            shapes.push({
+              type: 'rect',
+              xref: 'x',
+              yref: 'y',
+              x0: j - 0.5,
+              x1: j + 0.5,
+              y0: i - 0.5,
+              y1: i + 0.5,
+              line: { color: '#883030', width: 1, dash: 'dash' } // Borde rojo punteado
+            });
+          }
+        }
+      }
+
+      // 2. Destacar celda seleccionada (borde negro grueso)
+      if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-full') {
+        const labelToFind = `${globalSelectedFilter.regime} · ${globalSelectedFilter.state}`;
+        const yIdx = rowLabels.indexOf(labelToFind);
+        const xIdx = weekdays.indexOf(globalSelectedFilter.weekday);
+        if (yIdx !== -1 && xIdx !== -1) {
+          shapes.push({
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: xIdx - 0.5,
+            x1: xIdx + 0.5,
+            y0: yIdx - 0.5,
+            y1: yIdx + 0.5,
+            line: { color: '#000000', width: 2 }
+          });
+        }
+      }
+
+      const trace = {
+        z: zData,
+        x: weekdays,
+        y: rowLabels,
+        type: 'heatmap',
+        colorscale: 'Viridis',
+        zmin: 0,
+        zmax: 100,
+        zsmooth: false,
+        showscale: true,
+        colorbar: {
+          title: 'SDFP%',
+          titleside: 'top',
+          thickness: 10,
+          len: 0.9,
+          tickfont: { size: 7 },
+          titlefont: { size: 8, family: 'Inter' }
+        },
+        xgap: 2,
+        ygap: 2,
+        hovertemplate: '%{y}<br>Día: %{x}<br>SDFP: %{z}%<extra></extra>'
+      };
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 140, r: 45, t: 10, b: 25 },
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        xaxis: { ticks: '', showgrid: false },
+        yaxis: { ticks: '', showgrid: false },
+        height: 270,
+        shapes: shapes,
+        annotations: []
+      };
+
+      // Generar anotaciones en cada celda — siempre blanco con sombra para contraste universal
+      for (let i = 0; i < rowLabels.length; i++) {
+        for (let j = 0; j < weekdays.length; j++) {
+          const val = zData[i][j];
+          const isMarginal = (i === rowLabels.length - 1 || j === weekdays.length - 1);
+          layout.annotations.push({
+            x: weekdays[j],
+            y: rowLabels[i],
+            text: `<b>${textAnnotations[i][j]}</b>`,
+            showarrow: false,
+            font: { 
+              family: 'Inter', 
+              size: isMarginal ? 8 : 9, 
+              color: getTextColorForValue(val)
+            }
+          });
+        }
+      }
+
+      if (plotDiv.removeAllListeners) {
+        plotDiv.removeAllListeners('plotly_click');
+      }
+
+      Plotly.newPlot(plotDiv, [trace], layout, { responsive: true, displayModeBar: false });
+
+      // Registrar evento de clic para filtro cruzado en el heatmap granular
+      plotDiv.on('plotly_click', function(data) {
+        if (!data || !data.points || data.points.length === 0) return;
+        const pt = data.points[0];
+        
+        const clickedRow = pt.y;
+        const clickedWeekday = pt.x;
+        
+        // No permitir hacer clic en celdas marginales Σ para filtrar
+        if (clickedRow === 'Σ' || clickedWeekday === 'Σ') return;
+        
+        const parts = clickedRow.split(' · ');
+        const clickedRegime = parts[0];
+        const clickedState = parts[1];
+        
+        if (globalSelectedFilter && globalSelectedFilter.source === 'heatmap-full' && globalSelectedFilter.regime === clickedRegime && globalSelectedFilter.state === clickedState && globalSelectedFilter.weekday === clickedWeekday) {
+          globalSelectedFilter = null; // Toggle off
+        } else {
+          globalSelectedFilter = { 
+            weekday: clickedWeekday, 
+            regime: clickedRegime, 
+            state: clickedState, 
+            sizeBucket: null, 
+            sizeBucketLabel: null,
+            source: 'heatmap-full' 
+          };
+          globalSelectedWeekday = null; // Desactivar filtro de día simple
+        }
+        
+        window.filtrarYRenderizarGaps();
+      });
+    };
+
+    // Función para renderizar el histograma de distribución de Fill Depth
+    window.renderizarHistogramaFillDepth = function(points) {
+      const plotDiv = document.getElementById('grafico-fill-depth-hist');
+      if (!points || !plotDiv) return;
+      
+      // Crear bins de 10% desde 0% hasta >100%
+      const binLabels = ['0-10%', '10-20%', '20-30%', '30-40%', '40-50%', '50-60%', '60-70%', '70-80%', '80-90%', '90-100%', '>100%'];
+      const binCounts = new Array(11).fill(0);
+      const binFilled = new Array(11).fill(0);
+      
+      points.forEach(p => {
+        const depth = p.fill_depth * 100; // Convertir a porcentaje
+        let binIdx;
+        if (depth > 100) {
+          binIdx = 10; // >100% (overshoot)
+        } else {
+          binIdx = Math.min(Math.floor(depth / 10), 9);
+        }
+        binCounts[binIdx]++;
+        if (p.fill_depth >= globalMinFillTarget) binFilled[binIdx]++;
+      });
+      
+      // Colores: gradiente de momentum (azul oscuro) a reversión (carmesí)
+      const colors = binLabels.map((_, i) => {
+        if (i <= 3) return '#2c4a5e';   // Zona Momentum (0-40%)
+        if (i <= 6) return '#4a6984';   // Zona Transición (40-70%)
+        if (i <= 9) return '#6d4c4c';   // Zona Reversión (70-100%)
+        return '#883030';               // Overshoot (>100%)
+      });
+      
+      const traceHist = {
+        x: binLabels,
+        y: binCounts,
+        type: 'bar',
+        marker: { color: colors },
+        hovertemplate: 'Fill Depth: %{x}<br>Gaps: %{y}<extra></extra>'
+      };
+      
+      const layoutHist = {
+        xaxis: { 
+          gridcolor: 'rgba(0,0,0,0)',
+          title: { text: 'Fill Depth (%)', font: { size: 9, family: 'Inter' } }
+        },
+        yaxis: { 
+          gridcolor: '#f1f2f4',
+          title: { text: 'Frecuencia', font: { size: 9, family: 'Inter' } }
+        },
+        template: 'plotly_white',
+        height: 270,
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        margin: { l: 40, r: 15, t: 10, b: 40 },
+        // Añadir línea vertical en 100% como referencia
+        shapes: [{
+          type: 'line',
+          x0: 9.5, x1: 9.5,
+          y0: 0, y1: Math.max(...binCounts) * 1.1,
+          line: { color: '#883030', width: 1, dash: 'dot' }
+        }],
+        annotations: [{
+          x: 9.5, y: Math.max(...binCounts) * 1.05,
+          text: 'Fill = 100%',
+          showarrow: false,
+          font: { size: 8, color: '#883030', family: 'Inter' }
+        }]
+      };
+      
+      Plotly.newPlot(plotDiv, [traceHist], layoutHist, { responsive: true, displayModeBar: false });
+    };
+
+    // --- GRÁFICO 3D SURFACE: Gaps × Volatilidad × SDFP (Regresión Kernel Gaussiana) ---
+    window.renderizarGrafico3DSurface = function(points) {
+      const plotDiv = document.getElementById('grafico-gaps-3d');
+      if (!points || points.length === 0 || !plotDiv) return;
+      
+      const stepsX = 25;
+      const stepsY = 25;
+      
+      // Obtener rango de los datos
+      const gapSizes = points.map(p => p.gap_size_atr);
+      const natrs = points.map(p => p.natr);
+      const minX = Math.min(...gapSizes);
+      const maxX = Math.max(...gapSizes);
+      const minY = Math.min(...natrs);
+      const maxY = Math.max(...natrs);
+      
+      // Crear ejes de la cuadrícula
+      const xGrid = Array.from({length: stepsX}, (_, i) => minX + (i / (stepsX-1)) * (maxX - minX));
+      const yGrid = Array.from({length: stepsY}, (_, i) => minY + (i / (stepsY-1)) * (maxY - minY));
+      
+      // Bandwidth para el Kernel Gaussian
+      const sigmaX = 0.3; // en unidades de ATR
+      const sigmaY = 0.4; // en unidades de NATR%
+      
+      // Prior de regularización (tasa de llenado general de este conjunto para zonas sin datos)
+      const globalFillRate = points.filter(p => p.fill_depth >= globalMinFillTarget).length / points.length;
+      
+      const zMatrix = [];
+      
+      for (let i = 0; i < stepsY; i++) {
+        const row = [];
+        const yVal = yGrid[i];
+        for (let j = 0; j < stepsX; j++) {
+          const xVal = xGrid[j];
+          
+          let sumWeights = 0;
+          let sumWeightedFills = 0;
+          
+          points.forEach(p => {
+            const dist = Math.pow(p.gap_size_atr - xVal, 2) / (2 * sigmaX * sigmaX) + 
+                         Math.pow(p.natr - yVal, 2) / (2 * sigmaY * sigmaY);
+            const w = Math.exp(-dist);
+            sumWeights += w;
+            sumWeightedFills += w * (p.fill_depth >= globalMinFillTarget ? 1.0 : 0.0);
+          });
+          
+          // Regularizar con 0.5 de peso prior para evitar saltos en los bordes vacíos
+          const priorWeight = 0.5;
+          const finalVal = 100 * ((sumWeightedFills + priorWeight * globalFillRate) / (sumWeights + priorWeight));
+          row.push(finalVal);
+        }
+        zMatrix.push(row);
+      }
+      
+      const trace = {
+        z: zMatrix,
+        x: xGrid,
+        y: yGrid,
+        type: 'surface',
+        // Escala neuro-optimizada divergente (Azul Acero -> Gris Claro -> Crimson Red)
+        colorscale: [
+          [0.0, '#0d0887'],
+          [0.15, '#46039f'],
+          [0.3, '#7201a8'],
+          [0.45, '#9c179e'],
+          [0.6, '#d0436e'],
+          [0.75, '#f0605d'],
+          [0.85, '#fdae32'],
+          [1.0, '#f0f921']
+        ],
+        showscale: true,
+        colorbar: {
+          title: 'SDFP%',
+          titleside: 'top',
+          thickness: 10,
+          len: 0.8,
+          tickfont: { size: 7 }
+        }
+      };
+      
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 0, r: 0, t: 0, b: 0 },
+        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
+        height: 540,
+        scene: {
+          xaxis: { title: 'Gap (ATR)', titlefont: { size: 8 } },
+          yaxis: { title: 'NATR (%)', titlefont: { size: 8 } },
+          zaxis: { title: 'SDFP (%)', titlefont: { size: 8 }, range: [0, 100] },
+          camera: {
+            eye: { x: 1.5, y: 1.5, z: 1.1 }
+          }
+        }
+      };
+      
+      Plotly.newPlot(plotDiv, [trace], layout, { responsive: true, displayModeBar: false });
+
+      // Guardar la cuadrícula y matriz calculadas para interpretación agéntica
+      global3DSurfaceXGrid = xGrid;
+      global3DSurfaceYGrid = yGrid;
+      global3DSurfaceZMatrix = zMatrix;
+    };
+
+    window.calcularGapEstadistica = function() {
+      const cierreEl = document.getElementById("calc-cierre");
+      const aperturaEl = document.getElementById("calc-apertura");
+      const divRes = document.getElementById("calc-resultado");
+      if (!cierreEl || !aperturaEl || !divRes) return;
+      
+      const cierre = parseFloat(cierreEl.value);
+      const apertura = parseFloat(aperturaEl.value);
+      
+      if (isNaN(cierre) || isNaN(apertura) || !globalCurrentATR || !globalGapsData || !globalGapsData.points) {
+        divRes.innerHTML = "Ingrese el Cierre y la Apertura estimada para proyectar la probabilidad de llenado.";
+        return;
+      }
+      
+      const gap = apertura - cierre;
+      if (gap === 0) {
+        divRes.innerHTML = "El Gap estimado es 0. No hay brecha de apertura.";
+        return;
+      }
+      
+      const gap_atr = gap / globalCurrentATR;
+      const targetDirection = gap > 0 ? "UP" : "DOWN";
+      
+      // Filtrar gaps históricos similares en tamaño absoluto (ventana +-0.25 ATR) y misma dirección
+      const minSize = Math.abs(gap_atr) - 0.25;
+      const maxSize = Math.abs(gap_atr) + 0.25;
+      
+      const similarGaps = globalGapsData.points.filter(p => 
+        p.direction === targetDirection && 
+        Math.abs(p.gap_size_atr) >= minSize && 
+        Math.abs(p.gap_size_atr) <= maxSize
+      );
+      
+      if (similarGaps.length > 0) {
+        const filledCount = similarGaps.filter(p => p.fill_depth >= globalMinFillTarget).length;
+        const sdfp = (filledCount / similarGaps.length * 100).toFixed(1);
+        
+        const recomendacion = parseFloat(sdfp) >= 70.0 
+          ? "<b>Recomendación (FADE):</b> Alta probabilidad de cierre. Buscar setup en contra del gap (Fading) en la apertura con un stop ceñido."
+          : "<b>Recomendación (CONTINUATION):</b> Baja probabilidad de cierre. El gap muestra fuerte convicción institucional. Buscar compras/ventas en dirección del gap.";
+          
+        divRes.innerHTML = 
+          `<b>Gap Estimado:</b> ${gap.toFixed(2)} (${gap_atr.toFixed(2)} ATR) | Dirección: <b>${targetDirection}</b><br>` +
+          `<b>SDFP Histórica (Llenado):</b> ${sdfp}% (basado en ${similarGaps.length} eventos similares)<br><br>` +
+          `${recomendacion}`;
+      } else {
+        // Fallback: Mostrar métrica general de esa dirección
+        const generalDirectionGaps = globalGapsData.points.filter(p => p.direction === targetDirection);
+        if (generalDirectionGaps.length > 0) {
+          const genFilled = generalDirectionGaps.filter(p => p.fill_depth >= globalMinFillTarget).length;
+          const genSdfp = (genFilled / generalDirectionGaps.length * 100).toFixed(1);
+          divRes.innerHTML = 
+            `<b>Gap Estimado:</b> ${gap.toFixed(2)} (${gap_atr.toFixed(2)} ATR) | Dirección: <b>${targetDirection}</b><br>` +
+            `<i>Sin muestras similares en tamaño. Probabilidad general para Gaps ${targetDirection}: ${genSdfp}% (de ${generalDirectionGaps.length} muestras).</i>`;
+        } else {
+          divRes.innerHTML = `<b>Gap Estimado:</b> ${gap.toFixed(2)} (${gap_atr.toFixed(2)} ATR)<br>No hay registros históricos de gaps en esta dirección para este activo.`;
+        }
+      }
+    };
+  </script>
+</body>
+</html>

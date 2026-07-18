@@ -1,0 +1,1401 @@
+[00:04] Um, welcome to another exciting Plotly
+[00:06] webinar. This is Plotly Studio enters
+[00:08] the agentic era. I'm your speaker, uh,
+[00:11] Matt Brown. I'm a senior product manager
+[00:13] here at Plotly, um, and I cover Plotly
+[00:15] Studio primarily.
+[00:17] Um, and what we're going to do today is
+[00:19] we're going to walk through the brand
+[00:20] new workflow in Plotly Studio. If you've
+[00:22] been using Plotly Studio over the past
+[00:24] week and a half or so, you may have seen
+[00:26] this new, uh, agentic workflow, um, kind
+[00:29] of front and center. Um, if you're new,
+[00:31] uh, let let me just briefly cover that
+[00:33] we've released a brand new workflow
+[00:35] inside of Plotly Studio. Our classic
+[00:36] workflow was very, um,
+[00:39] was very focused on connecting to data
+[00:41] and then creating dashboards, very
+[00:43] BI-like experience. And while that's
+[00:45] super powerful, uh, we've been seeing
+[00:47] some of the amazing advancements, um,
+[00:49] happening kind of in the agentic AI
+[00:51] space, the multi-step workflow space,
+[00:53] um, and it's it's too it's too powerful
+[00:56] to ignore. We've, uh, we've essentially
+[00:59] changed our workflow. So, not only can
+[01:01] you now explore data and do ad hoc
+[01:03] analysis, you can also do, uh, you know,
+[01:06] dashboards and reports as well. So,
+[01:08] that's what we're going to cover today.
+[01:10] We're going to start in the deck and
+[01:11] then we're going to jump over to a, uh,
+[01:13] a live demo here. Uh, we'll talk a
+[01:16] little bit about the road map and now
+[01:17] that this kind of new workflow has
+[01:19] landed, where do we go from here and we
+[01:20] have like where do we see this, uh, this
+[01:22] thing going over the next, you know, I'd
+[01:24] say four to six months. Uh, and then we
+[01:26] can do a short round of Q&A. Um, so
+[01:28] without further ado, I will just jump
+[01:30] right in.
+[01:31] Um, so as I mentioned, there's a lot of
+[01:33] exciting things happening in the world
+[01:35] of agentic analytics. Uh, a lot of folks
+[01:37] here are probably using tools like
+[01:39] Claude Code, even Claude Desktop, Codex,
+[01:42] you name it. Uh, all of these tools are
+[01:44] incredible, uh, and actually quite
+[01:46] capable from a data analysis standpoint,
+[01:48] except
+[01:50] AI chatbots today are showing you walls
+[01:52] of text. I know I see this a lot when
+[01:54] I'm doing data analysis in Claude. Um,
+[01:57] it's an amazing tool, but it's hiding a
+[01:59] lot of the tool calls. Where are my
+[02:00] charts? I occasionally see some tables,
+[02:03] but I get walls of text returned to me
+[02:05] and
+[02:06] that [clears throat] doesn't feel great.
+[02:08] If I switch over to use Claude code if
+[02:10] I'm working in an IDE,
+[02:12] you know, also pretty capable, right?
+[02:15] But I have to kind of read between the
+[02:16] lines. I have to go back and look at the
+[02:17] code it's writing to understand what
+[02:19] it's doing. I have to trust its output.
+[02:21] I'm not seeing anything visual returned
+[02:23] back to me. It's not interactive beyond
+[02:25] just kind of the back and forth.
+[02:27] And you know, we want to basically want
+[02:31] to
+[02:32] bring Claude technologies to to everyone
+[02:34] who can use them, right? Data analysis
+[02:36] should be an everyone kind of thing, not
+[02:38] just software developers, right? Complex
+[02:41] data analysis should be visual. We think
+[02:42] it should be interactive. We think it
+[02:43] should be verifiable. And now with the
+[02:45] help of LLMs, it should be accessible to
+[02:48] everyone. And yet, when we're using
+[02:50] these tools, I often find these things
+[02:52] to be a little bit unintuitive, opaque.
+[02:55] I have to kind of dig in to go, you
+[02:56] know, find where it's writing the code
+[02:58] and read through it and understand what
+[02:59] it's writing.
+[03:01] It's brittle, right?
+[03:03] If I have to maintain something that
+[03:04] it's written, I have to kind of take on
+[03:06] the mental burden now and kind of dig
+[03:07] back into the project to figure out what
+[03:08] it's doing or maybe what maybe what's
+[03:10] broken, right? And this is why using
+[03:13] these tools is starting to feel to me
+[03:15] like it's only for software developers.
+[03:17] And again, we want this to be for
+[03:18] everyone. So we think there's a better
+[03:20] way. And that's where this Plotly Studio
+[03:22] agentic workflow comes into play, right?
+[03:26] Plotly Studio is an agentic AI product
+[03:27] that was purpose-built for data
+[03:29] analysis. Look, charts were charts
+[03:31] should be, right? Interactive graphs
+[03:33] that you can explore in an an
+[03:36] environment that puts your data and
+[03:37] charts front and center.
+[03:40] The the the cool thing about this and
+[03:42] why it's so different from our classic
+[03:44] workflow is that it plans out and works
+[03:47] through up to, you know, a dozen steps,
+[03:50] two dozen steps, right? It's not just
+[03:52] one thing. One of the issues we have
+[03:54] with current Plotly Studio is that while
+[03:56] it's an incredibly powerful chart
+[03:58] builder,
+[03:59] it can kind of do one step at a time.
+[04:01] And what we saw that it's missing is the
+[04:03] ability to connect to data, go explore
+[04:06] that data, understand you know, the
+[04:08] landscape, the type of analysis that
+[04:10] that can be performed upon it, show you
+[04:13] these things, and then have you guide it
+[04:16] toward what you're looking for. We often
+[04:17] find that the best analysis starts with
+[04:20] a few a few ad hoc questions and then
+[04:23] you know, the discovery of value and
+[04:25] then the need to share that. And that's
+[04:26] the the workflow that we're capturing
+[04:28] with this, right? We put your data front
+[04:31] and center. You're going to see
+[04:33] beautiful charts, interactive charts,
+[04:35] tables, you're going to be able to
+[04:37] filter, you're going to be able to look
+[04:40] at the code, right? All of our analytics
+[04:42] here are fully backed by code. And we've
+[04:46] simplified that the code that it's
+[04:47] writing quite a bit.
+[04:49] Um
+[04:50] So you don't need a ton of extra
+[04:51] boilerplate. We connect to your data, we
+[04:53] run queries, we run calculations, we
+[04:56] return tables and charts,
+[04:58] and these things are kind of nicely kind
+[05:00] of wrapped up, nicely componentized,
+[05:02] fairly easy to read I would say. And if
+[05:04] you're not a software developer and
+[05:05] can't read Python code, or maybe you
+[05:08] know, it's it's it's it's not your kind
+[05:10] of everyday thing, we also have helpful
+[05:12] tools that will summarize what's going
+[05:14] on in here as well. We think
+[05:16] transparency around the analytics should
+[05:18] be front and center, right? Another
+[05:21] really powerful thing about this tool is
+[05:23] that it consults you when ambiguity
+[05:25] arises. A lot of these AI tools, while
+[05:28] they're extremely capable and amazing,
+[05:30] they do often make assumptions, they
+[05:32] just jump right into analyses, make
+[05:34] assumptions, and they don't always tell
+[05:36] you that they've made those assumptions.
+[05:39] And so one of the key differentiators
+[05:41] with Plotly Studio is that when it
+[05:43] encounters ambiguity, it stops and asks
+[05:45] you, "How would you like to deal with
+[05:46] this?" And then it'll ask you a question
+[05:48] like, this is what we're seeing,
+[05:50] you know, we'd like to put you back in
+[05:51] the loop to under to to understand what
+[05:53] we're about to do and to know that going
+[05:55] forward. And then also, Plotly Studio is
+[05:57] great at reporting these ambiguities,
+[05:59] these assumptions, the methodologies,
+[06:01] all of those things at the reporting
+[06:03] stage as we'll see. Another great thing
+[06:05] about Plotly Studio is that it comes
+[06:06] packed with data skills, right? These
+[06:09] are basically
+[06:11] prepackaged reusable prompts that are
+[06:14] instructions that you can give Plotly
+[06:16] Studio. We have some ones in here of
+[06:17] course that, you know, the one-click
+[06:19] build a dash app or the one-click create
+[06:21] a write-up for me. But we also have some
+[06:23] really important prepackaged ones in
+[06:24] here
+[06:25] around data quality. We can actually go
+[06:27] through your data set if you found if
+[06:28] you're working with public data,
+[06:29] something you found online,
+[06:31] it can often have data quality issues.
+[06:33] We can check for those things and fix
+[06:34] them on the fly.
+[06:36] We can spot-check your analysis to make
+[06:39] sure things are looking like they are
+[06:41] being reported to you. We can view
+[06:43] assumptions and verify
+[06:45] what is being returned to you, right?
+[06:47] So,
+[06:48] a lot of really great skills packaged in
+[06:50] here. But this isn't all. You can
+[06:52] actually create custom skills in here as
+[06:54] well, which can be super helpful for
+[06:56] connecting to data sources, for example,
+[06:58] telling it what types of credentials
+[06:59] that you have, where you like to store
+[07:01] them, etc., right? To make that process
+[07:03] faster inside of one of these agentic
+[07:05] sessions as well. So, we'll see that
+[07:06] here in a minute.
+[07:08] But most importantly, and as I mentioned
+[07:10] before, this is all about moving
+[07:12] seamlessly from data exploration to
+[07:15] building an application and sharing,
+[07:16] right? So, all I all of the great
+[07:18] analysis that that we've done here at
+[07:20] Plotly has often started with ad hoc
+[07:22] questions, if you really important
+[07:23] questions, digging in, finding
+[07:26] you know, the the charts that that tell
+[07:29] us what we need to know, and then we
+[07:31] need to share this with our
+[07:32] stakeholders. We could take screenshots,
+[07:34] but that's not on live data. What we
+[07:36] really want to do is take a whole ad hoc
+[07:39] session of back and forth with an agent,
+[07:41] use that context to then create a data
+[07:44] application with one line of prompt, uh
+[07:47] and then share that with our teammates.
+[07:49] And that's what Plotly Studio can do, as
+[07:51] as we'll see.
+[07:53] Um the one-click uh share is is uh in
+[07:56] this mode as well, right? So, any of our
+[07:58] uh data applications, you just push that
+[08:00] publish button, uh and then it deploys a
+[08:03] few minutes later, you jump over to the
+[08:04] app, you share it with your teammates,
+[08:05] and you're ready to go. So, um without
+[08:08] further ado, let's dive in, and let's
+[08:10] let's actually run uh one of these
+[08:12] sessions and see for ourselves.
+[08:14] Uh give me just 1 second while I switch
+[08:16] screens here.
+[08:18] Pull up Plotly Studio.
+[08:20] All right, you should see Plotly Studio
+[08:22] now.
+[08:23] Um what we're going to do is we're going
+[08:24] to connect to a uh web API. So, let's
+[08:28] say connect to FRED web API.
+[08:33] All right. Um if you've used our classic
+[08:35] mode, you'll know that we have a similar
+[08:36] way of kind of starting uh this process
+[08:39] and connecting to data. Um
+[08:41] this could be anything, by the way. So,
+[08:43] you could drag and drop CSVs in here,
+[08:45] you could drag and drop Excel files, you
+[08:46] could drag and drop parquet files. You
+[08:48] could also connect to web APIs, right,
+[08:50] directly. You can also connect to
+[08:52] databases, data warehouses. Basically,
+[08:54] anything that Python can do from a data
+[08:56] connectivity standpoint, Plotly Studio
+[08:58] can do um already. Now, you'll notice
+[09:01] that because I'm connecting to a web API
+[09:03] and this is secured, um I need to enter
+[09:05] an API key. So, give me just 1 second to
+[09:07] drop this in here. I'll enter it and say
+[09:10] continue. Uh something to note about the
+[09:12] way that we uh store credentials is that
+[09:15] we take that information and we never
+[09:16] pass it directly to the LLM. Instead,
+[09:18] what we do
+[09:19] is we store those credentials in your OS
+[09:21] keyring, and then we refer back to them
+[09:23] in the code that we write when we
+[09:24] connect to
+[09:26] um our data. So, uh you can always rest
+[09:29] assured that what you're giving, you
+[09:31] know, to Plotly Studio is being properly
+[09:33] stored, secured, uh and and used
+[09:35] appropriately in the code. Now, the
+[09:36] first thing Plotly Studio is going to do
+[09:38] is it's going to connect and it's going
+[09:39] to test that connection.
+[09:41] Um looks like our connection was
+[09:42] successful, great. And then it's going
+[09:44] to stop and ask us what we'd like to do,
+[09:45] right? I didn't really give it um a
+[09:47] prompt. I just told it what I wanted to
+[09:48] connect to. One of the great things
+[09:49] about Plotly Studio is that it will
+[09:51] guide you toward possible analyses,
+[09:54] right? It's done a bit of exploring on
+[09:56] the uh on the data source
+[09:58] um and it's basically come back with
+[09:59] this. That's great. I'm going to enter
+[10:01] in my own prompts. Um
+[10:03] basically what I want it to do is give
+[10:05] me a a whole smattering of views of this
+[10:09] data so that I can create a dashboard
+[10:11] for myself, right?
+[10:12] Uh now, with these prompts I can be as
+[10:15] specific as I'd like or open-ended as
+[10:17] I'd like. We can actually be open-ended
+[10:19] and let it basically do run queries,
+[10:21] figure out what's there, tell you what's
+[10:23] there, um and you can do this kind of
+[10:25] back and forth. If you happen to know
+[10:26] what you want, you can just ask for that
+[10:28] as well. Um so, the first thing it's
+[10:30] going to do is it's going to create a
+[10:32] plan. We've got 10 steps here. Um it's
+[10:36] going to start by fetching data, pulling
+[10:37] all of this data, um and then it's going
+[10:39] to start creating its calculations. It's
+[10:41] going to start returning tables and
+[10:43] showing me charts. Let's take a look at
+[10:45] what it's doing.
+[10:46] So, first thing it's doing is fetching
+[10:49] um some rate environment data. You'll
+[10:51] notice that with each of these steps in
+[10:52] our session, you get these really nice
+[10:54] data cards here at the top, right? For
+[10:56] just quick, you know, quick glance, uh
+[10:58] can check over this data. Um you can
+[11:00] also see the table that was produced
+[11:02] here. I can click into this and then I
+[11:04] can get a larger view, which is pretty
+[11:06] awesome. So, um if I want to get in here
+[11:08] and actually look at the data, look at
+[11:10] these tables, I can do that. Um I have
+[11:12] filter controls available to me. I can
+[11:14] download these tables directly if I want
+[11:16] to. I can change some of the formatting
+[11:18] around these tables, like if I don't
+[11:20] want to see highlighting, for example,
+[11:21] like cell highlighting or if I want to
+[11:23] change the way that uh this data wraps
+[11:25] in the cells, I can do that as well.
+[11:28] Um
+[11:28] and uh most importantly, after it
+[11:31] fetches uh any of this data, um what it
+[11:34] likes to do is create a summary at the
+[11:36] top here. So, everything in bold is
+[11:39] actually calculated. So, even though
+[11:41] we're asking the model to create a
+[11:43] summary, all of the text that is in bold
+[11:46] has been calculated, and we can verify
+[11:48] that by jumping over to the code. I
+[11:50] switched over to the code view for this
+[11:52] step, and as you can see, this is all of
+[11:54] the Python code that was required to
+[11:55] fetch that data, return that table to
+[11:57] me.
+[11:58] And there's a nice summary here of what
+[12:01] this code is doing, which is super
+[12:02] helpful if I don't know how to read
+[12:03] Python.
+[12:05] Um
+[12:05] but you'll notice here that the string
+[12:07] that's returned, all of this is
+[12:09] interpolated, meaning all of these
+[12:12] numbers that we get here are calculated
+[12:14] directly and returned to us directly.
+[12:16] They're not passed through the model, so
+[12:18] very, very low chance for hallucination,
+[12:21] which is which is great, right? We want
+[12:23] you to be able to use this tool, get
+[12:25] analysis, and trust the analytics that
+[12:27] it's providing to you. All right, let's
+[12:29] move on. I'm sure we've created some
+[12:30] charts by now.
+[12:32] Let me scroll down here a few. Let's
+[12:34] take a look at some visualizations.
+[12:35] We've got some visualizations of rate
+[12:37] evolution here. Again, summary at the
+[12:40] top even for these types of steps and
+[12:41] these nice data cards here at the top.
+[12:44] All of the charts that we return to you
+[12:46] are Plotly charts, meaning they're
+[12:47] interactive. So, I can hover
+[12:49] over these charts and I get, you know,
+[12:51] these really nice tooltips that display.
+[12:53] I can click and drag and look at
+[12:54] particular time frames, right? I can
+[12:56] even turn on and off some of these
+[12:58] lines. And this is just default
+[13:00] functionality you get inside of the
+[13:02] Plotly graphing library, which is just
+[13:04] another kind of accelerator for this,
+[13:06] right? You're not having to generate
+[13:08] static images and have it be shown to
+[13:10] you and like start up Python processes
+[13:12] to like, you know, show you those images
+[13:14] like like I've seen it do in in cloud
+[13:17] code. This again is an is an environment
+[13:19] that is built specifically for data
+[13:21] analysis, you know, and and it's really
+[13:23] front and center here with Plotly
+[13:24] Technologies.
+[13:26] Let's see here. We've got another one
+[13:27] here for yield curve snapshots. Very
+[13:30] cool.
+[13:32] Term spread evolution. All right, some
+[13:34] of this is over my head, I will admit.
+[13:36] Um,
+[13:37] but if we're happy with the results, we
+[13:39] can score these. You can leave us some
+[13:41] feedback. If things are going off the
+[13:43] rails, please let us know.
+[13:44] Give us a one-star and tell us what's
+[13:46] what's not working for you because we
+[13:48] review all of that feedback daily. And
+[13:51] we are building out a benchmarking suite
+[13:54] of up to share here in the next few
+[13:56] weeks as well.
+[13:57] Where we run hundreds of data sets
+[13:59] through public studio and then judge the
+[14:02] output, right?
+[14:04] So, yeah,
+[14:06] a lot of those kind of the ethos from
+[14:07] our earlier incarnation of public studio
+[14:09] is still here with us as well. All
+[14:12] right, let's take a look. We've got some
+[14:13] nice heat map charts here.
+[14:16] Yeah, it's really creating a lot. I
+[14:17] mean, we've already gone up to what are
+[14:19] we at here? This looks like nine eight
+[14:22] or nine steps here. Eight steps, right?
+[14:24] All by itself. It's gone out and it's
+[14:26] looked at these things. I didn't have to
+[14:27] specify each chart. I didn't have to be
+[14:29] overly specific necessarily. I just let
+[14:32] it explore, create charts, and bring
+[14:33] things back to me. Now, it happens to
+[14:36] know that I want to do a
+[14:37] report next, right? So, it's stop and
+[14:39] it's asked me a question. Here's kind of
+[14:42] what the analysis covers. I can ask for,
+[14:45] you know, other things as well. I can
+[14:46] just jump down in here into the prompt
+[14:47] box and steer this in a different
+[14:49] direction if I want. It happened to get
+[14:51] it right that I want to generate a
+[14:52] report, so we'll just roll with it. But
+[14:54] it's going to ask me what should my
+[14:55] report cover at this point. I'm going to
+[14:58] click everything because I think that
+[15:00] would be interesting to show.
+[15:02] We want charts and visualizations and we
+[15:04] want stats and metrics.
+[15:06] We want at least some context, I would
+[15:08] say, some explanation around kind of
+[15:10] what it is that we're we're looking at.
+[15:12] And another kind of novel thing here is
+[15:14] editorial style. You can have it just
+[15:15] present the data. You can also have it,
+[15:18] you know, synthesize a little a little
+[15:20] And like try to understand uh the data,
+[15:23] what stands out to the LLM, and include
+[15:25] that as well. I I like a light narrative
+[15:27] with my report, so I'm going to say
+[15:29] light narrative and say continue.
+[15:31] At this point, it's going up and
+[15:33] building one of the two types of
+[15:35] artifacts that you can create in
+[15:36] Palantir Studio today. In addition to
+[15:37] tables and charts, uh the two kind of
+[15:39] top-level artifacts that you can create
+[15:42] are write-ups and uh Dash apps, right?
+[15:46] And as far as write-ups go, what this is
+[15:48] is it's is going to use all of the
+[15:50] context from our session that we've that
+[15:52] we've already generated, right? It's
+[15:54] going to look back through here, and
+[15:56] it's going to pull out all of the things
+[15:57] that it thinks is most important for
+[15:59] this type of report, and then it's going
+[16:01] to pull that together and just just
+[16:03] like, you know, if you're building an
+[16:04] app or creating visualizations, it's
+[16:06] going to use code to generate this
+[16:09] report um and show it to us.
+[16:12] Um and there's also a couple cool bells
+[16:13] and whistles in here that I'm excited to
+[16:15] show you just as it finishes. So, we've
+[16:17] got a little uh
+[16:19] preview here of our report. I'll open
+[16:21] this up. Let's take a look. Uh this is
+[16:23] telling you this is a computational
+[16:24] report, right? Um these are the uh kind
+[16:28] of code modules it's generated under the
+[16:29] hood to um create all of the the
+[16:33] analysis that you'll see. And similarly
+[16:35] to the session above, um we have these
+[16:38] really nice summaries and then all of
+[16:39] these interactive visualizations baked
+[16:41] right in. This is a pretty long report,
+[16:43] tons of charts in here, lots of uh
+[16:46] summaries, right? Pretty amazing that it
+[16:48] can pull all of this together. Um yeah,
+[16:51] and this has only been just a few
+[16:52] minutes. I probably could do this in a
+[16:54] fraction of the time if I wasn't
+[16:55] narrating the whole thing. But one thing
+[16:57] I want to uh share with you here at the
+[16:59] end, right? Super helpful um is this
+[17:02] methodology, data sources, and
+[17:04] limitations section. So, basically, this
+[17:05] will go through, and for any reports it
+[17:07] creates, it always includes this
+[17:09] section.
+[17:10] It includes the methodology, any
+[17:11] correlate or all of the um the ways that
+[17:14] it went about uh you know, calculating
+[17:15] your data, the data sources, right? What
+[17:18] APIs are you connecting to? And then
+[17:20] also, what period of time? Because often
+[17:22] that matters for this as well. And then
+[17:24] any limitations that, uh, that it knows
+[17:26] about, it will also surface those as
+[17:28] well. So, you can use this to
+[17:29] confidently communicate with your
+[17:31] colleagues when generating reports. It's
+[17:33] not just a chart, it's not just a number
+[17:36] inside of a wall of text. Um, you get
+[17:38] the code that created it, and you also
+[17:40] get, you know, uh, the LLM's best job
+[17:43] at, you know, enumerating all of the
+[17:45] potential gaps that you might have with
+[17:46] this as well, allowing you to maybe, you
+[17:48] know, correct or steer or at least, you
+[17:50] know, view certain things with a grain
+[17:52] of salt. Again, transparency is, you
+[17:54] know, a top priority for us. The next
+[17:56] thing that we're going to create is an
+[17:58] app, right? Reports are great, um, they
+[18:00] summarize everything together, but what
+[18:02] I'd like to do is,
+[18:03] uh, build an app for this analysis.
+[18:08] Right. Um, again, the second, this is
+[18:10] our our second big, um,
+[18:12] you know, entity that we can create in
+[18:15] Plotly Studio. This is going to create a
+[18:16] Dash app under the hood for us, and uh,
+[18:19] it'll be a live running Dash app that we
+[18:20] can deploy to Plotly Cloud or to Dash
+[18:22] Enterprise. I'm currently logged into
+[18:24] Plotly Cloud, but of course you can, uh,
+[18:26] work with Dash Enterprise with this tool
+[18:28] as well. While this is generating our
+[18:29] app, I think it's a great time to open
+[18:31] up the skills panel, and uh, I'm going
+[18:34] to walk through
+[18:35] just a couple of these, right? So, if I
+[18:38] were if I wanted to, instead of coming
+[18:39] down here and asking for a Dash app, I
+[18:41] could have just clicked this. Uh,
+[18:43] clicking into any one of these skills
+[18:44] allow you to view what the instructions
+[18:46] are, which is pretty useful, especially
+[18:47] if you want to kind of copy and modify
+[18:49] one, you can do that. Um, and basically,
+[18:53] if these prompts are, uh, multi-step, if
+[18:55] they have like enumerated steps, it'll
+[18:57] actually break them out into multiple
+[18:59] steps in your session as well, which is
+[19:01] pretty cool. Um, you can click run
+[19:02] skill, and away you go. If you wanted to
+[19:04] create a custom one, though, uh, you can
+[19:06] jump into this custom mode, you can
+[19:09] provide a slash command, right? Name
+[19:12] of my skill. You can provide a short
+[19:15] description and then enter in
+[19:18] instructions here that you want to
+[19:20] execute. Again, this is great for kind
+[19:23] of
+[19:24] connecting to data sources, right?
+[19:26] Enumerating what
+[19:28] credentials that you might have. This is
+[19:30] great for styling directives, right? To
+[19:32] let it know like, "Hey, when you build
+[19:33] my app, you should use this color
+[19:35] scheme. It should look like this brand."
+[19:37] You know, those those kinds of things.
+[19:38] Super useful for that. And then, if you
+[19:40] have particular,
+[19:42] you know, a particular use case,
+[19:43] particular verticals, if you have
+[19:46] certain types of calculations you always
+[19:47] want to run, again, you can just enter
+[19:49] those in here and they become a slash
+[19:50] command or a one click in order to run
+[19:52] them, which is super powerful.
+[19:54] It looks like our Dash app is done.
+[19:57] Let's take a look at it.
+[19:59] All right, so here we go.
+[20:01] Here is our Macro Regime dashboard.
+[20:03] We've got some data cards here at the
+[20:05] top, and then here are all of the charts
+[20:08] that we asked for. It looks like this
+[20:09] one actually had a little bit of trouble
+[20:12] with these tabs, so you know, it
+[20:14] happens.
+[20:15] But that being said, when we go to
+[20:17] publish, we just come up here, push the
+[20:19] the publish tab, we push the publish app
+[20:21] button, and away we go. Under the hood,
+[20:24] of course, this is just a Dash app,
+[20:26] right? And this is all of the code used
+[20:28] to create this report. But if it
+[20:31] returned something that I didn't
+[20:32] particularly love, or maybe it's missing
+[20:34] a particular chart, or maybe this is an
+[20:37] old app that I've been working on that,
+[20:39] "Hey, requirements have changed. I
+[20:40] actually need to create some, you know,
+[20:42] new charts for this thing." I can do
+[20:44] that as well.
+[20:46] One thing I can do is jump back in here
+[20:48] and inside my prompt say,
+[20:50] you know, remove the tabs on this app,
+[20:54] make it a single page, right? This
+[20:57] actually allows me to iterate on
+[21:00] any of the artifacts that I created
+[21:01] before, right? So, similar to like a
+[21:03] vibe coding,
+[21:05] you know, interface, you can just
+[21:07] prompt, ask for things, and mutate those
+[21:10] those previous artifacts, right? So,
+[21:13] this will actually generate a brand new
+[21:14] app.
+[21:15] Um today, we have artifacts tied to each
+[21:18] step. So, you can actually create
+[21:19] multiple versions of apps and deploy
+[21:21] them separately if you'd like. Uh we'll
+[21:23] talk in once we get to the roadmap
+[21:24] section about how we see this evolving
+[21:27] over time, but you should know that you
+[21:29] can refer back to anything that's been
+[21:31] created. You can iterate on those things
+[21:33] that have been created. Uh wrap them up
+[21:35] into a Dash app and deploy and share
+[21:37] with with teammates, right? Super
+[21:39] powerful workflow.
+[21:41] Um this one, let's see if it let's see
+[21:43] if it works. It did. Okay, it removed my
+[21:45] broken tabs. That's great. Um and now I
+[21:47] can see this is much longer. Here's all
+[21:49] of our charts uh for our application,
+[21:51] right? And again, I can just jump up
+[21:53] here and publish. Uh once our app is
+[21:56] like built and deployed, I can go over
+[21:59] to Plotly Cloud or into Dash Enterprise,
+[22:01] and then I can basically assign the
+[22:03] teammates who I'd like to um you know,
+[22:05] have access to this application, and and
+[22:08] then they can just see it just by
+[22:10] logging in and visiting a URL, right?
+[22:13] Pretty amazing workflow.
+[22:15] Um I think that covers it for our in-app
+[22:18] demo today. I'm going to switch back
+[22:19] over to the slides. We're going to talk
+[22:20] through roadmap here. Give me just a
+[22:22] second while I change gears.
+[22:29] All right. So, uh one thing I should
+[22:32] note is that you can try Plotly Studio
+[22:34] for free today. Uh it is a desktop
+[22:37] application. You'll need to
+[22:39] uh go over to plotly.com/downloads
+[22:42] and download the free desktop
+[22:43] application. You'll sign up for a free
+[22:45] account uh with Plotly Cloud to get
+[22:47] started, and you get free credits. Uh
+[22:50] you get a creator seat, and you can
+[22:51] create um up to one publicly viewable
+[22:54] application. Um if you like what you
+[22:56] see, you can jump up to our pro plan,
+[22:58] which gives you a 50 credits monthly, um
+[23:01] one creator seat up to 10 private
+[23:03] viewers, unlimited dash apps both
+[23:05] locally and deployed, custom app URLs,
+[23:09] and if you happen to want to also deploy
+[23:12] your applications via like CICD, we have
+[23:15] API keys available and a new CLI tool
+[23:18] which by the way you should go check
+[23:19] that out if that's interesting to you.
+[23:22] So that's how you would work with Plotly
+[23:24] Cloud kind of in our SaaS model, but I'm
+[23:27] going to guess that a lot of the folks
+[23:28] here on the call are interested in our
+[23:30] enterprise plan. Our enterprise plan
+[23:33] allows you to work completely on prem or
+[23:36] use SaaS,
+[23:37] use your private LLM, right? So you
+[23:39] wouldn't be using Plotly's
+[23:42] LLM in the background. You'd actually be
+[23:44] sending all of your data through your
+[23:45] own private LLM and we can keep
+[23:47] everything behind your firewall, right?
+[23:50] The enterprise plan is for those who are
+[23:51] you know security conscious and working
+[23:53] with sensitive data. Of course we also
+[23:56] have SSO, our enterprise libraries you
+[23:59] know can be accessed and we're in this
+[24:00] course SOC 2 certified. So if you're
+[24:03] interested in kind of learning more
+[24:05] about kind of the the more secure way of
+[24:08] running Plotly Studio on prem for your
+[24:10] team behind your firewall, you're going
+[24:12] to want to reach out to our sales team
+[24:14] you know and chat with them a little bit
+[24:16] about
+[24:17] you know what we have to offer there.
+[24:19] Let's talk a little bit about road map.
+[24:22] So one thing you may have caught is that
+[24:24] we're creating a lot of sessions, right?
+[24:25] It's one session kind of per analysis
+[24:28] and while that works pretty well, it
+[24:30] means that for all of the new sessions
+[24:31] that you create you'll also have to spin
+[24:34] up data connections, right? And what we
+[24:36] really want is for you to be able to
+[24:38] come in and create a single data
+[24:40] connection and maybe spawn several
+[24:42] different types of analysis off of that
+[24:44] one connection and then share that with
+[24:46] a colleague and that's where projects
+[24:48] come into play. So projects will be a
+[24:50] new kind of top level construct that
+[24:53] wraps these session objects. So you can
+[24:55] have multiple sessions inside of a
+[24:57] project, a common data connection, and a
+[25:00] common set of artifacts and applications
+[25:02] that you can iterate on. It's basically
+[25:04] a central repository
+[25:06] for all of these things. That it would
+[25:08] also introduce version control as well.
+[25:10] So, you would be able to roll back
+[25:12] changes when things go awry and, you
+[25:14] know, iterate with confidence as you're
+[25:16] changing these common artifacts, right?
+[25:19] But most importantly, you'd be able to
+[25:20] share these things with teammates,
+[25:22] right? So, you'd be able to onboard them
+[25:23] much faster after you maybe you've
+[25:25] created your data connection, you kind
+[25:26] of set up the project, you just share
+[25:28] that out with your teammates, and now
+[25:30] they can benefit from all of that work
+[25:31] that you've done kind of, you know, as
+[25:33] an early adopter of the tool. We think
+[25:35] this is, you know, kind of the the next
+[25:37] step in really what's going to turn this
+[25:38] into, you know, a powerhouse of a tool
+[25:41] that allows teams to onboard very, very
+[25:43] quickly. Something we're all very
+[25:44] excited about.
+[25:45] Um the other thing is um allowing
+[25:48] sessions to run autonomously, right?
+[25:50] We're calling them scheduled sessions.
+[25:52] The idea here is that you could run a
+[25:54] daily report, uh you know, before you
+[25:56] arrive to work. It create It could
+[25:57] create a report for you or even a dash
+[25:59] app and publish it, right? Uh it could
+[26:01] run periodic analysis, right? Throughout
+[26:03] the day or throughout the week all by
+[26:04] itself and then letting you know, "Hey,
+[26:07] I've got some new things for you to take
+[26:08] a look at, right?"
+[26:10] Um it could be just creating a session.
+[26:11] It could could be creating um reports or
+[26:14] apps that are shared. Um and then it
+[26:16] could also even like share these things
+[26:18] with teammates on your behalf. So, this
+[26:19] is where we're getting into like the
+[26:20] autonomous agent uh agentic analytics.
+[26:24] Um and you know, again, we think this is
+[26:26] kind of what turns this tool from, you
+[26:28] know, something that works amazingly
+[26:30] well for ad hoc analysis to something
+[26:31] that can run and alert you when it
+[26:33] finds, you know, anomalies or uh or
+[26:35] maybe just, you know, kind of will help
+[26:37] you run your daily stand-ups, right? Uh
+[26:40] and yeah, so anyway,
+[26:42] really excited about that one. Um
+[26:44] questions. Uh I think unfortunately uh
+[26:47] Zoom's got a little bit different. This
+[26:48] UI doesn't have that same questions UI,
+[26:50] but we do have a chat, and it looks like
+[26:53] we have a lot
+[26:53] >> No, no, Matt, Matt, I got I got Matt, I
+[26:56] got you covered. Wait one second.
+[26:57] >> Awesome. Okay, thank you, Adam.
+[26:59] >> I got some good questions here.
+[27:01] Um perfect. And I see we have time for
+[27:03] that, so that's great. First of all, I
+[27:04] do want to thank
+[27:05] Mike and Esther, one of our participants
+[27:08] here,
+[27:09] um our viewers for sharing their apps.
+[27:11] Check it out, it's in the chat. They
+[27:12] built pretty cool apps uh with Plotly
+[27:15] Studio.
+[27:16] Um so, check those out. And uh thank you
+[27:19] everybody for joining and for the
+[27:20] questions. So, Matt, I have a few
+[27:21] questions here.
+[27:22] >> Awesome. Fire away.
+[27:23] >> First question
+[27:25] um is actually just so you know, Matt,
+[27:26] uh I I was able to answer. Does Plotly
+[27:28] Studio support connecting to remote MCP
+[27:31] server? So, my answer was not yet, but
+[27:33] uh and and Robert was helping me, but
+[27:34] something they're working on in the
+[27:36] future. Is that correct?
+[27:37] >> That is correct. Yes. Um and maybe just
+[27:39] a quick plug, uh we have a brand new MCP
+[27:42] feature coming to Dash that basically
+[27:45] turns every Dash app into an MCP server,
+[27:47] which is incredible when you think about
+[27:50] uh Plotly Studio being able to connect
+[27:51] to potentially all of the apps that your
+[27:52] teammates have published and use them as
+[27:54] resources. That's the vision. We're not
+[27:56] quite there yet, but we uh but the first
+[27:58] step was to get the MCP uh functionality
+[28:01] into our library. Uh that's that's here,
+[28:04] and then kind of the next step is to get
+[28:06] that integrated into Plotly Studio. So,
+[28:07] soon. That's a great It's a great
+[28:09] question, and the answer is soon you'll
+[28:10] be able to [clears throat] do that.
+[28:12] >> Great. And then we have a question from
+[28:13] a couple of questions actually from from
+[28:15] Christine.
+[28:16] Um so, let me break them up. The first
+[28:18] one is
+[28:19] what data does Plotly send to the LLM
+[28:23] model uh to generate these dashboards?
+[28:27] >> Great question. Uh so, in general, we we
+[28:30] send data extracts, and we actually
+[28:31] allow the LLM to kind of figure out what
+[28:34] it needs to send. We don't send
+[28:35] everything. We obviously don't send full
+[28:37] tables. Uh that's way too much for the
+[28:39] context window of the LLM. But in
+[28:41] general, um the LLM will look at the
+[28:44] schema of your data and send that. It
+[28:47] might send a couple of sample values,
+[28:49] you know, for each
+[28:51] of the the samples that it sends to the
+[28:54] LLM and that really increases the
+[28:55] accuracy of what it returns back to you.
+[28:58] But in reality, it's mostly up to the
+[29:00] LLM as far as what it
+[29:03] what it thinks to ask for, which is
+[29:05] another reason why it's so important
+[29:06] that we have an enterprise plan that
+[29:08] allows you to work on like behind your
+[29:10] firewall with your LLM,
+[29:13] you know, could be running in AWS
+[29:15] Bedrock, right? It doesn't have to be a
+[29:16] public LLM. These are things that you
+[29:19] can host. You can set up agreements with
+[29:21] these providers directly and control
+[29:23] your own data privacy and we fully work
+[29:25] within that ecosystem. So, if if that's
+[29:28] something that is some you know,
+[29:30] somewhat unnerving to you, just know we
+[29:32] have some solutions that allow you to
+[29:34] work completely privately. But that
+[29:35] being said, in general, it's just a data
+[29:37] extract.
+[29:39] >> So, we're we're getting a lot of
+[29:40] questions now, but to follow up on that
+[29:42] from Christine, can we control the data
+[29:44] that we send the LLMs? And if we have
+[29:47] personal identifiable information, do we
+[29:49] do we need to completely do you
+[29:50] recommend we completely remove it and
+[29:53] then add it back to the final version of
+[29:54] the app?
+[29:55] >> Yes, I would say if you are interested
+[29:59] in using our cloud you know, our cloud
+[30:01] version which uses our LLM, if you don't
+[30:03] want to run the enterprise version, yes,
+[30:05] absolutely strip out all of the PII
+[30:07] ahead of time and then you know, pull
+[30:09] that back in. Plotly Studio,
+[30:12] you can advise it what you'd like to you
+[30:14] know, send and not send, but at the end
+[30:16] of the day, it's up to the LLM to kind
+[30:17] of make those decisions.
+[30:19] I would recommend looking into our
+[30:22] enterprise package because at that point
+[30:25] it it's less it's more about you know,
+[30:27] kind of the agreement between you and
+[30:28] your LLM provider than it is about what
+[30:30] Plotly Studio is and isn't allowed to
+[30:32] send. Another thing to keep in mind too
+[30:34] is that if you're connecting to a
+[30:36] database and you have you know, you
+[30:38] don't want to give Plotly Studio access
+[30:39] to absolutely everything, you don't have
+[30:41] to. You could create you know, separate
+[30:43] users for Plotly Studio that only have
+[30:45] access to the data that
+[30:47] um you know, that you deem to be um
+[30:50] non-sensitive and then you can give that
+[30:52] to Plotly Studio as well. So, there's
+[30:53] ways to work around it, but again, I'd
+[30:55] reach out to our to our sales team and
+[30:57] and chat with them about our enterprise
+[30:58] offering and see if that might be uh
+[31:00] more interesting to you. Then you don't
+[31:01] have to work around around it so much.
+[31:02] You can just use the full power of the
+[31:04] tool inside of a safe environment.
+[31:06] That'd be my recommendation.
+[31:08] >> Thank you, Matt. Now, I have another
+[31:09] question from
+[31:10] These are really good questions actually
+[31:11] we're getting here. So, uh Steven just
+[31:13] asked this question. There was a few
+[31:15] people in line before them, but uh it's
+[31:17] more relevant to this. I'm going to ask
+[31:18] it now. What about um we're talking
+[31:20] about data sets. What about unclean data
+[31:22] sets? Is Plotly making everything
+[31:25] without consulting or does it consult
+[31:27] you as you showed in the steps by the
+[31:29] example?
+[31:30] >> It can be both. If you give it like a
+[31:32] whole list of things you want it to do,
+[31:34] it'll largely just go off and do them.
+[31:36] If you don't know what you want, you can
+[31:38] ask it questions and have it just return
+[31:40] things kind of in a more like
+[31:41] step-by-step way. It's really quite
+[31:43] flexible. For the demo today, we wanted
+[31:45] to load up something that kind of ran by
+[31:47] itself and then kind of showed you the
+[31:49] full breadth of what the tool can do,
+[31:50] but that's by no means the only way to
+[31:52] work with a tool. You can absolutely do
+[31:54] this in a more kind of back and forth ad
+[31:56] hoc stumble onto something interesting
+[31:58] kind of way and then dig into it
+[32:00] further. We have sessions internally
+[32:02] sometimes that are like, you know, 50,
+[32:05] 60, 70 steps, right? Just going back and
+[32:07] forth, digging, asking other questions,
+[32:10] expanding the timeframe, or looking at
+[32:11] another timeframe. You can do all of
+[32:13] that stuff in very kind of back and
+[32:14] forth way. So, it's not a not a one-shot
+[32:16] tool by any stretch of the imagination.
+[32:19] >> Cool. Then we have a question by
+[32:22] Gene uh Jen. Um how many It's probably
+[32:25] more question out of curio- out of
+[32:27] curiosity, Matt, but the demo app that
+[32:29] you built it to show, do you know how
+[32:30] many credits more or less did the did it
+[32:32] use?
+[32:33] >> Uh
+[32:34] um no. And actually Rob- I think Robert,
+[32:37] if he's still on, has he might have um
+[32:39] better estimates in general. What I'll
+[32:42] say um at the outset is that these
+[32:44] sessions are variable. So, it's it's
+[32:46] hard to know exactly how many it costs
+[32:49] exactly because apps vary, right? From
+[32:52] the data source to how many steps to
+[32:54] what type of analysis you're running, um
+[32:55] etc. But, I will also say that like it's
+[32:58] very very reasonably uh priced. The best
+[33:00] thing you could do is download the free
+[33:02] version of Plotly Studio and play around
+[33:03] with it a little bit and see how far
+[33:05] those free credits stretch you. It's a
+[33:06] good way uh you know, use some use some
+[33:08] representative data sets or even
+[33:09] synthesize some data sets that are
+[33:11] similar to what you're used to working
+[33:13] with um and then just build some apps
+[33:15] and see, right? Totally free of charge.
+[33:17] But, yeah, at this point because it's so
+[33:19] variable, it's just hard to say because
+[33:22] what we're trying to do is take the
+[33:23] guardrails off of the LLM to allow it to
+[33:26] do a lot more extensive analysis um and
+[33:28] give you high-quality results, right?
+[33:30] And with that comes the variability that
+[33:32] makes it hard to say exactly, but um
+[33:35] this, you know, as we learn more, uh we
+[33:37] can definitely add that information to
+[33:39] our documentation just to kind of help
+[33:41] frame things for users. So, watch out
+[33:43] for that. But, yeah, we're we're still
+[33:44] kind of doing lots of testing on this to
+[33:46] understand what those ranges would be.
+[33:48] >> Thanks, man. And I'm going to add again
+[33:49] but I added the link to download Plotly
+[33:50] Studio several times in this chat uh for
+[33:54] uh people who want to try it out. It's
+[33:55] free version. So, I'll add it again in a
+[33:57] minute. Another question that we have
+[33:59] here from Silver. What advantages does
+[34:02] your platform Plotly Studio
+[34:05] >> Mhm.
+[34:05] >> have over existing comp competitors such
+[34:08] as I'm not sure where they gave the
+[34:09] example Metabase
+[34:10] >> Oh.
+[34:10] >> or just
+[34:11] >> Gotcha. Yeah, um it's it's a different
+[34:14] interface. Uh it's a very different
+[34:15] interface, right? Um Metabase is super
+[34:17] cool,
+[34:19] um
+[34:19] you know, but it's a
+[34:22] it it is a very different approach that
+[34:23] we're taking. So, we're leaning into a
+[34:25] very chat-focused approach.
+[34:28] Um we are really focused on basically
+[34:32] writing Python code under the hood and
+[34:34] giving you the full flexibility of
+[34:36] what's possible in Python coding, but
+[34:40] putting it inside of a form factor that
+[34:41] is for data analysts specifically,
+[34:43] right? So, you know, Metabase, I don't
+[34:47] know that tool super super well, but I'm
+[34:49] assuming that it's not, you know, just
+[34:51] openly writing code using whatever
+[34:54] frameworks it needs to or whatever
+[34:56] packages it needs to.
+[34:58] You know, it's probably working inside
+[34:59] of a much more confined space, but
+[35:01] highly capable for a BI tool,
+[35:02] absolutely. But what this allows you to
+[35:04] do is kind of work more open-ended, do
+[35:06] ad-hoc questions,
+[35:08] you know,
+[35:09] use different libraries or even esoteric
+[35:11] libraries eventually
+[35:13] to, you know, answer answer these types
+[35:16] of questions, right? You're only the
+[35:18] goal here is for it to only be
+[35:19] constrained by what Python could give
+[35:21] you, but then make it so approachable if
+[35:23] you're not if you're a non-software
+[35:25] developer, right? Kind of like the best
+[35:26] parts of what Cloud Code can do, but
+[35:28] through the lens of data analysis,
+[35:31] right? That That would be kind of
+[35:33] the way I'd answer that question. But
+[35:34] like on a, you know, on a
+[35:36] feature-for-feature
+[35:38] comparison, you know, it's probably too
+[35:40] too complicated to get into the weeds
+[35:41] here. Um
+[35:42] But yeah, good question.
+[35:44] >> Back to the other question, Matt. Can we
+[35:45] track the cost of the LLM side for
+[35:47] creating these apps?
+[35:48] >> Yes. So, a couple things. When you're in
+[35:51] Plotly Studio in the upper right-hand
+[35:52] corner, you'll actually see how many
+[35:53] credits you have at your team level. And
+[35:56] so, as you use it, you can see them
+[35:58] being spent. So, you can definitely use
+[36:00] that as kind of a rough approximation.
+[36:02] If you're on our enterprise plan, we
+[36:04] actually just go through your LLM
+[36:05] provider. So, whatever tracking you're
+[36:07] doing through them directly, you can
+[36:09] just monitor that as well. So.
+[36:12] >> We have a few few questions coming in.
+[36:13] We have five
+[36:15] I have five more for you, Matt, for now.
+[36:17] >> Okay.
+[36:18] >> Um is Do some of us asking, is the pro
+[36:21] plan good for to use, for example, for
+[36:25] clients to build and deploy data apps
+[36:28] for other businesses.
+[36:30] >> Oh, I see. Yeah, absolutely.
+[36:33] Yes, absolutely. So, you could do that
+[36:34] in a number of ways. So, one, if you're
+[36:36] using Plotly Cloud, you could actually
+[36:39] create separate teams for different
+[36:40] clients, right? So, let's say you're a
+[36:42] consultant and you want to be doing some
+[36:45] data analysis and then publishing for
+[36:47] these various clients, you just create
+[36:48] separate teams for each of one of the
+[36:50] each one of those clients. In Plotly
+[36:52] Studio, you can just select that team
+[36:55] that you want to work for,
+[36:57] run your analysis, your I think your
+[36:59] sessions are scoped to the particular
+[37:01] team that you're working with, and then
+[37:04] when you deploy, it actually deploys
+[37:05] into that team's workspace. So,
+[37:08] the apps you create can be scoped for
+[37:10] them, and then once it's deployed in
+[37:12] Plotly Cloud, you can go in and then
+[37:13] just give those folks access. You could
+[37:15] by default just say everybody who's
+[37:16] invited gets it, or you could part out
+[37:18] the access to individual you know users
+[37:20] as needed. So, yes, we definitely
+[37:22] support that in Cloud, and then on Dash
+[37:24] Enterprise, definitely possible as well,
+[37:28] but because it's like an on-prem
+[37:29] installation and there are groups
+[37:31] managed and like it's kind of a whole
+[37:33] other thing, but yes, it would be
+[37:34] possible through Dash Enterprise as
+[37:36] well. But, yeah, certainly for like
+[37:38] small consultancies and stuff, Plotly
+[37:40] Cloud should also work just as well, and
+[37:42] that's probably how I'd approach it.
+[37:44] >> From a question from Fistful, wondering
+[37:47] what limits might be on CSV uploads in
+[37:50] terms of number of columns and rows. For
+[37:52] example, I have more than 500 columns in
+[37:54] some cases.
+[37:55] >> That's a really interesting question.
+[37:58] You can certainly because it runs
+[37:59] locally, you can certainly throw a ton
+[38:01] of data at this thing, but there is like
+[38:03] a limit to how much you can share with
+[38:05] the LLM. We're still testing the upper
+[38:07] boundaries of how big of a data set that
+[38:09] you can throw into Plotly Studio. Again,
+[38:11] I think this is probably going to take
+[38:13] quite a bit of like trial and error
+[38:15] playing with the tool. That being said,
+[38:18] you can also take that data and put it
+[38:19] into a database and Plotly Studio is
+[38:21] great at writing queries as well. You
+[38:24] can push a lot of that computation
+[38:25] directly into the database and just
+[38:28] return aggregates or, you know, results
+[38:30] essentially from the database as well.
+[38:33] So, there's ways to work around it, but
+[38:34] as far as how much Plotly Studio can
+[38:36] handle on the desktop, I think it'll
+[38:37] take a little bit of trial and error
+[38:39] on your particular machine.
+[38:41] >> Awesome. Kevin was asking, "Does this
+[38:44] agentic workflow extend into the
+[38:47] standard app builder that is, for
+[38:50] example,
+[38:52] uh trying to explain yourself, plots
+[38:53] generated in that agentic workflow being
+[38:56] added directly into a normal Studio
+[38:58] designed application?"
+[39:00] >> Oh, I see. Um I I'm not sure I fully
+[39:03] understand the question, but reading
+[39:05] between the lines, um
+[39:07] the couple is a couple things here. One,
+[39:09] any of the charts that you create, you
+[39:10] can go in and you can copy and paste
+[39:12] that code. So, if you like wanted to use
+[39:14] this as a way to like quickly generate
+[39:15] some charts and stick them into another
+[39:16] application that you're developing,
+[39:18] yeah, you can absolutely do that. Um you
+[39:20] would just copy the code out, maybe put
+[39:21] it in a file, and then if you're vibe
+[39:23] coding, you could just tell your LLM,
+[39:25] "Hey, this is, you know, a chart I'd
+[39:26] like to incorporate," and then let it
+[39:28] kind of figure that out. All of the data
+[39:29] connection and query code is also in
+[39:31] there. One thing I didn't get a chance
+[39:32] to show is that at the session level,
+[39:34] you can actually see all the files that
+[39:36] it's created, the virtual files that
+[39:37] it's created under the hood. So, yes,
+[39:39] like you have access to all of those
+[39:41] things. Um I will say the tool today
+[39:44] isn't particularly well suited for like
+[39:47] bringing another application into it and
+[39:49] then vibe coding on top of it, right?
+[39:51] You'd probably still want to use
+[39:52] something like Cloud Code for that if
+[39:54] you're already using those tools, but
+[39:56] Plotly Studio could help you do some of
+[39:57] the data analysis side and even kind of
+[39:59] chart discovery side that you could then
+[40:01] bring back over to that other tool.
+[40:03] Maybe longer term, though, um you know,
+[40:05] things would would evolve to allow you
+[40:07] to bring in all types of things. It's
+[40:09] actually how
+[40:10] >> Yeah, actually I the the way actually
+[40:12] Matt, I That's actually good to know.
+[40:14] The The I interpreted this question is,
+[40:17] if I create a plotly generated
+[40:19] uh uh the plots you created that you
+[40:21] showed us and generated through that
+[40:22] genetic workflow, what if I want to I
+[40:24] love plotly studio and how plotly studio
+[40:26] makes their apps in the theme? Can I
+[40:28] drag that and can I make that or
+[40:30] integrate that into a plotly studio the
+[40:32] plotly studio app the the the classic
+[40:35] mode or what we have now?
+[40:36] >> mode. That's a great that's a great
+[40:38] point actually. So the two modes today
+[40:40] are entirely separate. And today you can
+[40:44] actually switch between them by
+[40:47] an option. We do see the future of this
+[40:49] tool being the agentic mode, but we're
+[40:52] not you know ready to retire that
+[40:53] classic mode just yet. And one of the
+[40:55] things we'd like to you know solve is
+[40:57] like what that migration story looks
+[40:59] like, right? I think you can't do this
+[41:01] today necessarily, but I think the goal
+[41:04] is for you to be able to export your
+[41:06] projects out of plotly studio classic
+[41:08] and then bring them into agentic and
+[41:10] then kind of start working from that as
+[41:12] a base. Should work in theory. A lot
+[41:14] more testing needed and that's why we
+[41:15] haven't you know removed like the
+[41:17] classic mode at this point. So yeah,
+[41:20] still ways to go there. But yeah, that
+[41:21] that's kind of the vision at the moment.
+[41:23] >> Perfect. And Robert also gave a response
+[41:26] for one of those questions. So thank
+[41:28] you, Robert.
+[41:29] Another question from Christine.
+[41:31] If I ask it to change something like you
+[41:34] mentioned um
+[41:36] while in the app, will it
+[41:38] will it generate a new app? Will it
+[41:40] change any other parts of the app even
+[41:42] if I didn't ask it to? And then uh
+[41:45] follow up questions like are there any
+[41:46] health hallucinations have you tested
+[41:48] for hallucinations?
+[41:49] >> Um so as far as the way you iterate on
+[41:51] apps today each of the artifacts is
+[41:54] associated with a step. So if I ask it
+[41:57] to generate an app, it'll create an app
+[41:58] and store it at the step level. If I ask
+[42:00] for a change to that app, it's actually
+[42:02] copying it, making a change, and then
+[42:04] attaching that to the next step. So the
+[42:06] old app in its old state is preserved.
+[42:09] Um so there's pros and cons to that.
+[42:11] Like, the pro is that you can iterate
+[42:14] without, you know, hesitation because
+[42:16] all of the kind of previous versions are
+[42:19] are still there. You could actually
+[42:20] deploy any one of those older versions
+[42:21] if you want. They're technically
+[42:22] separate applications, so nothing to
+[42:24] worry about there. But, this dovetails
+[42:26] into what I was saying earlier about our
+[42:28] vision for projects, which will
+[42:31] basically allow you to do that iteration
+[42:33] on top of like one
+[42:35] file or one application, right? Make
+[42:38] changes to that application and also
+[42:40] have version control that allows you to
+[42:41] go back in time. So, today it's a little
+[42:44] bit rough and ready, but you can still
+[42:46] iterate with confidence. In the future,
+[42:47] it'll be a bit more sophisticated and
+[42:49] again, you'll have more of a project
+[42:51] view with common files rather than kind
+[42:53] of generating new things each time. So,
+[42:55] it's an important distinction. Yeah.
+[42:57] >> That's a good point.
+[42:58] Um,
+[42:59] hallucinations? Have you had Do we test
+[43:02] for hallucinations? Christine was
+[43:03] asking.
+[43:04] >> Uh, testing for hallucinations. We are
+[43:06] currently building a benchmark suite to
+[43:09] do this, right? Where we run through a
+[43:11] bunch of data sets, we generate
+[43:14] analyses, we actually spot check all of
+[43:16] them by hand, and we also have an LLM as
+[43:18] judge like looking at these things
+[43:20] as we're going.
+[43:22] So far, we've seen that the LLMs are
+[43:25] incredible at this work and it what
+[43:27] they're returning is like dead on. So,
+[43:31] yes, we'd like to publish this at some
+[43:33] point. This is on our to-do list over
+[43:35] the next several weeks. So, keep an eye
+[43:37] on our
+[43:39] website for this because this is
+[43:41] something that we'll be publicizing once
+[43:42] we get out there. But, in general, like
+[43:45] yeah, like we're doing a lot of this
+[43:46] analysis ourselves. We're using the tool
+[43:48] in a dogfooding style internally and
+[43:50] checking this thing a lot. It's It's
+[43:52] amazing what it's capable of doing.
+[43:55] But, as far as formal benchmarks, which
+[43:56] I think would be kind of the right
+[43:58] answer for that question, those are
+[43:59] those are coming down the road. So, so
+[44:00] keep an eye out.
+[44:01] >> Cool. One final question from Christine.
+[44:04] Um,
+[44:05] I'm assuming the answer is yes, she
+[44:07] says, but always good to confirm. Can we
+[44:10] put in or can we add complex formulas
+[44:14] for our metrics into the prompts for
+[44:17] Plotly Studio to generate the code and
+[44:19] the visuals?
+[44:20] >> Yes, absolutely. Yeah, so like you could
+[44:22] even drop in code, you could drop in
+[44:24] calculations, you can drop in basically
+[44:27] anything into that prompt and then
+[44:29] Plotly Studio will use that going
+[44:30] forward. So yes, very flexible.
+[44:33] Whatever kind of specificity you need,
+[44:35] you can put that in there. And if it's
+[44:36] something you run all the time, you can
+[44:37] put that in a skill as well. So it
+[44:39] becomes a one-click. Uh so you don't
+[44:41] have to go hunting for it and pasting it
+[44:42] in all the time. So let's keep So keep
+[44:44] that in mind.
+[44:45] >> Awesome. Matt, thank you so much. You've
+[44:47] answered all the questions so far. If we
+[44:49] have any more, I'll we'll answer them
+[44:50] after this webinar.
+[44:51] >> Awesome. Okay,
+[44:53] final plug. Go try Plotly Studio for
+[44:55] free today. Again, download this, try it
+[44:57] out, and then let us know. There's a
+[44:59] handy feedback feedback button in there
+[45:01] and I'm pretty sure it goes right to my
+[45:03] inbox. So really excited to see what
+[45:05] folks are at what building and, you
+[45:07] know, to hear all of your feedback. Um
+[45:10] Adam, do you want to, you know,
+[45:12] introduce this this webinar and the
+[45:15] week?
+[45:16] >> So yeah, on June 23rd, one one second.
+[45:18] Let me get some water. Okay. I'm getting
+[45:20] all these comments on the side. I'm
+[45:21] pretty excited about all this activity
+[45:22] in the chat. So yeah, June 23rd, 11:00
+[45:25] a.m. Eastern Time, we're going to have
+[45:27] another webinar.
+[45:29] It's introducing Dash MCP and how to
+[45:32] build Dash apps with coding agents.
+[45:34] We're going to have two of my
+[45:35] colleagues, if I'm mistaken, it's going
+[45:37] to be Nathan and Cleo who are going to
+[45:38] one of our best developers are going to
+[45:40] be
+[45:41] running this webinar.
+[45:43] And it's it's pretty exciting. Like I
+[45:45] started working with it
+[45:47] with Dash MCP and how to connect it to
+[45:49] to I don't want to, you know,
+[45:52] share everything right now and
+[45:54] but it started connecting it to cloud
+[45:56] desktop and I could just learn so much
+[45:58] and get so much information about my app
+[46:01] in like a matter of seconds just using
+[46:02] Bash and SCP. So, please join us. I'm
+[46:05] going to add this link or maybe Genie
+[46:06] you can help me or see uh, sorry, my
+[46:08] marketing team if you can help me add
+[46:10] this link to the chat,
+[46:12] so people can sign up.
+[46:16] All you have to do is put your name down
+[46:17] there. Perfect. Thank you, marketing
+[46:18] team.
+[46:19] >> Awesome. Thanks so much, Adam.
+[46:21] And with that, I think we're going to
+[46:23] we're going to close close up for today.
+[46:24] Thank you again for joining us on this
+[46:25] other platform and sorry again for those
+[46:27] technical difficulties. So glad that
+[46:30] everybody could join us here today and
+[46:31] if you you missed this or or missed a
+[46:33] chunk of this, remember this will be
+[46:35] recorded. You can download it.
+[46:37] You can download it from our website.
+[46:38] So, thanks again, everybody. Have a
+[46:39] great week.

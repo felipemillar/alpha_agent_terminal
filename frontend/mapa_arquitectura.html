@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Arquitectónico — Alpha Agent Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f4f6f9;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8fafc;
+            --accent-blue: #005cff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --border-color: #eaecef;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            padding: 16px 40px;
+            border-bottom: 1px solid var(--border-color);
+            border-top: 4px solid var(--accent-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-title p {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: calc(100vh - 72px);
+        }
+
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+        }
+
+        .sidebar h3 {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            padding-left: 12px;
+            font-weight: 700;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 10px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
+
+        .nav-item.active {
+            border-left: 3px solid var(--accent-blue);
+            padding-left: 9px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .main-content {
+            padding: 30px 40px;
+            overflow-y: auto;
+            max-height: calc(100vh - 72px);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .chart-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 40px 24px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            display: block;
+            width: 100%;
+        }
+
+        .mermaid {
+            width: 100%;
+            min-width: 960px;
+            margin: 0 auto;
+            background-color: transparent !important;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .info-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-card h4 {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .function-tag {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            display: inline-block;
+            margin: 3px 2px;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            color: #334155;
+            margin-top: 10px;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>Alpha Agent Terminal</h1>
+            <p>Mapa Relacional y Funcional</p>
+        </div>
+        <div style="font-size: 0.65rem; color: var(--text-secondary); background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 3px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">
+            QRT QUANTITATIVE DESK
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Visualizaciones</h3>
+            <ul class="nav-list">
+                <li class="nav-item active" onclick="switchTab(0)">Diagrama Relacional</li>
+                <li class="nav-item" onclick="switchTab(1)">Mapa de Funciones (src/)</li>
+                <li class="nav-item" onclick="switchTab(2)">Estructura de Datos</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- TAB 1: DIAGRAMA RELACIONAL -->
+            <div class="tab-panel active" id="tab-0">
+                <h2 class="section-title">Flujo de Datos y Sincronización</h2>
+                <div class="chart-box">
+                    <div class="mermaid">
+                        graph LR
+                            %% Style definitions
+                            classDef source fill:#f8fafc,stroke:#10b981,stroke-width:1.5px,color:#15803d;
+                            classDef python fill:#f8fafc,stroke:#005cff,stroke-width:1.5px,color:#005cff;
+                            classDef json fill:#f8fafc,stroke:#ea580c,stroke-width:1.5px,color:#c2410c;
+                            classDef ui fill:#f8fafc,stroke:#4f46e5,stroke-width:1.5px,color:#4f46e5;
+                            classDef agent fill:#f8fafc,stroke:#64748b,stroke-width:1.5px,color:#334155;
+
+                            subgraph DATA [1. Fuente de Datos]
+                                CSV[(TV Datafeed Skill<br/>Archivos CSV)]:::source
+                            end
+
+                            subgraph BACKEND [2. Motor Cuantitativo Backend]
+                                ENG[engine.py<br/>Data Pipeline & Gaps]:::python
+                                KPI[kpis.py<br/>ATR, Markov, Rachas]:::python
+                                SRV[server.py<br/>API, Inferencia, Confluencias]:::python
+                                
+                                ENG <-->|Delega Matemáticas| KPI
+                                SRV -->|Importa y Orquesta| ENG
+                            end
+
+                            subgraph BRIDGE [3. Disco / JSON Bridge]
+                                ST[estado_dashboard.json]:::json
+                                REQ[antigravity_bridge_request.json]:::json
+                                RES[antigravity_bridge_response.json]:::json
+                            end
+
+                            subgraph FRONTEND [4. Dashboard UI]
+                                DASH[dashboard_volatilidad.html]:::ui
+                            end
+
+                            subgraph AI [5. Inteligencia Artificial]
+                                AGENT[Agente Antigravity IDE]:::agent
+                            end
+
+                            %% Flujos de Conexión
+                            CSV -->|Carga Históricos CSV| ENG
+                            
+                            SRV <-->|Peticiones HTTP REST| DASH
+                            
+                            ENG -->|Guarda Asset Activo| ST
+                            SRV -->|Pide Inferencia a IA| REQ
+                            RES -->|Lee Respuesta IA| SRV
+                            
+                            AGENT -->|Lee Contexto| ST
+                            AGENT -->|Lee Data Puntos 3D| REQ
+                            AGENT -->|Escribe Reporte Experto| RES
+                    </div>
+                </div>
+
+                <div class="grid-cards">
+                    <div class="info-card">
+                        <h4>Origen de Datos (tvdatafeed-skill)</h4>
+                        <p>La ingesta de datos históricos en formato CSV se lee de forma local desde la carpeta de la skill tvdatafeed-skill integrada en el proyecto, asegurando cotizaciones actualizadas para los cálculos del engine.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Interpretación 3D</h4>
+                        <p>El botón de interpretar envía la matriz de la superficie para resolver gradientes, cima, valle y confluencias con los heatmaps.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Informe Experto</h4>
+                        <p>El Agente lee la geometría desde el request, procesa el informe y lo escribe en el bridge para sincronizarse con el pie de la barra lateral.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: MAPA DE FUNCIONES -->
+            <div class="tab-panel" id="tab-1">
+                <h2 class="section-title">Mapa de Funciones del Servidor</h2>
+                <div class="grid-cards">
+                    <div class="info-card">
+                        <h4>kpis.py</h4>
+                        <p>Biblioteca matemática independiente.</p>
+                        <div>
+                            <span class="function-tag">calculate_atr()</span>
+                            <span class="function-tag">calculate_natr()</span>
+                            <span class="function-tag">classify_regimes_full()</span>
+                            <span class="function-tag">calculate_expansion_contraction()</span>
+                            <span class="function-tag">get_streak_metrics()</span>
+                            <span class="function-tag">calculate_markov_matrix()</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4>engine.py</h4>
+                        <p>Ingesta de CSVs y pipelines principales.</p>
+                        <div>
+                            <span class="function-tag">fetch_data()</span>
+                            <span class="function-tag">analyze_volatility()</span>
+                            <span class="function-tag">run_pipeline()</span>
+                            <span class="function-tag">analyze_gaps()</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4>server.py</h4>
+                        <p>API Router y lógica de confluencias.</p>
+                        <div>
+                            <span class="function-tag">/api/volatility</span>
+                            <span class="function-tag">/api/gaps</span>
+                            <span class="function-tag">/api/gaps/analyze_surface</span>
+                            <span class="function-tag">/api/gaps/analyze_cell</span>
+                            <span class="function-tag">/api/streaks</span>
+                            <span class="function-tag">/api/markov</span>
+                            <span class="function-tag">/api/agent/analyze</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: ESTRUCTURA DE DATOS -->
+            <div class="tab-panel" id="tab-2">
+                <h2 class="section-title">Esquemas JSON del Bridge</h2>
+                
+                <h4 style="margin: 10px 0 5px 0; font-size:0.85rem; font-weight:700; text-transform:uppercase;">1. bridge/estado_dashboard.json</h4>
+                <pre class="code-block">{
+  "activo": "USDCLP_PEPPERSTONE",
+  "ultimo_calculo": {
+    "fecha": "2026-07-17",
+    "precio_cierre": 918.45,
+    "atr_actual": 8.12,
+    "natr_actual": 0.884,
+    "regimen_volatilidad": "MEDIO",
+    "estado_volatilidad": "CONTRACCION"
+  },
+  "alerta": "Entorno Óptimo",
+  "mandato_qrt": "Estructura limpia. Ejecutar sistema tendencial estándar con riesgo normal."
+}</pre>
+
+                <h4 style="margin: 25px 0 5px 0; font-size:0.85rem; font-weight:700; text-transform:uppercase;">2. bridge/antigravity_bridge_request.json</h4>
+                <pre class="code-block">{
+  "type": "3d_surface_interpretation",
+  "asset": "USDCLP_PEPPERSTONE",
+  "min_fill_target": 1.0,
+  "max_val": 60.92,
+  "x_max": 0.054,
+  "y_max": 0.671,
+  "min_val": 2.26,
+  "x_min": 1.549,
+  "y_min": 0.838,
+  "ratio": 3.79,
+  "efficient_pct": 0.0,
+  "x_grid": [...],
+  "y_grid": [...],
+  "z_matrix": [[...]]
+}</pre>
+
+                <h4 style="margin: 25px 0 5px 0; font-size:0.85rem; font-weight:700; text-transform:uppercase;">3. bridge/antigravity_bridge_response.json</h4>
+                <pre class="code-block">{
+  "ai_raw_text": "&lt;div&gt;...HTML del informe experto...&lt;/div&gt;",
+  "chart_5m": {
+    "x": ["09:00", "09:05", "..."],
+    "y": [100.0, 100.15, "..."]
+  },
+  "chart_usdclp": {
+    "x": [-5, -4, "..."],
+    "y": [99.5, 100.2, "..."]
+  }
+}</pre>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Mermaid in light / neutral theme with LR settings and straight/orthogonal lines
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'linear' // Straight lines prevent the circular basis overlaps!
+            },
+            themeVariables: {
+                primaryColor: '#ffffff',
+                primaryTextColor: '#1a1a1a',
+                lineColor: '#94a3b8',
+                textColor: '#1a1a1a',
+                mainBkg: '#ffffff',
+                nodeBorder: '#cbd5e1'
+            }
+        });
+
+        // Tab switcher function
+        function switchTab(index) {
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            document.getElementById(`tab-${index}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diseños de Visualización: Opening Gaps</title>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #212529;
+      --text-muted: #6c757d;
+      --border-color: #dee2e6;
+      --primary: #4a6984;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      background-color: var(--bg-color);
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: -0.5px;
+      color: #1a2a3a;
+    }
+
+    p.subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 15px 20px;
+      background-color: #fafafa;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #333;
+    }
+
+    .card-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 380px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Opening Gaps: Alternativas de Visualización</h1>
+      <p class="subtitle">Propuestas interactivas de diseño para analizar rangos de tamaño de gap y comportamiento de reversión.</p>
+    </header>
+
+    <div class="grid">
+      
+      <!-- DISEÑO 1: CURVAS DE PROBABILIDAD CONTINUA -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Diseño 1: Curva Continua de Probabilidad (CDF)</h3>
+            <span class="card-desc">Decaimiento de SDFP% a medida que se incrementa el tamaño del gap (sin buckets artificiales)</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="chart-cdf" class="chart-container"></div>
+        </div>
+      </div>
+
+      <!-- DISEÑO 2: BOX PLOTS DE DISPERSIÓN -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Diseño 2: Box Plots de Dispersión (Fill Depth)</h3>
+            <span class="card-desc">Distribución, cuartiles y mediana del retroceso por rangos de tamaño</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="chart-boxplot" class="chart-container"></div>
+        </div>
+      </div>
+
+      <!-- DISEÑO 3: BULLET BARS GRID -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Diseño 3: Bullet Charts Comparativos</h3>
+            <span class="card-desc">Relación directa entre SDFP% (ancho de la barra) y Fill Depth% (indicador de rombo) en una sola vista</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="chart-bullet" class="chart-container"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- MOCK DATA GENERATION ---
+
+    // 1. CDF Curves Data
+    const xSizes = [];
+    for (let x = 0.05; x <= 1.8; x += 0.05) {
+      xSizes.push(parseFloat(x.toFixed(2)));
+    }
+
+    // Funciones sigmoides de decaimiento realistas para cada régimen
+    // P(y) = L / (1 + e^(-k*(x - x0)))
+    const cdfBajo = xSizes.map(x => {
+      const p = 100 / (1 + Math.exp(2.8 * (x - 0.75))); // Cae a la mitad en 0.75 ATR
+      return Math.round(p);
+    });
+    const cdfMedio = xSizes.map(x => {
+      const p = 95 / (1 + Math.exp(3.5 * (x - 0.55))); // Cae a la mitad en 0.55 ATR
+      return Math.round(p);
+    });
+    const cdfAlto = xSizes.map(x => {
+      const p = 85 / (1 + Math.exp(4.0 * (x - 0.35))); // Cae rápido a la mitad en 0.35 ATR
+      return Math.round(p);
+    });
+
+    // 2. Box Plots Data
+    function genBoxPoints(median, std, n = 60) {
+      const pts = [];
+      for (let i = 0; i < n; i++) {
+        // Box-Muller para distribución normal
+        const u1 = Math.random() || 0.0001;
+        const u2 = Math.random() || 0.0001;
+        const randStd = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+        let val = median + randStd * std;
+        // Acotar lógicamente para retrocesos
+        pts.push(parseFloat(Math.max(-20, Math.min(150, val)).toFixed(1)));
+      }
+      return pts;
+    }
+
+    // 3. Render Graphs
+    window.addEventListener("DOMContentLoaded", () => {
+      renderCDF();
+      renderBoxPlot();
+      renderBullet();
+    });
+
+    function renderCDF() {
+      const traceBajo = {
+        x: xSizes,
+        y: cdfBajo,
+        mode: 'lines',
+        name: 'Régimen BAJO',
+        line: { color: '#457b9d', width: 3, shape: 'spline' },
+        hovertemplate: 'Gap: %{x} ATR<br>Probabilidad: %{y}%<extra></extra>'
+      };
+
+      const traceMedio = {
+        x: xSizes,
+        y: cdfMedio,
+        mode: 'lines',
+        name: 'Régimen MEDIO',
+        line: { color: '#a855f7', width: 3, shape: 'spline' },
+        hovertemplate: 'Gap: %{x} ATR<br>Probabilidad: %{y}%<extra></extra>'
+      };
+
+      const traceAlto = {
+        x: xSizes,
+        y: cdfAlto,
+        mode: 'lines',
+        name: 'Régimen ALTO',
+        line: { color: '#e63946', width: 3, shape: 'spline' },
+        hovertemplate: 'Gap: %{x} ATR<br>Probabilidad: %{y}%<extra></extra>'
+      };
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 60, r: 20, t: 30, b: 50 },
+        font: { family: 'Inter, sans-serif', color: '#444' },
+        xaxis: {
+          title: 'Tamaño del Gap (ATR)',
+          gridcolor: '#f0f0f0',
+          zeroline: false
+        },
+        yaxis: {
+          title: 'Probabilidad de Llenado (SDFP%)',
+          range: [0, 105],
+          gridcolor: '#f0f0f0',
+          ticksuffix: '%'
+        },
+        legend: { orientation: 'h', y: 1.1, x: 0.1 }
+      };
+
+      Plotly.newPlot('chart-cdf', [traceBajo, traceMedio, traceAlto], layout, { responsive: true });
+    }
+
+    // Box Plots por Rangos
+    function renderBoxPlot() {
+      const b1 = genBoxPoints(95, 8);   // <0.25 ATR
+      const b2 = genBoxPoints(80, 14);  // 0.25 - 0.50
+      const b3 = genBoxPoints(55, 22);  // 0.50 - 0.75
+      const b4 = genBoxPoints(35, 28);  // 0.75 - 1.00
+      const b5 = genBoxPoints(15, 20);  // >1.00 ATR
+
+      const trace = {
+        y: [...b1, ...b2, ...b3, ...b4, ...b5],
+        x: [
+          ...Array(b1.length).fill('< 0.25 ATR'),
+          ...Array(b2.length).fill('0.25 – 0.50'),
+          ...Array(b3.length).fill('0.50 – 0.75'),
+          ...Array(b4.length).fill('0.75 – 1.00'),
+          ...Array(b5.length).fill('> 1.00 ATR')
+        ],
+        type: 'box',
+        boxpoints: 'outliers',
+        line: { color: '#4a6984', width: 1.5 },
+        fillcolor: 'rgba(74, 105, 132, 0.15)',
+        hovertemplate: '%{x}<br>Fill Depth: %{y}%<extra></extra>'
+      };
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 60, r: 20, t: 30, b: 50 },
+        font: { family: 'Inter, sans-serif', color: '#444' },
+        xaxis: {
+          title: 'Tamaño del Gap (ATR)',
+          gridcolor: '#f0f0f0'
+        },
+        yaxis: {
+          title: 'Cantidad de Llenado (Fill Depth %)',
+          range: [-25, 150],
+          gridcolor: '#f0f0f0',
+          ticksuffix: '%'
+        }
+      };
+
+      Plotly.newPlot('chart-boxplot', [trace], layout, { responsive: true });
+    }
+
+    function renderBullet() {
+      const categories = ['< 0.25 ATR', '0.25 – 0.50', '0.50 – 0.75', '0.75 – 1.00', '> 1.00 ATR'];
+      const sdfpValues = [92, 75, 45, 25, 8];
+      const depthValues = [98, 85, 62, 48, 22];
+
+      const traceBar = {
+        x: sdfpValues,
+        y: categories,
+        type: 'bar',
+        orientation: 'h',
+        name: 'Tasa Llenado (SDFP%)',
+        marker: {
+          color: 'rgba(74, 105, 132, 0.45)',
+          line: { color: '#4a6984', width: 1 }
+        },
+        hovertemplate: 'SDFP: %{x}%<extra></extra>'
+      };
+
+      const traceMarker = {
+        x: depthValues,
+        y: categories,
+        mode: 'markers',
+        type: 'scatter',
+        name: 'Profundidad Media (Depth%)',
+        marker: {
+          symbol: 'diamond',
+          size: 11,
+          color: '#10b981',
+          line: { color: '#047857', width: 1.5 }
+        },
+        hovertemplate: 'Profundidad: %{x}%<extra></extra>'
+      };
+
+      const layout = {
+        template: 'plotly_white',
+        margin: { l: 100, r: 20, t: 30, b: 50 },
+        font: { family: 'Inter, sans-serif', color: '#444' },
+        xaxis: {
+          title: 'Porcentaje (%)',
+          range: [0, 105],
+          gridcolor: '#f0f0f0',
+          ticksuffix: '%'
+        },
+        yaxis: {
+          gridcolor: '#f0f0f0'
+        },
+        legend: { orientation: 'h', y: 1.1, x: 0.1 },
+        barmode: 'overlay'
+      };
+
+      Plotly.newPlot('chart-bullet', [traceBar, traceMarker], layout, { responsive: true });
+    }
+  </script>
+</body>
+</html>

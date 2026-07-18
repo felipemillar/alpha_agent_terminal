@@ -1,0 +1,6 @@
+tvdatafeed @ git+https://github.com/skalaydzhiyski/tvdatafeed.git@f1584264e9115ebec11df1835ebc50f231f7d44d
+pandas==3.0.3
+requests==2.34.2
+pydantic>=2.0.0
+tqdm
+python-dotenv>=1.0.0
