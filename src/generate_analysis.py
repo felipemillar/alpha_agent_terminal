@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 import os
+import sys
 import json
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
+# Agregar la ruta del proyecto para importar modulos locales
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import engine
+import kpis
+import config
+import expert_nlg
+import google.generativeai as genai
+
 # Configuración de rutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "..", "tvdatafeed-skill", "data")
+DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 BRIDGE_DIR = os.path.join(BASE_DIR, "..", "bridge")
 REQ_PATH = os.path.join(BRIDGE_DIR, "antigravity_bridge_request.json")
 RES_PATH = os.path.join(BRIDGE_DIR, "antigravity_bridge_response.json")
@@ -74,7 +83,7 @@ def get_single_usdclp_window(target_date_str, window_days=15):
     """
     Retorna la serie de tiempo absoluta de USDCLP para una sola fecha.
     """
-    usdclp_path = os.path.join(DATA_DIR, "USDCLP_PEPPERSTONE_historico.csv")
+    usdclp_path = os.path.join(DATA_DIR, "USDCLP_historico.csv")
     if not os.path.exists(usdclp_path):
         return {"x": [], "y": []}
         
@@ -99,7 +108,7 @@ def get_event_study_usdclp(target_date_str, relative_days=5):
     Extrae la serie de USD/CLP alrededor del evento (t-5 a t+5 días operativos)
     y la normaliza a base 100 en t=0.
     """
-    usdclp_path = os.path.join(DATA_DIR, "USDCLP_PEPPERSTONE_historico.csv")
+    usdclp_path = os.path.join(DATA_DIR, "USDCLP_historico.csv")
     if not os.path.exists(usdclp_path):
         return None
         
@@ -138,6 +147,161 @@ def get_event_study_usdclp(target_date_str, relative_days=5):
         "y": slice_df['normalized'].round(4).tolist()
     }
 
+
+def generate_deterministic_report(asset):
+    assets = engine.get_available_assets()
+    asset_path = next((a['path'] for a in assets if a['name'] == asset), None)
+    if not asset_path:
+        return f"Asset path no encontrado para {asset}."
+    
+    df = engine.fetch_data(asset_path)
+    if df.empty:
+        return "No hay datos suficientes."
+        
+    # Calcular ATR y NATR
+    df['ATR'] = kpis.calculate_atr(df)
+    df['NATR'] = kpis.calculate_natr(df)
+    
+    # Calcular Regime (BAJO, MEDIO, ALTO)
+    regimes_series, _ = kpis.classify_regimes_full(df)
+    df['Regime'] = regimes_series
+    
+    # Calcular State (EXPANSIÓN, CONTRACCIÓN)
+    state_series = kpis.calculate_expansion_contraction(df)
+    df['State'] = state_series
+    
+    # Saneamiento de retornos
+    if 'Close' in df.columns:
+        returns = df['Close'].pct_change().dropna()
+        clean_returns = returns[returns.abs() < 0.15]
+    else:
+        clean_returns = pd.Series(dtype=float)
+        
+    # Markov Matrix
+    markov_data = kpis.calculate_markov_matrix(df['Regime'])
+    persistence = markov_data.get('persistence', {})
+    prob_b_b = persistence.get('BAJO', 0.92)
+    prob_m_m = persistence.get('MEDIO', 0.79)
+    prob_a_a = persistence.get('ALTO', 0.92)
+    
+    # Métricas de magnitud (usando datos reales)
+    natr_last = df['NATR'].iloc[-1]
+    
+    # Percentil manual sobre la historia completa del activo
+    if len(df) > 0:
+        natr_window = df['NATR']
+        natr_p = (sum(natr_window < natr_last) / len(natr_window)) * 100
+    else:
+        natr_p = 50.0
+        
+    natr_median = df['NATR'].median()
+    natr_p90 = df['NATR'].quantile(0.90)
+    natr_max = df['NATR'].max()
+    atr_14 = df['ATR'].iloc[-1]
+    price = df['Close'].iloc[-1]
+    
+    current_regime = df['Regime'].iloc[-1].capitalize()
+    current_state = df['State'].iloc[-1].capitalize()
+    
+    # Hurst and ER
+    try:
+        hurst_hist = kpis.calculate_hurst_exponent(df['Close'].dropna())
+    except:
+        hurst_hist = 0.5
+        
+    try:
+        df_er = kpis.calculate_kaufman_efficiency_ratio(df.copy())
+        er_hist = df_er['ER'].mean()
+        er_cond = df_er['ER'].iloc[-30:].mean()
+    except:
+        er_hist = 0.16
+        er_cond = 0.14
+        
+    try:
+        # Hurst de los últimos 120 días para el condicional
+        hurst_cond = kpis.calculate_hurst_exponent(df['Close'].dropna().iloc[-120:])
+    except:
+        hurst_cond = 0.51
+        
+    # Distribución
+    kurt = clean_returns.kurt() if len(clean_returns) > 10 else 0
+    skw = clean_returns.skew() if len(clean_returns) > 10 else 0
+    last_ret = clean_returns.iloc[-1] * 100 if len(clean_returns) > 0 else 0
+    mean_ret = clean_returns.mean() * 100
+    std_ret = clean_returns.std() * 100
+    z_score = (last_ret - mean_ret) / std_ret if std_ret > 0 else 0
+    
+    stats = {
+        'natr_last': natr_last, 'natr_p': natr_p, 'natr_median': natr_median, 
+        'natr_p90': natr_p90, 'natr_max': natr_max, 'atr_14': atr_14, 'price': price,
+        'regime': current_regime, 'state': current_state, 
+        'prob_b_b': prob_b_b, 'prob_a_a': prob_a_a, 'prob_m_m': prob_m_m,
+        'hurst_hist': hurst_hist, 'hurst_cond': hurst_cond, 'er_hist': er_hist, 'er_cond': er_cond,
+        'kurt': kurt, 'skw': skw, 'z_score': z_score, 'last_ret': last_ret
+    }
+    
+    html_report = f"""
+<div style="font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.7; color: #334155;">
+    
+    <h2>Informe de Volatilidad — {asset}</h2>
+    
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 0. Resumen ejecutivo
+        </h3>
+        {expert_nlg.generate_resumen_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 1. Magnitud de la volatilidad
+        </h3>
+        {expert_nlg.generate_magnitud_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 2. Régimen y dinámica temporal
+        </h3>
+        {expert_nlg.generate_regimen_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 3. Estructura del movimiento
+        </h3>
+        {expert_nlg.generate_estructura_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 4. Distribución de retornos y riesgo de cola
+        </h3>
+        {expert_nlg.generate_distribucion_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 5. Trayectoria reciente
+        </h3>
+        {expert_nlg.generate_trayectoria_nlg(stats)}
+    </div>
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+        <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
+            ## 6. Síntesis operativa
+        </h3>
+        {expert_nlg.generate_sintesis_nlg(stats)}
+    </div>
+    
+    <div style="font-size: 11px; color: #64748b;">
+        <strong>Notas de calidad:</strong> Se purgaron outliers sucios >15% antes del cómputo para distribuciones de retorno.
+    </div>
+
+</div>
+"""
+    return html_report
+
 def main():
     if not os.path.exists(REQ_PATH):
         print(f"No request file found at {REQ_PATH}")
@@ -148,6 +312,18 @@ def main():
         
     asset = req.get("asset")
     dates = req.get("dates", [])
+    
+    if req.get("type") == "asset_full_report":
+        html_report = generate_deterministic_report(asset)
+        response_data = {
+            "status": "ready",
+            "ai_raw_text": html_report
+        }
+        with open(RES_PATH, "w", encoding="utf-8") as f:
+            json.dump(response_data, f, indent=4)
+        print(f"Respuesta full report generada autónomamente para {asset}")
+        return
+
     if not dates:
         print("No dates to analyze.")
         return

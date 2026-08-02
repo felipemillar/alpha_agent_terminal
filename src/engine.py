@@ -5,7 +5,7 @@ import glob
 import json
 import config
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tvdatafeed-skill", "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 
 def get_available_assets():
     """
@@ -40,7 +40,7 @@ def fetch_data(file_path: str) -> pd.DataFrame:
         })
         
         # Convertir a datetime y ordenar cronológicamente
-        df['Date'] = pd.to_datetime(df['Date'])
+        df['Date'] = pd.to_datetime(df['Date'], utc=True).dt.tz_localize(None)
         df = df.sort_values('Date').reset_index(drop=True)
         
         return df
@@ -112,6 +112,29 @@ def analyze_volatility(df: pd.DataFrame) -> dict:
         alert = "Alerta de Ruido Extremo (Fat Tails)"
         action = "KILL SWITCH ACTIVADO. Prohibición total de operar hoy."
 
+    # Calcular Exponente de Hurst H(t) segmentado por Regímenes de Volatilidad
+    hurst_info = kpis.calculate_hurst_by_regime(df)
+
+    # Calcular Eficiencia Estructural de Kaufman ER y Noise Factor
+    kaufman_info = kpis.calculate_kaufman_metrics(df)
+
+    # Calcular Z-Score de Retornos y Regla de Weissman (Serie Histórica Completa)
+    zscore_info = kpis.calculate_zscore_metrics(df, window=None)
+
+
+    # Calcular Plano Cartesiano 2D Hurst vs. Kaufman (Constelación Histórica Completa) para múltiples horizontes
+    scatter2d_info_5d = kpis.calculate_hurst_kaufman_scatter(df, trajectory_days=None, window_days=5)
+    scatter2d_info_14d = kpis.calculate_hurst_kaufman_scatter(df, trajectory_days=None, window_days=14)
+    scatter2d_info_30d = kpis.calculate_hurst_kaufman_scatter(df, trajectory_days=None, window_days=30)
+    
+    scatter2d_info = {
+        "5d": scatter2d_info_5d,
+        "14d": scatter2d_info_14d,
+        "30d": scatter2d_info_30d
+    }
+
+
+
     return {
         "current_price": round(float(current_price), 2),
         "current_atr": round(float(current_atr), 4),
@@ -123,9 +146,18 @@ def analyze_volatility(df: pd.DataFrame) -> dict:
         "alert": alert,
         "action": action,
         "volatility_state": current_exp_contra,
+        "hurst": hurst_info,
+        "kaufman": kaufman_info,
+        "zscore": zscore_info,
+        "scatter_2d": scatter2d_info,
         "lookback_days": len(valid_data),
         "last_date": last_date.strftime("%Y-%m-%d")
     }
+
+
+
+
+
 
 def run_pipeline(file_path: str, asset_name: str) -> dict:
     """

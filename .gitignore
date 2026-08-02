@@ -31,3 +31,7 @@ Thumbs.db
 bridge/antigravity_bridge_request.json
 bridge/antigravity_bridge_response.json
 bridge/estado_dashboard.json
+
+# Data files (Best Practice: Never commit raw data)
+data/
+*.csv

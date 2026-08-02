@@ -17,8 +17,8 @@ graph TD
     classDef csv fill:#f0fdf4,stroke:#22c55e,stroke-width:2px;
     classDef agent fill:#fafaf9,stroke:#78716c,stroke-width:2px;
 
-    %% Base de Datos (Ingesta local desde tvdatafeed-skill)
-    CSV_DATA[(tvdatafeed-skill / CSV)]:::csv
+    %% Base de Datos Centralizada
+    CSV_DATA[(data / CSV)]:::csv
   
     %% Modulo Backend (src/)
     subgraph Backend_Python [src/ - Python Engine]

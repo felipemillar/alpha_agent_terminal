@@ -1,0 +1,6 @@
+yfinance>=0.2.36
+pandas>=2.0.0
+requests
+pydantic>=2.0.0
+tqdm
+python-dotenv

@@ -12,7 +12,7 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
 
-DATA_DIR = os.path.join(PROJECT_ROOT, "tvdatafeed-skill", "data")
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 BRIDGE_DIR = os.path.join(PROJECT_ROOT, "bridge")
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
 

@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 import traceback
 import datetime
+import threading
+import time
+import subprocess
 
 # Agregar la ruta del proyecto para importar modulos locales
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -239,7 +242,6 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                         "total_streaks": 0,
                         "avg_duration": 0.0,
                         "median_duration": 0.0,
-                        "pct_positive": 0.0,
                         "max_duration": 0
                     }
                 else:
@@ -249,13 +251,11 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                     avg_dur = float(df_streaks['duration'].mean())
                     med_dur = float(df_streaks['duration'].median())
                     max_dur = int(df_streaks['duration'].max())
-                    pct_pos = float((df_streaks['change'] > 0).sum() / total_str) * 100
                     
                     summary = {
                         "total_streaks": total_str,
                         "avg_duration": round(avg_dur, 2),
                         "median_duration": round(med_dur, 1),
-                        "pct_positive": round(pct_pos, 1),
                         "max_duration": max_dur
                     }
 
@@ -357,6 +357,43 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 df = engine.fetch_data(asset_path)
                 gap_results = engine.analyze_gaps(df)
                 gap_results["asset"] = asset_name
+
+                # Resetear el estado del reporte del agente (bloquea el dashboard hasta que se genere nuevo reporte)
+                try:
+                    with open(config.BRIDGE_RESPONSE_PATH, "w", encoding="utf-8") as f:
+                        json.dump({
+                            "status": "processing",
+                            "ai_raw_text": "<i>El agente Antigravity está analizando la nueva data de forma autónoma...</i>"
+                        }, f, indent=4)
+                except Exception as e:
+                    print(f"No se pudo limpiar el bridge de respuesta: {e}")
+
+                def trigger_autonomous_analysis(asset_id):
+                    # 1. Escribimos la solicitud de reporte completo
+                    try:
+                        req_data = {
+                            "type": "asset_full_report",
+                            "asset": asset_id
+                        }
+                        with open(config.BRIDGE_REQUEST_PATH, "w", encoding="utf-8") as f:
+                            json.dump(req_data, f, indent=4)
+                    except Exception as e:
+                        print(f"Error escribiendo request autonomo: {e}")
+                        return
+                    
+                    # 2. Simulamos el tiempo de "pensamiento"
+                    time.sleep(2)
+                    
+                    # 3. Lanzamos el generador
+                    gen_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "generate_analysis.py")
+                    try:
+                        subprocess.run(["python3", gen_script], check=True)
+                        print("Análisis autónomo generado con éxito.")
+                    except Exception as e:
+                        print(f"Error generando análisis autónomo: {e}")
+
+                # Iniciar el hilo autónomo
+                threading.Thread(target=trigger_autonomous_analysis, args=(asset_name,), daemon=True).start()
 
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
@@ -460,10 +497,40 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_cors_headers()
                 self.end_headers()
                 self.wfile.write(json.dumps(response_data).encode("utf-8"))
-
             except Exception as e:
+                import traceback
                 traceback.print_exc()
-                self.send_error_response(500, f"Error en puente con Antigravity: {type(e).__name__}")
+                self.send_error_response(500, f"Error en puente con Antigravity: {type(e).__name__} (detalles omitidos por seguridad)")
+
+        elif path == "/api/agent/report":
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                asset = data.get('asset', 'Unknown Asset')
+                metrics = data.get('metrics', {})
+                
+                request_data = {
+                    "type": "asset_full_report",
+                    "asset": asset,
+                    "metrics": metrics
+                }
+                
+                with open(config.BRIDGE_REQUEST_PATH, "w", encoding="utf-8") as f:
+                    json.dump(request_data, f, indent=4)
+                
+                placeholder_response = {"ai_raw_text": "<i>El agente Antigravity en tu IDE está siendo notificado. Pídele que genere el reporte...</i>"}
+                with open(config.BRIDGE_RESPONSE_PATH, "w", encoding="utf-8") as f:
+                    json.dump(placeholder_response, f, indent=4)
+                
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ok"}).encode("utf-8"))
+            except Exception as e:
+                self.send_error_response(500, f"Error agent report: {type(e).__name__} (detalles omitidos por seguridad)")
 
         elif path == "/api/gaps/analyze_cell":
             try:
