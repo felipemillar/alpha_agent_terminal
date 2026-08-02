@@ -231,13 +231,17 @@ def generate_deterministic_report(asset):
     std_ret = clean_returns.std() * 100
     z_score = (last_ret - mean_ret) / std_ret if std_ret > 0 else 0
     
+    t33 = df['NATR'].quantile(0.3333)
+    t66 = df['NATR'].quantile(0.6666)
+    
     stats = {
         'natr_last': natr_last, 'natr_p': natr_p, 'natr_median': natr_median, 
         'natr_p90': natr_p90, 'natr_max': natr_max, 'atr_14': atr_14, 'price': price,
         'regime': current_regime, 'state': current_state, 
         'prob_b_b': prob_b_b, 'prob_a_a': prob_a_a, 'prob_m_m': prob_m_m,
         'hurst_hist': hurst_hist, 'hurst_cond': hurst_cond, 'er_hist': er_hist, 'er_cond': er_cond,
-        'kurt': kurt, 'skw': skw, 'z_score': z_score, 'last_ret': last_ret
+        'kurt': kurt, 'skw': skw, 'z_score': z_score, 'last_ret': last_ret,
+        't33': t33, 't66': t66
     }
     
     html_report = f"""
@@ -256,7 +260,7 @@ def generate_deterministic_report(asset):
         <h3 style="text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px;">
             ## 1. Magnitud de la volatilidad
         </h3>
-        {expert_nlg.generate_magnitud_nlg(stats)}
+        {expert_nlg.nlg_1_regimen_y_dimension(stats)}
     </div>
 
     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">

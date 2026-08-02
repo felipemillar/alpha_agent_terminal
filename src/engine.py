@@ -68,16 +68,12 @@ def calculate_natr(df: pd.DataFrame) -> pd.DataFrame:
 def analyze_volatility(df: pd.DataFrame) -> dict:
     """
     Analiza la volatilidad actual en contexto histórico.
-    Usa un lookback estricto de 6 meses (120 días operativos).
+    Usa toda la historia disponible para extraer umbrales (t33, t66).
     """
     if 'NATR' not in df.columns:
         raise ValueError("El DataFrame debe contener la columna 'NATR'")
         
-    valid_data = df.dropna(subset=['NATR'])
-    
-    lookback_period = 120
-    if len(valid_data) > lookback_period:
-        valid_data = valid_data.tail(lookback_period).copy()
+    valid_data = df.dropna(subset=['NATR']).copy()
     
     if len(valid_data) < 20:
         raise ValueError("No hay suficientes datos históricos (mínimo 20 días) para el percentil.")
@@ -91,15 +87,16 @@ def analyze_volatility(df: pd.DataFrame) -> dict:
     exp_contra_series = kpis.calculate_expansion_contraction(df)
     current_exp_contra = exp_contra_series.iloc[-1]
     
-    percentile_rank = (np.count_nonzero(valid_data['NATR'] < current_natr) / len(valid_data['NATR'])) * 100
+    t33 = valid_data['NATR'].quantile(0.3333)
+    t66 = valid_data['NATR'].quantile(0.6666)
     
-    if percentile_rank <= 33.33:
+    if current_natr <= t33:
         regime = "BAJO"
         color = "PLATA"
         hex_color = "#a4b7c1"
         alert = "Alerta de Asfixia / Mercado Plano"
         action = "Operar con 50% de riesgo. Priorizar reversión a la media. No esperar grandes recorridos."
-    elif percentile_rank <= 66.66:
+    elif current_natr <= t66:
         regime = "MEDIO"
         color = "ACERO"
         hex_color = "#4a6984"
@@ -139,7 +136,6 @@ def analyze_volatility(df: pd.DataFrame) -> dict:
         "current_price": round(float(current_price), 2),
         "current_atr": round(float(current_atr), 4),
         "current_natr": round(float(current_natr), 4),
-        "percentile": round(float(percentile_rank), 1),
         "regime": regime,
         "color": color,
         "hex_color": hex_color,

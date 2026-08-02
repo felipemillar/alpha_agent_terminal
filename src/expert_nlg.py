@@ -1,36 +1,50 @@
 import numpy as np
 
-def generate_magnitud_nlg(stats):
-    natr_last = stats.get('natr_last', 0)
-    natr_p = stats.get('natr_p', 50)
-    natr_median = stats.get('natr_median', 0)
-    natr_p90 = stats.get('natr_p90', 0)
-    natr_max = stats.get('natr_max', 0)
-    atr_14 = stats.get('atr_14', 0)
-    price = stats.get('price', 0)
+def nlg_1_regimen_y_dimension(stats):
+    """
+    Régimen de volatilidad y su implicancia cualitativa según los umbrales T33 y T66.
+    """
+    regime = stats.get('regime', 'Desconocido')
+    natr_last = stats.get('natr_last', 0.0)
+    t33 = stats.get('t33', 0.0)
+    t66 = stats.get('t66', 0.0)
     
-    # Nivel 1
-    if natr_p < 33:
-        clasificacion = "Volatilidad actual **Baja**."
-    elif natr_p > 66:
-        clasificacion = "Volatilidad actual **Alta**."
+    # Textos base (Clasificación)
+    if regime == 'BAJO':
+        clasificacion = f"**Régimen actual {regime}.** Volatilidad comprimida, ideal para estrategias no direccionales o acumulación."
+    elif regime == 'ALTO':
+        clasificacion = f"**Régimen actual {regime}.** Volatilidad crítica y expandida. Zona de reducción de lotaje y riesgo direccional masivo."
     else:
-        clasificacion = "Volatilidad actual **Media**."
+        clasificacion = f"**Régimen actual {regime}.** El mercado transita en la norma de ruido histórico."
         
-    # Nivel 2
-    base = f"*Base histórica:* en una sesión típica, el activo se mueve alrededor de **±{natr_median:.2f}%** respecto al día anterior; en periodos de estrés el rango diario llega a **±{natr_p90:.2f}%** y, en su extremo histórico, a **±{natr_max:.2f}%**."
+    base = f"*Base histórica:* el activo navega estructuralmente entre los umbrales estáticos del {t33:.2f}% y {t66:.2f}%."
     
-    if natr_p < 33:
-        contingencia = f"*Contingencia:* hoy el movimiento diario esperado es de **±{natr_last:.2f}%**, en el **percentil {natr_p:.0f}** de su historia completa — es decir, **más contenido que su norma reciente**."
-        implicancia = "**Implicancia:** los rangos diarios están comprimidos. Es un entorno de bajo recorrido; los objetivos intradía deben dimensionarse en consecuencia."
-    elif natr_p > 66:
-        contingencia = f"*Contingencia:* hoy el movimiento diario esperado es de **±{natr_last:.2f}%**, en el **percentil {natr_p:.0f}** de su historia completa — es decir, **con alta expansión respecto a la norma**."
+    # Cálculos cualitativos (sin asustar con números)
+    if regime == 'BAJO':
+        distance = t33 - natr_last
+        if distance > (t33 * 0.2): # muy abajo
+            contingencia = f"*Contingencia:* la volatilidad está **profundamente comprimida**, muy lejos de la zona media histórica."
+        else:
+            contingencia = f"*Contingencia:* la volatilidad está comprimida, pero **rozando la barrera hacia la zona Media histórica**."
+        implicancia = "**Implicancia:** los rangos diarios están apagados. Es un entorno de bajo recorrido; los objetivos intradía deben dimensionarse en consecuencia."
+        
+    elif regime == 'ALTO':
+        distance = natr_last - t66
+        if distance > (t66 * 0.2):
+            contingencia = f"*Contingencia:* la volatilidad ha **explotado por completo**, despegándose aceleradamente del límite histórico superior."
+        else:
+            contingencia = f"*Contingencia:* la volatilidad ha superado el techo histórico y está **entrando a la zona de pánico**."
         implicancia = "**Implicancia:** los rangos diarios están muy expandidos. Riesgo direccional elevado, exige stops más amplios y reducción de apalancamiento."
-    else:
-        contingencia = f"*Contingencia:* hoy el movimiento diario esperado es de **±{natr_last:.2f}%**, en el **percentil {natr_p:.0f}** de su historia completa — en equilibrio con su promedio reciente."
+        
+    else: # MEDIO
+        mid_point = (t33 + t66) / 2
+        if natr_last < mid_point:
+            contingencia = f"*Contingencia:* la volatilidad está operando en la zona Media, **cerca del soporte de compresión histórica**."
+        else:
+            contingencia = f"*Contingencia:* la volatilidad está operando en la zona Media, **acercándose peligrosamente al techo de expansión**."
         implicancia = "**Implicancia:** rangos diarios dentro del comportamiento habitual. Adecuado para operativas estándar sin ajustes extraordinarios de dimensión."
 
-    sub_text = f"Nivel técnico — NATR hoy {natr_last:.2f}% (percentil {natr_p:.0f}/100, historia completa) · NATR mediano histórico {natr_median:.2f}% · p90 (estrés) {natr_p90:.2f}% · máx {natr_max:.2f}% · ATR(14) {atr_14:.2f} · precio {price:.2f}."
+    sub_text = f"Nivel técnico — NATR actual {natr_last:.2f}% frente a umbrales T33 ({t33:.2f}%) y T66 ({t66:.2f}%)."
     
     return f"""
 <p style="margin: 0;"><strong>Nivel 1 — Clasificación:</strong> {clasificacion}</p>
@@ -38,7 +52,7 @@ def generate_magnitud_nlg(stats):
 <p style="margin: 0;">{base}</p>
 <p style="margin: 0;">{contingencia}</p>
 <p style="margin: 0;">{implicancia}</p>
-<br><sub style="color: #94a3b8; font-size: 10px;">{sub_text}</sub>
+<p style="margin: 10px 0 0 0; font-size: 11px; color: #94a3b8;">{sub_text}</p>
 """
 
 def generate_regimen_nlg(stats):

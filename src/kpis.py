@@ -171,14 +171,15 @@ def classify_regimes_full(df):
         import kpis
         df['NATR'] = kpis.calculate_natr(df)
         
-    # Calcular percentil global
-    percentiles = df['NATR'].rank(pct=True) * 100
+    # Calcular umbrales estáticos globales
+    t33 = df['NATR'].quantile(0.3333)
+    t66 = df['NATR'].quantile(0.6666)
     
-    # Asignar regímenes usando np.select
+    # Asignar regímenes usando np.select y los umbrales
     conditions = [
-        percentiles <= 33.33,
-        percentiles <= 66.66,
-        percentiles > 66.66
+        df['NATR'] <= t33,
+        (df['NATR'] > t33) & (df['NATR'] <= t66),
+        df['NATR'] > t66
     ]
     
     regime_choices = ["BAJO", "MEDIO", "ALTO"]
