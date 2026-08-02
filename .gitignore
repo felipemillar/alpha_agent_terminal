@@ -35,3 +35,7 @@ bridge/estado_dashboard.json
 # Data files (Best Practice: Never commit raw data)
 data/
 *.csv
+
+# Excepciones: Activos permitidos para subir a GitHub
+!data/
+!data/USDCLP_historico.csv
