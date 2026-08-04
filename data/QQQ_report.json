@@ -1,0 +1,29 @@
+{
+    "ticker": "QQQ",
+    "period": null,
+    "interval": "1d",
+    "auto_adjust": true,
+    "timestamp_utc": "2026-08-04T00:36:27.105773+00:00",
+    "versions": {
+        "yfinance": "1.5.2",
+        "pandas": "3.0.3",
+        "skill_version": "2.1.2",
+        "schema_version": "2.1.0"
+    },
+    "status": "success",
+    "output_path": "/Users/fmillar/Proyectos_Desarrollo/alpha_agent_terminal/data/QQQ.csv",
+    "initial_records": 6685,
+    "final_records": 6685,
+    "dropped_records": 0,
+    "diagnostics": {
+        "duplicates_detected": 0,
+        "null_rows_detected": 0,
+        "invalid_prices_detected": 0,
+        "extreme_outliers_detected": 0
+    },
+    "clean_mode": "strict",
+    "date_range_start": "2000-01-03T00:00:00",
+    "date_range_end": "2026-08-03T00:00:00",
+    "schema_version": "2.1.0",
+    "file_hash": "92d46a158b8e9885ae03d5c9739dd330f51dbbb10e2a3e6a364b40a44907a207"
+}

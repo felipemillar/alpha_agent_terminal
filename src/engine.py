@@ -12,11 +12,12 @@ def get_available_assets():
     Lista todos los archivos CSV descargados por la skill de TradingView.
     Retorna una lista de diccionarios con el nombre a mostrar y la ruta.
     """
-    csv_files = glob.glob(os.path.join(DATA_DIR, "*_historico.csv"))
+    csv_files = glob.glob(os.path.join(DATA_DIR, "*.csv"))
     assets = []
     for file_path in csv_files:
         basename = os.path.basename(file_path)
-        name = basename.replace("_historico.csv", "")
+        # Limpiar distintos sufijos para dejar solo el Ticker
+        name = basename.replace("_historico.csv", "").replace("_market_data.csv", "").replace(".csv", "")
         assets.append({"name": name, "path": file_path})
     return sorted(assets, key=lambda x: x["name"])
 

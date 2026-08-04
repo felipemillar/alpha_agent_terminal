@@ -12,6 +12,7 @@ import engine
 import kpis
 import config
 import expert_nlg
+import adn
 import google.generativeai as genai
 
 # Configuración de rutas
@@ -223,9 +224,10 @@ def generate_deterministic_report(asset):
     except:
         hurst_cond = 0.51
         
+    # Pilar 2
+    pilar2 = adn.caracterizar_pilar2(df)
+
     # Distribución
-    kurt = clean_returns.kurt() if len(clean_returns) > 10 else 0
-    skw = clean_returns.skew() if len(clean_returns) > 10 else 0
     last_ret = clean_returns.iloc[-1] * 100 if len(clean_returns) > 0 else 0
     mean_ret = clean_returns.mean() * 100
     std_ret = clean_returns.std() * 100
@@ -240,8 +242,9 @@ def generate_deterministic_report(asset):
         'regime': current_regime, 'state': current_state, 
         'prob_b_b': prob_b_b, 'prob_a_a': prob_a_a, 'prob_m_m': prob_m_m,
         'hurst_hist': hurst_hist, 'hurst_cond': hurst_cond, 'er_hist': er_hist, 'er_cond': er_cond,
-        'kurt': kurt, 'skw': skw, 'z_score': z_score, 'last_ret': last_ret,
-        't33': t33, 't66': t66
+        'z_score': z_score, 'last_ret': last_ret,
+        't33': t33, 't66': t66,
+        'pilar2': pilar2
     }
     
     html_report = f"""

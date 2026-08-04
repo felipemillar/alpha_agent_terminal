@@ -1,0 +1,29 @@
+{
+    "ticker": "AAPL",
+    "period": null,
+    "interval": "1d",
+    "auto_adjust": true,
+    "timestamp_utc": "2026-08-04T00:39:09.826061+00:00",
+    "versions": {
+        "yfinance": "1.5.2",
+        "pandas": "3.0.3",
+        "skill_version": "2.1.2",
+        "schema_version": "2.1.0"
+    },
+    "status": "success",
+    "output_path": "/Users/fmillar/Proyectos_Desarrollo/alpha_agent_terminal/data/AAPL.csv",
+    "initial_records": 6685,
+    "final_records": 5824,
+    "dropped_records": 861,
+    "diagnostics": {
+        "duplicates_detected": 0,
+        "null_rows_detected": 0,
+        "invalid_prices_detected": 0,
+        "extreme_outliers_detected": 861
+    },
+    "clean_mode": "strict",
+    "date_range_start": "2000-01-03T00:00:00",
+    "date_range_end": "2026-08-03T00:00:00",
+    "schema_version": "2.1.0",
+    "file_hash": "640559d015dca16824a38b0da934b8f8aa871b711520e92cf2911acd233f30cb"
+}

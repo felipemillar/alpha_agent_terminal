@@ -37,32 +37,26 @@ sino *"¿cómo se comporta **cuando la volatilidad está alta y expandiéndose**
 
 ## DESK 1 — VOLATILITY DESK
 
-### Cabecera: semáforo + 5 tarjetas KPI
+### Cabecera: semáforo + 4 tarjetas KPI
 
-**1. ATR(14) — Average True Range.**
+**1. Precio de Cierre.**
+*Qué mide:* el último precio registrado del activo.
+*Lectura de volatilidad:* contexto base sobre el valor actual del instrumento antes de analizar su variación.
+
+**2. ATR(14) — Average True Range.**
 *Qué mide:* el rango diario promedio (incluye gaps), suavizado de Wilder, en unidades de precio.
 *Lectura de volatilidad:* magnitud **absoluta** del movimiento diario esperado. Es la unidad base para
 stops y objetivos ("el activo se mueve ±X por día"). No es comparable entre activos por sí solo.
 
-**2. NATR(%) — ATR Normalizado.**
+**3. NATR(%) — ATR Normalizado.**
 *Qué mide:* `ATR / Close × 100`.
 *Lectura de volatilidad:* magnitud **relativa y comparable** entre activos. Un NATR de 2% dice que el
 activo se mueve el doble (en %) que uno de 1%, sea EURUSD u ORO. Es la métrica para comparar universos.
 
-**3. Percentil de volatilidad (móvil 120d).**
-*Qué mide:* en qué percentil está el NATR de hoy frente a sus últimos 120 días.
-*Lectura de volatilidad:* dice si la volatilidad actual es **cara o barata** respecto a su propia historia
-reciente. Es el insumo directo de la clasificación de régimen (ver abajo).
-
-**4. VOLATILITY BIAS — Expansión / Contracción.**
+**4. Estado de Volatilidad (Expansión / Contracción).**
 *Qué mide:* cruce `ATR(5) vs ATR(14)`. Expansión si el corto supera al largo.
 *Lectura de volatilidad:* la **dirección de la volatilidad** (no del precio): ¿se está acelerando o
 comprimiendo? Compresión suele preceder rupturas; expansión indica régimen de estrés en curso.
-
-**5. HURST MEMORY H(t).**
-*Qué mide:* exponente de Hurst actual (resumen; detalle en su panel).
-*Lectura de volatilidad:* si el movimiento tiene **memoria** (tiende) o revierte. Contextualiza si la
-volatilidad se traduce en avance direccional o en zigzag.
 
 **Semáforo QRT.** Sintetiza régimen + estado en un veredicto legible con mandato operativo (qué favorece
 / qué evitar). Es el "titular" que resume las cinco tarjetas.

@@ -124,28 +124,69 @@ def generate_estructura_nlg(stats):
 """
 
 def generate_distribucion_nlg(stats):
-    kurt = stats.get('kurt', 0)
-    skw = stats.get('skw', 0)
+    pilar2 = stats.get('pilar2', {})
+    if not pilar2 or 'error' in pilar2:
+        kurt = stats.get('kurt', 0)
+        skw = stats.get('skw', 0)
+        n_efectivo_str = ""
+    else:
+        kurt = pilar2.get("P2_02_curtosis", {}).get("global", {}).get("valor", 0)
+        skw = pilar2.get("P2_01_asimetria", {}).get("global", {}).get("valor", 0)
+
     z_score = stats.get('z_score', 0)
     last_ret = stats.get('last_ret', 0)
+    regime = stats.get('regime', 'MEDIO').upper()
+    
+    # Riesgo de Cola (P2.04 ES)
+    es_msg = ""
+    n_efectivo_str = ""
+    if pilar2 and 'P2_03_04_riesgo_cola' in pilar2:
+        riesgo = pilar2["P2_03_04_riesgo_cola"]["por_regimen"].get(regime, {}).get("1", {})
+        largo = riesgo.get("largo", {})
+        corto = riesgo.get("corto", {})
+        
+        fallback_msg = ""
+        if not largo.get("publicable") or not corto.get("publicable"):
+            riesgo = pilar2["P2_03_04_riesgo_cola"]["global"].get("1", {})
+            largo = riesgo.get("largo", {})
+            corto = riesgo.get("corto", {})
+            fallback_msg = " Debido a insuficiencia estadística en este régimen específico, se expone el riesgo de cola de la distribución global."
+        
+        if largo.get("publicable") and corto.get("publicable"):
+            es_l = largo['es_pct']
+            var_l = largo['var_pct']
+            n_eff_l = largo['n_efectivo']
+            err_l = largo['error_estandar']
+            
+            es_c = corto['es_pct']
+            var_c = corto['var_pct']
+            n_eff_c = corto['n_efectivo']
+            err_c = corto['error_estandar']
+            
+            es_msg = f" En el régimen actual, la pérdida esperada en 1 día ante el 5% de peores escenarios es de **{es_l}%** para largos y **{es_c}%** para cortos.{fallback_msg}"
+            n_efectivo_str = f" · n_efectivo {n_eff_l} (err {err_l}%)"
+            
+            implicancia = f"**Implicancia:** Una de cada veinte sesiones pierde más de {var_l}% (largo) o {var_c}% (corto); cuando ocurre, la pérdida media es {es_l}% y {es_c}%. El dimensionamiento debe soportar la pérdida media esperada, no solo el percentil 5."
+        else:
+            implicancia = "**Implicancia:** el dimensionamiento no debe calibrarse solo con la media."
+    else:
+        if abs(z_score) < 1.5:
+            implicancia = "**Implicancia:** aunque hoy no hay anomalía, el dimensionamiento no debe calibrarse solo con la media."
+        else:
+            implicancia = "**Implicancia:** detectamos un shock estadístico intradiario. Máxima alerta de riesgo de cola."
     
     class_1 = "Retorno de hoy **dentro de la norma**" if abs(z_score) < 1.5 else "Retorno de hoy **extremo**"
-    class_2 = "**gruesas**" if kurt > 3 else "**normales**"
+    class_2 = "**gruesas**" if kurt > 0 else "**normales**"
     
     base = f"*Base histórica:* los retornos se distribuyen con asimetría de {skw:.2f} y exceso de curtosis de {kurt:.2f}. "
-    if kurt > 3:
+    if kurt > 0:
          base += "Las **colas gruesas** indican que movimientos extremos ocurren mucho más de lo que predice una distribución normal."
     else:
          base += "Las colas se asemejan a una distribución normal."
          
-    contingencia = f"*Contingencia:* el retorno de la última sesión fue **{last_ret:.2f}%**, equivalente a **{z_score:.2f} desviaciones**."
-    
-    if abs(z_score) < 1.5:
-        implicancia = "**Implicancia:** aunque hoy no hay anomalía, el dimensionamiento no debe calibrarse solo con la media."
-    else:
-        implicancia = "**Implicancia:** detectamos un shock estadístico intradiario. Máxima alerta de riesgo de cola."
+    contingencia = f"*Contingencia:* el retorno de la última sesión fue **{last_ret:.2f}%**, equivalente a **{z_score:.2f} desviaciones**.{es_msg}"
         
-    sub_text = f"Nivel técnico — Retorno último {last_ret:.2f}% · Z = {z_score:.2f} · asimetría {skw:.2f} · curtosis (exceso) {kurt:.2f}."
+    sub_text = f"Nivel técnico — Retorno último {last_ret:.2f}% · Z = {z_score:.2f} · asimetría {skw:.2f} · curtosis (exceso) {kurt:.2f}{n_efectivo_str}."
 
     return f"""
 <p style="margin: 0;"><strong>Nivel 1 — Clasificación:</strong> {class_1}; colas históricas {class_2}.</p>

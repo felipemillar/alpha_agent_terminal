@@ -515,6 +515,24 @@
       letter-spacing: 1px;
     }
 
+    .time-filter-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .time-filter-btn:hover { background: #cbd5e1; color: #1e293b; }
+    .time-filter-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
     .select-styled {
       font-family: 'Inter', sans-serif;
       font-size: 0.8rem;
@@ -915,6 +933,46 @@
       min-width: 90px;
       height: auto;
     }
+    .structural-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-top: 24px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .structural-summary {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      list-style: none;
+    }
+    .structural-summary::-webkit-details-marker {
+      display: none;
+    }
+    .structural-summary::before {
+      content: "▶";
+      font-size: 0.8rem;
+      color: #64748b;
+      transition: transform 0.2s;
+    }
+    details[open] > .structural-summary::before {
+      transform: rotate(90deg);
+    }
+    .structural-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 
@@ -929,7 +987,7 @@
   <div class="agent-backdrop" id="agent-backdrop"></div>
   <div class="agent-modal" id="agent-modal">
     <div class="agent-modal-header">
-      <span>QRT-AI AGENT ANALYSIS</span>
+      <span>ANÁLISIS DE AGENTE IA QRT</span>
     </div>
     <div class="agent-modal-stats" id="agent-modal-stats">
       <!-- Estadísticas aquí -->
@@ -963,11 +1021,19 @@
         </div>
         <div class="controls-container">
           <button id="btn-generar-informe" class="tab-button" style="background: #005cff; color: white; padding: 6px 12px; margin-right: 15px; border-radius: 4px;" onclick="generarInformeExperto()">GENERAR INFORME IA</button>
+          
+          <div class="time-filter-group" style="display: flex; gap: 4px; margin-right: 15px; background: #e2e8f0; padding: 2px; border-radius: 6px;">
+            <button class="time-filter-btn active" onclick="aplicarFiltroTemporal('1Y')" data-range="1Y">1Y</button>
+            <button class="time-filter-btn" onclick="aplicarFiltroTemporal('5Y')" data-range="5Y">5Y</button>
+            <button class="time-filter-btn" onclick="aplicarFiltroTemporal('10Y')" data-range="10Y">10Y</button>
+            <button class="time-filter-btn" onclick="aplicarFiltroTemporal('ALL')" data-range="ALL">ALL</button>
+          </div>
+
           <span class="controls-label">TICKER:</span>
           <select id="asset-selector" class="select-styled" onchange="cargarDatosActivo(this.value)">
             <option value="">INITIALIZING FEED...</option>
           </select>
-          <span id="loading-spinner" class="loading-overlay">SYNCING...</span>
+          <span id="loading-spinner" class="loading-overlay">SINCRONIZANDO...</span>
         </div>
       </div>
 
@@ -1000,16 +1066,14 @@
       <div class="summary-bar" style="margin-bottom: 0;">
         <div id="semaforo" class="semaforo-card" style="padding: 10px 16px;">
           <div id="semaforo-title" class="semaforo-title" style="font-size: 0.85rem; margin-bottom: 2px;">
-            REGIME: PENDING
+            RÉGIMEN: PENDIENTE
           </div>
-          <div id="semaforo-desc" class="semaforo-desc" style="font-size: 0.8rem; line-height: 1.35;">
-            Awaiting telemetry...
-          </div>
+
         </div>
 
         <div class="metric-grid">
           <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-label" id="label-fecha">LATEST FIX</div>
+            <div class="metric-label" id="label-fecha">FECHA</div>
             <div id="metric-cierre" class="metric-value" style="font-size: 1.2rem;">-</div>
           </div>
           <div class="metric-card" style="padding: 10px 14px;">
@@ -1024,10 +1088,7 @@
             <div class="metric-label">VOLATILITY BIAS</div>
             <div id="metric-estado" class="metric-value" style="font-size: 1.2rem;">-</div>
           </div>
-          <div class="metric-card" style="padding: 10px 14px;">
-            <div class="metric-label">HURST MEMORY H(t)</div>
-            <div id="metric-hurst" class="metric-value" style="font-size: 1.2rem;">-</div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -1035,7 +1096,215 @@
     <!-- DESK 1: VOLATILITY DESK -->
     <div id="desk-volatilidad">
 
-    <!-- MÓDULO B: MAPA DE SÍNTESIS 2D (PLANOS DE CUADRANTES HURST H VS. KAUFMAN ER) -->
+    <!-- SECCIÓN ESTRUCTURAL PILAR 1 -->
+    <details id="structural-details" class="structural-section" ontoggle="onStructuralSectionToggle(event)">
+      <summary class="structural-summary">
+        Caracterización Estructural del Instrumento 
+        <span class="structural-badge">Lectura Estructural (Exenta de filtros)</span>
+      </summary>
+      
+      <div class="dashboard-grid" style="margin-top: 16px;">
+        <!-- Panel A: Estructura temporal del régimen (P1.02) -->
+        <div class="grid-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">ESTRUCTURA TEMPORAL DEL RÉGIMEN</h3>
+          </div>
+          <div id="grafico-p102" class="chart-container" style="height: 300px;"></div>
+        </div>
+
+      <!-- Panel E: Partición del riesgo diario (P1.06 + P1.07) -->
+      <div class="grid-panel" >
+        <div class="panel-header">
+          <h3 class="panel-title">PARTICIÓN DEL RIESGO DIARIO</h3>
+        </div>
+        <div class="kpi-strip" id="strip-p106-p107">
+          <!-- Se inyectarán los KPIs aquí -->
+        </div>
+        <div id="grafico-p106-p107" class="chart-container" style="height: 100px; margin-top: 12px;"></div>
+      </div>
+      </div>
+
+      <div class="dashboard-grid" style="margin-top: 16px; grid-template-columns: 1fr 1fr;">
+        <!-- Panel B: Dirección de la volatilidad (P1.03 + P1.08) -->
+        <div class="grid-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">DIRECCIÓN DE LA VOLATILIDAD</h3>
+          </div>
+          <div id="grafico-p103" class="chart-container" style="height: 240px;"></div>
+          <div id="grafico-p108" class="chart-container" style="height: 60px; margin-top: 8px;"></div>
+        
+</div>
+<div class="grid-panel" >
+          <div class="panel-header">
+            <h3 class="panel-title">PERSISTENCIA DIRECCIONAL</h3>
+          </div>
+          <div id="grafico-p104" class="chart-container" style="height: 300px;"></div>
+        </div>
+
+
+      </div>
+
+      <div class="dashboard-grid" style="margin-top: 16px; grid-template-columns: 1fr 1fr;">
+        <!-- Panel D: Validación de la segmentación (P1.05) -->
+        <div class="grid-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">VALIDACIÓN DE LA SEGMENTACIÓN</h3>
+            <span id="badge-p105-valida" class="badge"></span>
+          </div>
+          <div id="grafico-p105" class="chart-container" style="height: 300px;"></div>
+        </div>
+      <!-- C4: Análisis de Rachas por Régimen -->
+      <div class="grid-panel" >
+        <div class="panel-header">
+          <h4 class="panel-title">PERSISTENCIA DEL RÉGIMEN</h4>
+          
+        </div>
+        
+        
+        <div id="grafico-streaks" class="chart-container" style="height: 300px;"></div>
+      </div>
+      </div>
+    </div>
+    
+
+
+        <!-- Panel C: Persistencia del estado direccional (P1.04) -->
+        
+
+    </details>
+
+        <!-- Cuadrícula 2x2 (Bloomberg Light) -->
+    <div class="dashboard-grid" style="grid-template-columns: 3fr 2fr;">
+      <!-- C1: Evolución Temporal del ATR -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">LÍNEA DE TIEMPO DE VOLATILIDAD</h4>
+          <div class="tab-container">
+            <button id="tab-nominal" class="tab-button active" onclick="cambiarMetricaATR('nominal')">NOM</button>
+            <button id="tab-porcentual" class="tab-button" onclick="cambiarMetricaATR('porcentual')">NORM (%)</button>
+          </div>
+        </div>
+        <div id="grafico-atr" class="chart-container"></div>
+      </div>
+
+      <!-- C3: Histograma de Distribución de Volatilidad -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">HISTOGRAMA DE DISTRIBUCIÓN DE VOLATILIDAD</h4>
+        </div>
+        <div id="grafico-histograma-natr" class="chart-container" style="height: 330px;"></div>
+      </div>
+
+
+      <!-- C2: Dispersión Retorno vs NATR -->
+      <div class="grid-panel">
+        <div class="panel-header">
+          <h4 class="panel-title">DISPERSIÓN DE RETORNOS DIARIOS</h4>
+          <div class="tab-container" style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-analizar-clicks" class="tab-button" style="background-color: #28a745; color: white; display: none; border-color: #28a745;" onclick="analizarPuntosClickeados()">Analizar Selección (0)</button>
+            <button id="tab-disp-direccional" class="tab-button active" onclick="cambiarModoDispersion('direccional')">DIR</button>
+            <button id="tab-disp-absoluto" class="tab-button" onclick="cambiarModoDispersion('absoluto')">ABS (|X|)</button>
+          </div>
+        </div>
+        <div id="grafico-dispersion" class="chart-container"></div>
+      </div>
+
+    <!-- Evaluación Estocástica de Retornos & Regla de Weissman (Serie Histórica Completa 5 Años) -->
+    <div class="zscore-card-container" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
+            // EVALUACIÓN ESTOCÁSTICA DE RETORNOS (Z-SCORE SERIE HISTÓRICA)
+          </div>
+          <div id="zscore-filter-subtitle" style="font-size: 10px; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 3px;">
+            [ SERIE HISTÓRICA COMPLETA ]
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
+          POBLACIÓN DE REFERENCIA: HISTORIA COMPLETA (5 AÑOS)
+        </div>
+      </div>
+
+
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <div id="zscore-val-display" style="font-size: 20px; font-weight: 700; color: #1e293b;">
+            Z: -
+          </div>
+          <div id="zscore-return-display" style="font-size: 12px; font-weight: 600; color: #475569; background: #eef2f6; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px;">
+            RETORNO DÍA: -
+          </div>
+          <div id="zscore-shape-badge" style="font-size: 10px; font-weight: 700; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 3px 8px; border-radius: 4px; display: none;">
+            -
+          </div>
+        </div>
+        <div id="zscore-badge" style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; color: #fff; background: #64748b;">
+          -
+        </div>
+      </div>
+
+      <!-- Contenedor del Gráfico Plotly de Distribución Gaussiana Doble (Animada) -->
+      <div id="zscore-chart-container" style="width: 100%; height: 240px; background: transparent; margin-bottom: 6px;"></div>
+
+
+
+
+      <div id="zscore-interpretation" style="font-size: 12px; color: #475569; line-height: 1.5; font-style: italic;">
+        Awaiting econometric calculation...
+      </div>
+
+
+</div>
+</div>
+        
+    <!-- MÓDULO P2: RIESGO DE COLA (EXPECTED SHORTFALL 1D) -->
+    <div class="tail-risk-card-container" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
+            // PÉRDIDA ESPERADA CONDICIONAL (EXPECTED SHORTFALL - 1D)
+          </div>
+          <div id="pilar2-filter-subtitle" style="font-size: 10px; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 3px;">
+            [ RÉGIMEN ACTUAL ]
+          </div>
+        </div>
+        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>HORIZONTE:</span>
+          <div style="display: flex; background: #e2e8f0; border-radius: 4px; padding: 2px;">
+            <button onclick="cambiarHorizontePilar2('1')" id="btn-p2-hor-1" style="background: #ffffff; border: none; font-size: 10px; font-weight: 700; color: #0f172a; padding: 2px 8px; border-radius: 3px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">1D</button>
+            <button onclick="cambiarHorizontePilar2('2')" id="btn-p2-hor-2" style="background: transparent; border: none; font-size: 10px; font-weight: 700; color: #64748b; padding: 2px 8px; border-radius: 3px; cursor: pointer; transition: all 0.2s;">2D</button>
+            <button onclick="cambiarHorizontePilar2('3')" id="btn-p2-hor-3" style="background: transparent; border: none; font-size: 10px; font-weight: 700; color: #64748b; padding: 2px 8px; border-radius: 3px; cursor: pointer; transition: all 0.2s;">3D</button>
+            <button onclick="cambiarHorizontePilar2('5')" id="btn-p2-hor-5" style="background: transparent; border: none; font-size: 10px; font-weight: 700; color: #64748b; padding: 2px 8px; border-radius: 3px; cursor: pointer; transition: all 0.2s;">5D</button>
+          </div>
+        </div>
+        <div id="pilar2-warning-badge" style="display: none; font-size: 10px; color: #b45309; font-weight: 700; background: #fef3c7; padding: 3px 8px; border-radius: 3px; border: 1px solid #fde68a;">
+          <span style="margin-right:4px;">⚠️</span> ALERTA DE MUESTRA (n < 20) - MOSTRANDO RIESGO GLOBAL
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <!-- RIESGO LARGOS (CAÍDAS) -->
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 10px; font-weight: 700; color: #e11d48; letter-spacing: 1px; margin-bottom: 5px;">RIESGO POSICIÓN LARGA (CAÍDAS)</div>
+          <div id="pilar2-es-largo" style="font-size: 24px; font-weight: 700; color: #be123c;">-%</div>
+          <div style="font-size: 9px; color: #9f1239; margin-top: 5px;">Peor 5% de escenarios diarios</div>
+        </div>
+
+        <!-- RIESGO CORTOS (SUBIDAS EXTREMAS) -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 10px; font-weight: 700; color: #16a34a; letter-spacing: 1px; margin-bottom: 5px;">RIESGO POSICIÓN CORTA (ALZAS)</div>
+          <div id="pilar2-es-corto" style="font-size: 24px; font-weight: 700; color: #15803d;">-%</div>
+          <div style="font-size: 9px; color: #166534; margin-top: 5px;">Peor 5% de escenarios diarios</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 10px; font-size: 10px; color: #64748b; font-style: italic; text-align: center;">
+        *Expected Shortfall (CVaR) al 5%. Representa el valor promedio de la pérdida si se supera el umbral extremo.
+      </div>
+    </div>
+
+        <!-- MÓDULO B: MAPA DE SÍNTESIS 2D (PLANOS DE CUADRANTES HURST H VS. KAUFMAN ER) -->
     <div class="scatter2d-card-container" style="margin-top: 15px; margin-bottom: 25px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
         <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
@@ -1265,51 +1534,6 @@
       </div>
     </div>
 
-    <!-- Evaluación Estocástica de Retornos & Regla de Weissman (Serie Histórica Completa 5 Años) -->
-    <div class="zscore-card-container" style="margin-top: 15px; margin-bottom: 25px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
-            // EVALUACIÓN ESTOCÁSTICA DE RETORNOS (Z-SCORE SERIE HISTÓRICA)
-          </div>
-          <div id="zscore-filter-subtitle" style="font-size: 10px; color: #475569; font-weight: 700; background: #e2e8f0; padding: 2px 8px; border-radius: 3px;">
-            [ SERIE HISTÓRICA COMPLETA ]
-          </div>
-        </div>
-        <div style="font-size: 10px; color: #94a3b8; font-weight: 600;">
-          POBLACIÓN DE REFERENCIA: HISTORIA COMPLETA (5 AÑOS)
-        </div>
-      </div>
-
-
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-          <div id="zscore-val-display" style="font-size: 20px; font-weight: 700; color: #1e293b;">
-            Z: -
-          </div>
-          <div id="zscore-return-display" style="font-size: 12px; font-weight: 600; color: #475569; background: #eef2f6; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px;">
-            RETORNO DÍA: -
-          </div>
-          <div id="zscore-shape-badge" style="font-size: 10px; font-weight: 700; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; padding: 3px 8px; border-radius: 4px; display: none;">
-            -
-          </div>
-        </div>
-        <div id="zscore-badge" style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 4px; color: #fff; background: #64748b;">
-          -
-        </div>
-      </div>
-
-      <!-- Contenedor del Gráfico Plotly de Distribución Gaussiana Doble (Animada) -->
-      <div id="zscore-chart-container" style="width: 100%; height: 240px; background: transparent; margin-bottom: 6px;"></div>
-
-
-
-
-      <div id="zscore-interpretation" style="font-size: 12px; color: #475569; line-height: 1.5; font-style: italic;">
-        Awaiting econometric calculation...
-      </div>
-    </div>
 
 
 
@@ -1319,71 +1543,7 @@
 
 
 
-    <!-- Cuadrícula 2x2 (Bloomberg Light) -->
-    <div class="dashboard-grid">
-      <!-- C1: Evolución Temporal del ATR -->
-      <div class="grid-panel">
-        <div class="panel-header">
-          <h4 class="panel-title">VOLATILITY TIMELINE</h4>
-          <div class="tab-container">
-            <button id="tab-nominal" class="tab-button active" onclick="cambiarMetricaATR('nominal')">NOM</button>
-            <button id="tab-porcentual" class="tab-button" onclick="cambiarMetricaATR('porcentual')">NORM (%)</button>
-          </div>
-        </div>
-        <div id="grafico-atr" class="chart-container"></div>
-      </div>
 
-      <!-- C2: Dispersión Retorno vs NATR -->
-      <div class="grid-panel">
-        <div class="panel-header">
-          <h4 class="panel-title">RETURN DISPERSION</h4>
-          <div class="tab-container" style="display: flex; gap: 8px; align-items: center;">
-            <button id="btn-analizar-clicks" class="tab-button" style="background-color: #28a745; color: white; display: none; border-color: #28a745;" onclick="analizarPuntosClickeados()">Analizar Selección (0)</button>
-            <button id="tab-disp-direccional" class="tab-button active" onclick="cambiarModoDispersion('direccional')">DIR</button>
-            <button id="tab-disp-absoluto" class="tab-button" onclick="cambiarModoDispersion('absoluto')">ABS (|X|)</button>
-          </div>
-        </div>
-        <div id="grafico-dispersion" class="chart-container"></div>
-      </div>
-
-      <!-- C3: Histograma de Distribución de Volatilidad -->
-      <div class="grid-panel">
-        <div class="panel-header">
-          <h4 class="panel-title">VOLATILITY DISTRIBUTION HISTOGRAM</h4>
-        </div>
-        <div id="grafico-autocorr" class="chart-container" style="height: 330px;"></div>
-      </div>
-
-      <!-- C4: Análisis de Rachas por Régimen -->
-      <div class="grid-panel">
-        <div class="panel-header">
-          <h4 class="panel-title">REGIME PERSISTENCE</h4>
-          <div class="tab-container">
-            <button id="tab-streak-bajo" class="tab-button active" onclick="cambiarRegimenStreak('BAJO')">LOW</button>
-            <button id="tab-streak-medio" class="tab-button" onclick="cambiarRegimenStreak('MEDIO')">MID</button>
-            <button id="tab-streak-alto" class="tab-button" onclick="cambiarRegimenStreak('ALTO')">HIGH</button>
-          </div>
-        </div>
-        
-        <!-- Stats de Racha -->
-        <div class="streak-stats-grid">
-          <div class="streak-stat-card">
-            <div class="streak-stat-label">N_OBS</div>
-            <div id="streak-total" class="streak-stat-value">-</div>
-          </div>
-          <div class="streak-stat-card">
-            <div class="streak-stat-label">MEDIAN(d)</div>
-            <div id="streak-median" class="streak-stat-value">-</div>
-          </div>
-          <div class="streak-stat-card">
-            <div class="streak-stat-label">MAX(d)</div>
-            <div id="streak-max" class="streak-stat-value">-</div>
-          </div>
-        </div>
-        
-        <div id="grafico-streaks" class="chart-container" style="height: 300px;"></div>
-      </div>
-    </div>
     </div> <!-- FIN desk-volatilidad -->
 
     <!-- DESK 2: OPENING GAPS DESK -->
@@ -1490,7 +1650,7 @@
           <!-- Panel 1: Scatter Plot -->
           <div class="grid-panel">
             <div class="panel-header">
-              <h4 class="panel-title">GAP SIZE vs VOLATILITY SCATTER</h4>
+              <h4 class="panel-title">DISPERSIÓN: TAMAÑO DE GAP vs VOLATILIDAD</h4>
               <div class="tab-container" style="display: flex; gap: 8px;">
                  <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Azul: Llenados | Carmesí: Abiertos | Escala Fija</span>
               </div>
@@ -1501,7 +1661,7 @@
           <!-- Panel 2: Heatmap 2 (Completo / Granular) -->
           <div class="grid-panel">
             <div class="panel-header">
-              <h4 class="panel-title">REGIME × STATE × WEEKDAY — SDFP MATRIX</h4>
+              <h4 class="panel-title">MATRIZ SDFP: RÉGIMEN × ESTADO × DÍA</h4>
               <div class="tab-container" style="display: flex; gap: 8px;">
                  <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Bordes punteados = n < 5</span>
               </div>
@@ -1517,7 +1677,7 @@
           <!-- Panel 1: Heatmap 1 (Regime) -->
           <div class="grid-panel">
             <div class="panel-header">
-              <h4 class="panel-title">FILL RATE: REGIME × WEEKDAY</h4>
+              <h4 class="panel-title">TASA DE CIERRE: RÉGIMEN × DÍA</h4>
               <div class="tab-container" style="display: flex; gap: 8px;">
                  <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Clic en celda para filtrar</span>
               </div>
@@ -1528,7 +1688,7 @@
           <!-- Panel 2: Heatmap 3 (Size) -->
           <div class="grid-panel">
             <div class="panel-header">
-              <h4 class="panel-title">FILL RATE: GAP SIZE × WEEKDAY</h4>
+              <h4 class="panel-title">TASA DE CIERRE: TAMAÑO DE GAP × DÍA</h4>
               <div class="tab-container" style="display: flex; gap: 8px;">
                  <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Tamaño del gap en ATR(14)</span>
               </div>
@@ -1543,7 +1703,7 @@
       <!-- ═══════════ 3D PROBABILITY SURFACE (Full Width) ═══════════ -->
       <div class="grid-panel" style="margin-bottom: 25px;">
         <div class="panel-header">
-          <h4 class="panel-title">3D PROBABILITY SURFACE</h4>
+          <h4 class="panel-title">SUPERFICIE DE PROBABILIDAD 3D</h4>
           <div class="tab-container" style="display: flex; align-items: center; gap: 10px;">
              <span style="font-size: 0.65rem; color: #888888; text-transform: uppercase; font-family: 'Inter', sans-serif;">Girar con ratón</span>
              <button class="tab-button select-compact" id="btn-interpretar-3d" style="font-size: 0.65rem; background-color: #005cff; color: white; border-color: #005cff; font-family: 'Inter', sans-serif; font-weight: 600; padding: 4px 8px; margin: 0; line-height: 1; border-radius: 3px !important; cursor: pointer;" onclick="interpretarSuperficie3D()">Interpretar</button>
@@ -1593,6 +1753,8 @@
     let globalMarkovData = null;
     let globalStreaksData = null;
     let globalGapsData = null;
+    let globalPilar1Data = null;
+    let globalPilar2Data = null;
     let globalCurrentATR = 0;
     let globalSelectedWeekday = null;
     let globalScatterRangeX = null;
@@ -1745,8 +1907,6 @@
 
       // Actualizar valor de la tarjeta superior KPI (usando global.global)
       const globalHurst = (hDataMatrix['global'] && hDataMatrix['global']['global']) ? hDataMatrix['global']['global'] : hData;
-      const metricHurst = document.getElementById("metric-hurst");
-      if (metricHurst) metricHurst.textContent = globalHurst.value !== undefined ? globalHurst.value : "-";
 
       // Actualizar vista detallada del Hurst según régimen y dirección seleccionados
       const hurstValueDisp = document.getElementById("hurst-value-display");
@@ -1989,19 +2149,6 @@
       animId: null
     };
 
-    function calculateSkewness(returns, mean, std) {
-      if (!returns || returns.length < 3 || std === 0) return 0;
-      let n = returns.length;
-      let sumCubed = returns.reduce((acc, r) => acc + Math.pow((r - mean) / std, 3), 0);
-      return (n / ((n - 1) * (n - 2))) * sumCubed;
-    }
-
-    function calculateKurtosis(returns, mean, std) {
-      if (!returns || returns.length < 4 || std === 0) return 0;
-      let n = returns.length;
-      let sumQuartic = returns.reduce((acc, r) => acc + Math.pow((r - mean) / std, 4), 0);
-      return (sumQuartic / n) - 3.0; // Curtosis de exceso
-    }
 
     function renderZScoreChart(zData) {
       const container = document.getElementById("zscore-chart-container");
@@ -2064,19 +2211,28 @@
         }
       }
 
-      // Diagnóstico de Forma Estocástica (Curtosis & Skewness)
+      // Diagnóstico de Forma Estocástica (Curtosis & Skewness desde API Pilar 2)
       const shapeBadge = document.getElementById("zscore-shape-badge");
       if (shapeBadge) {
-        if (rawMatchingReturns.length >= 4 && calculatedStdPct > 0) {
-          let skew = calculateSkewness(rawMatchingReturns, calculatedMeanPct, calculatedStdPct);
-          let kurt = calculateKurtosis(rawMatchingReturns, calculatedMeanPct, calculatedStdPct);
+        if (typeof globalPilar2Data !== 'undefined' && globalPilar2Data) {
+          let skew = 0;
+          let kurt = 0;
+          let rKey = activeRegime.toUpperCase();
+          
+          if (activeRegime === 'global' || !globalPilar2Data.P2_01_asimetria.por_regimen[rKey]) {
+            skew = globalPilar2Data.P2_01_asimetria.global.valor;
+            kurt = globalPilar2Data.P2_02_curtosis.global.valor;
+          } else {
+            skew = globalPilar2Data.P2_01_asimetria.por_regimen[rKey].valor;
+            kurt = globalPilar2Data.P2_02_curtosis.por_regimen[rKey].valor;
+          }
 
           let kurtLabel = "NORMAL";
           let kurtColor = "#0284c7";
           let kurtBg = "#e0f2fe";
           let kurtBorder = "#bae6fd";
 
-          if (kurt > 0.8) {
+          if (kurt > 0) {
             kurtLabel = "COLAS PESADAS (FAT TAILS)";
             kurtColor = "#991b1b";
             kurtBg = "#fef2f2";
@@ -2398,6 +2554,13 @@
       if (typeof drawScatter2DStep === 'function' && scatter2DFullData) {
         drawScatter2DStep(0, false);
       }
+      
+      if (typeof renderizarGraficoDispersion === 'function' && globalChartData) {
+        renderizarGraficoDispersion(globalChartData, globalModoDispersion);
+      }
+      if (typeof renderPilar2Widget === 'function') {
+        renderPilar2Widget();
+      }
     }
 
     let scatter2DAnimationTimer = null;
@@ -2531,7 +2694,7 @@
       
       // Actualizar el DOM con los valores de la nueva ventana seleccionada
       const coordsDisp = document.getElementById("scatter2d-coords-display");
-      if (coordsDisp) coordsDisp.textContent = `HURST H: ${scatter2DFullData.current_hurst} | KAUFMAN ER: ${scatter2DFullData.current_kaufman}`;
+      if (coordsDisp) coordsDisp.textContent = `HURST (H): ${scatter2DFullData.current_hurst} | EFICIENCIA KAUFMAN (ER): ${scatter2DFullData.current_kaufman}`;
 
       const qBadge = document.getElementById("scatter2d-quadrant-badge");
       if (qBadge) {
@@ -2637,7 +2800,7 @@
           opacity: isFiltered ? 0.65 : 0.40
         },
         hoverinfo: 'text',
-        hovertext: displayPoints.map(t => `Día: ${t.date}<br>Hurst H: ${t.hurst}<br>Kaufman ER: ${t.kaufman}<br>Régimen: ${t.regime || 'N/A'}<br>Estado: ${t.state || 'N/A'}`)
+        hovertext: displayPoints.map(t => `Fecha: ${t.date}<br>Hurst (H): ${t.hurst}<br>Eficiencia Kaufman (ER): ${t.kaufman}<br>Régimen: ${t.regime || 'N/A'}<br>Estado: ${t.state || 'N/A'}`)
       };
 
       const fillQ1 = 'rgba(2, 132, 199, 0.05)';
@@ -2743,7 +2906,7 @@
         }
       } catch (err) {
         console.error(err);
-        document.getElementById("semaforo-desc").innerHTML = `SYS_ERR: Kernel connection refused (port ${window.location.port || '80'}).`;
+        document.getElementById("semaforo-title").textContent = `SYS_ERR: Kernel connection refused (port ${window.location.port || '80'}).`;
       }
     });
 
@@ -2769,18 +2932,25 @@
       }
 
       try {
-        const [volRes, markovRes, streaksRes, gapsRes] = await Promise.all([
+        const [volRes, markovRes, streaksRes, gapsRes, pilar1Res, pilar2Res] = await Promise.all([
           fetch(`${API_BASE}/volatility?asset=${assetName}`).then(r => r.json()),
           fetch(`${API_BASE}/markov?asset=${assetName}`).then(r => r.json()),
-          fetch(`${API_BASE}/streaks?asset=${assetName}&regime=${globalRegimenStreak}`).then(r => r.json()),
-          fetch(`${API_BASE}/gaps?asset=${assetName}`).then(r => r.json())
+          fetch(`${API_BASE}/streaks?asset=${assetName}&regime=ALL`).then(r => r.json()),
+          fetch(`${API_BASE}/gaps?asset=${assetName}`).then(r => r.json()),
+          fetch(`${API_BASE}/adn/pilar1?asset=${assetName}`).then(r => r.json()),
+          fetch(`${API_BASE}/adn/pilar2?asset=${assetName}`).then(r => r.json())
         ]);
 
-        globalChartData = volRes.chart_data;
+        window.globalChartDataRaw = volRes.chart_data;
+        window.currentDataFilter = '1Y';
+        // We will call aplicarFiltroTemporal at the end of this function which will set globalChartData and render.
+        globalChartData = volRes.chart_data; 
         globalAssetName = assetName;
         globalMarkovData = markovRes;
         globalStreaksData = streaksRes;
         globalGapsData = gapsRes;
+        globalPilar1Data = pilar1Res;
+        globalPilar2Data = pilar2Res;
         globalCurrentATR = volRes.metrics.current_atr;
         
         // Calcular rangos globales absolutos para escala fija del Scatter Plot de Gaps
@@ -2809,10 +2979,6 @@
 
         document.getElementById("semaforo-title").textContent = `REGIME: ${metrics.regime}`;
         document.getElementById("semaforo-title").style.color = metrics.hex_color;
-        document.getElementById("semaforo-desc").innerHTML = `
-          <strong>ALERT:</strong> ${metrics.alert}<br>
-          <strong>EXECUTION MANDATE:</strong> ${metrics.action}
-        `;
 
         document.getElementById("label-fecha").textContent = `FIX: ${metrics.last_date}`;
         document.getElementById("metric-cierre").textContent = metrics.current_price;
@@ -2877,7 +3043,7 @@
           const sData = scatter2DFullData;
           
           const coordsDisp = document.getElementById("scatter2d-coords-display");
-          if (coordsDisp) coordsDisp.textContent = `HURST H: ${sData.current_hurst} | KAUFMAN ER: ${sData.current_kaufman}`;
+          if (coordsDisp) coordsDisp.textContent = `HURST (H): ${sData.current_hurst} | EFICIENCIA KAUFMAN (ER): ${sData.current_kaufman}`;
 
           const qBadge = document.getElementById("scatter2d-quadrant-badge");
           if (qBadge) {
@@ -2941,18 +3107,198 @@
         globalSelectedFilter = null;
         window.filtrarYRenderizarGaps();
 
-        renderizarGraficoATR(globalChartData, globalMetricaActual);
-        renderizarGraficoDispersion(globalChartData, globalModoDispersion);
-        renderizarHistogramaVolatilidad(globalChartData);
         renderizarScatterRachas(streaksRes);
+
+        // Reset pills UI to 1Y (default para carga rápida)
+        document.querySelectorAll('.time-filter-btn').forEach(b => b.classList.remove('active'));
+        const defaultBtn = document.querySelector('.time-filter-btn[data-range="1Y"]');
+        if (defaultBtn) defaultBtn.classList.add('active');
+
+        aplicarFiltroTemporal('1Y');
+        renderPilar2Widget();
 
       } catch (err) {
         console.error(err);
         alert("Telemetry sync failed. Verify local engine.");
       } finally {
         spinner.style.display = "none";
+        
+        // Re-renderizar Pilar 1 si está abierto
+        const details = document.getElementById("structural-details");
+        if (details && details.open) {
+          renderizarPanelD_P105();
+          renderizarPanelE_P106_107();
+          renderizarPanelA_P102();
+          renderizarPanelB_P103_108();
+          renderizarPanelC_P104();
+        } else {
+          pilar1Rendered = false;
+        }
+
         startAgentPolling(); // Inicia el polling global para habilitar el botón
       }
+    }
+
+    
+    window.currentPilar2Horizon = '1';
+
+    function cambiarHorizontePilar2(hor) {
+        window.currentPilar2Horizon = hor;
+        
+        // Actualizar UI botones
+        ['1', '2', '3', '5'].forEach(h => {
+            const btn = document.getElementById(`btn-p2-hor-${h}`);
+            if(btn) {
+                if(h === hor) {
+                    btn.style.background = '#ffffff';
+                    btn.style.color = '#0f172a';
+                    btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                } else {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#64748b';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        });
+        renderPilar2Widget();
+    }
+
+    function renderPilar2Widget() {
+      if (!globalPilar2Data || !globalPilar2Data.P2_03_04_riesgo_cola) return;
+      
+      const regimen = (typeof currentGlobalRegime !== 'undefined') ? currentGlobalRegime : 'global';
+      const hor = window.currentPilar2Horizon || '1';
+      
+      let targetObj = null;
+      let isGlobal = false;
+      let isNLow = false;
+      
+      const pilar2Root = globalPilar2Data.P2_03_04_riesgo_cola;
+      
+      if (regimen === "global") {
+        targetObj = pilar2Root.global;
+        isGlobal = true;
+      } else {
+        const condObj = pilar2Root.por_regimen;
+        const regimenKey = regimen.toUpperCase();
+        
+        if (condObj && condObj[regimenKey]) {
+            targetObj = condObj[regimenKey];
+            
+            // Check N efectivo del horizonte seleccionado
+            if (targetObj[hor]) {
+               const l_pub = targetObj[hor].largo ? targetObj[hor].largo.publicable : false;
+               const c_pub = targetObj[hor].corto ? targetObj[hor].corto.publicable : false;
+               
+               if (!l_pub || !c_pub) {
+                   isNLow = true;
+                   targetObj = pilar2Root.global;
+               }
+            }
+        } else {
+            targetObj = pilar2Root.global;
+            isGlobal = true;
+        }
+      }
+      
+      const subtitle = document.getElementById("pilar2-filter-subtitle");
+      const warning = document.getElementById("pilar2-warning-badge");
+      const esLargo = document.getElementById("pilar2-es-largo");
+      const esCorto = document.getElementById("pilar2-es-corto");
+      
+      if (isGlobal || regimen === "global") {
+         if (subtitle) subtitle.textContent = "[ HISTÓRICO GLOBAL ]";
+         if (warning) warning.style.display = "none";
+      } else {
+         if (subtitle) subtitle.textContent = `[ RÉGIMEN ${regimen} ]`;
+         if (isNLow) {
+             if (warning) warning.style.display = "block";
+         } else {
+             if (warning) warning.style.display = "none";
+         }
+      }
+      
+      // Update values
+      if (targetObj && targetObj[hor]) {
+         const dataLargo = targetObj[hor].largo;
+         const dataCorto = targetObj[hor].corto;
+         
+         // LARGOS
+         if (dataLargo && dataLargo.es_pct !== undefined) {
+            if (esLargo) esLargo.textContent = dataLargo.es_pct.toFixed(2) + "%";
+         } else {
+            if (esLargo) esLargo.textContent = "-%";
+         }
+         
+         // CORTOS
+         if (dataCorto && dataCorto.es_pct !== undefined) {
+            if (esCorto) esCorto.textContent = dataCorto.es_pct.toFixed(2) + "%";
+         } else {
+            if (esCorto) esCorto.textContent = "-%";
+         }
+      } else {
+         if (esLargo) esLargo.textContent = "-%";
+         if (esCorto) esCorto.textContent = "-%";
+      }
+    }
+
+    function aplicarFiltroTemporal(rango) {
+      if (!window.globalChartDataRaw || !window.globalChartDataRaw.dates) return;
+
+      window.currentDataFilter = rango;
+
+      // Actualizar UI
+      document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.range === rango) {
+          btn.classList.add('active');
+        }
+      });
+
+      const dates = window.globalChartDataRaw.dates;
+      if (dates.length === 0) return;
+
+      // Obtener la fecha máxima
+      const maxDate = new Date(dates[dates.length - 1]);
+      let minDate = new Date(0); // Para 'ALL'
+
+      if (rango === '1Y') {
+        minDate = new Date(maxDate);
+        minDate.setFullYear(maxDate.getFullYear() - 1);
+      } else if (rango === '5Y') {
+        minDate = new Date(maxDate);
+        minDate.setFullYear(maxDate.getFullYear() - 5);
+      } else if (rango === '10Y') {
+        minDate = new Date(maxDate);
+        minDate.setFullYear(maxDate.getFullYear() - 10);
+      }
+
+      const minDateStr = minDate.toISOString().split('T')[0];
+
+      // Filtrar todas las llaves en globalChartDataRaw (arrays)
+      const filteredData = {};
+      const indices = [];
+
+      for (let i = 0; i < dates.length; i++) {
+        if (dates[i] >= minDateStr) {
+          indices.push(i);
+        }
+      }
+
+      for (const key in window.globalChartDataRaw) {
+        if (Array.isArray(window.globalChartDataRaw[key])) {
+          filteredData[key] = indices.map(idx => window.globalChartDataRaw[key][idx]);
+        } else {
+          filteredData[key] = window.globalChartDataRaw[key];
+        }
+      }
+
+      // Reasignar la global de chartData y disparar redibujado
+      globalChartData = filteredData;
+      
+      renderizarGraficoATR(globalChartData, globalMetricaActual);
+      renderizarGraficoDispersion(globalChartData, globalModoDispersion);
+      renderizarHistogramaVolatilidad(globalChartData);
     }
 
     function cambiarMetricaATR(tipo) {
@@ -2991,27 +3337,6 @@
       renderizarGraficoDispersion(globalChartData, modo);
     }
 
-    async function cambiarRegimenStreak(regime) {
-      if (!globalAssetName) return;
-      globalRegimenStreak = regime;
-
-      const regimes = ["BAJO", "MEDIO", "ALTO"];
-      regimes.forEach(r => {
-        const btn = document.getElementById(`tab-streak-${r.toLowerCase()}`);
-        if (r === regime) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
-      });
-
-      try {
-        const streaksData = await fetch(`${API_BASE}/streaks?asset=${globalAssetName}&regime=${regime}`).then(r => r.json());
-        renderizarScatterRachas(streaksData);
-      } catch (err) {
-        console.error(err);
-      }
-    }
 
     function renderizarGraficoATR(chartData, metrica) {
       const seriesY = metrica === "porcentual" ? chartData.natr : chartData.atr;
@@ -3084,6 +3409,12 @@
 
       for (let i = 0; i < chartData.dates.length; i++) {
         const reg = chartData.regimes[i];
+        const state = chartData.states ? chartData.states[i] : 'global';
+        
+        // Aplicar filtros globales
+        if (currentGlobalRegime !== 'global' && reg !== currentGlobalRegime) continue;
+        if (currentGlobalState !== 'global' && state !== currentGlobalState) continue;
+
         if (regMap[reg]) {
           const valX = modo === "absoluto" ? Math.abs(chartData.return[i]) : chartData.return[i];
           regMap[reg].x.push(valX);
@@ -3167,7 +3498,7 @@
         if(points.length === 0) return;
         
         document.getElementById("loading-spinner").style.display = "inline";
-        document.getElementById("loading-spinner").textContent = "AGENT THINKING...";
+        document.getElementById("loading-spinner").textContent = "AGENTE PENSANDO...";
         
         // Iniciar barra de estado
         const progressContainer = document.getElementById("agent-progress-container");
@@ -3215,7 +3546,7 @@
             setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
         } finally {
             document.getElementById("loading-spinner").style.display = "none";
-            document.getElementById("loading-spinner").textContent = "SYNCING...";
+            document.getElementById("loading-spinner").textContent = "SINCRONIZANDO...";
         }
       });
       
@@ -3277,7 +3608,7 @@
     }
 
     function renderizarHistogramaVolatilidad(data) {
-      const plotDiv = document.getElementById('grafico-autocorr');
+      const plotDiv = document.getElementById('grafico-histograma-natr');
       if (!plotDiv || !data || !data.natr || data.natr.length === 0) return;
 
       const natr = data.natr;
@@ -3430,53 +3761,120 @@
         ]
       };
 
-      Plotly.newPlot('grafico-autocorr', [traceBajo, traceMedio, traceAlto, traceCDF], layout, { responsive: true, displayModeBar: false });
+      Plotly.newPlot('grafico-histograma-natr', [traceBajo, traceMedio, traceAlto, traceCDF], layout, { responsive: true, displayModeBar: false });
     }
 
     function renderizarScatterRachas(data) {
-      document.getElementById("streak-total").textContent = data.summary.total_streaks;
-      document.getElementById("streak-median").textContent = data.summary.median_duration;
-      document.getElementById("streak-max").textContent = data.summary.max_duration;
+      // Stats removidas de la vista superior
 
-      const streaks = data.streaks;
+      const streaks = data.streaks || [];
+      const container = document.getElementById("grafico-streaks");
 
       if (streaks.length === 0) {
-        Plotly.newPlot('grafico-streaks', [], {
-          title: "NO DATA",
-          height: 250
-        });
+        container.innerHTML = "<div style='padding: 20px; text-align: center; color: #64748b;'>NO DATA</div>";
         return;
       }
 
-      const xVals = streaks.map(s => s.duration);
+      const bins = [
+        { label: "1 a 3 días (Ruido)", min: 1, max: 3, bajo: 0, medio: 0, alto: 0 },
+        { label: "4 a 7 días (La Norma)", min: 4, max: 7, bajo: 0, medio: 0, alto: 0 },
+        { label: "8 a 14 días (Tensión)", min: 8, max: 14, bajo: 0, medio: 0, alto: 0 },
+        { label: "15 a 30 días (Anomalía)", min: 15, max: 30, bajo: 0, medio: 0, alto: 0 },
+        { label: "Más de 30 días (Extremo)", min: 31, max: 9999, bajo: 0, medio: 0, alto: 0 }
+      ];
 
-      const traceHist = {
-        x: xVals,
-        type: 'histogram',
-        name: 'STREAKS DUR',
-        marker: {
-          color: '#0284c7',
-          line: { width: 1, color: '#ffffff' }
-        },
-        hovertemplate: '<b>Duración:</b> %{x} días<br><b>Frecuencia:</b> %{y} rachas<extra></extra>'
-      };
+      let d_bajo = [], d_medio = [], d_alto = [];
 
-      const traces = [traceHist];
+      streaks.forEach(s => {
+        const d = s.duration;
+        const r = s.regime;
+        if (r === "BAJO") d_bajo.push(d);
+        else if (r === "MEDIO") d_medio.push(d);
+        else if (r === "ALTO") d_alto.push(d);
 
-      const layout = {
-        xaxis: { gridcolor: '#f1f2f4', title: { text: "Duración (Días)", font: { size: 10, color: '#64748b' } } },
-        yaxis: { gridcolor: '#f1f2f4', zerolinecolor: '#d1d5da', zerolinewidth: 1, title: { text: "Frecuencia", font: { size: 10, color: '#64748b' } } },
-        template: 'plotly_white',
-        height: 250,
-        font: { family: 'Inter, sans-serif', color: '#444444', size: 9 },
-        hovermode: 'closest',
-        margin: { l: 45, r: 15, t: 10, b: 35 },
-        showlegend: false
-      };
+        for (let b of bins) {
+          if (d >= b.min && d <= b.max) {
+            if (r === "BAJO") b.bajo++;
+            else if (r === "MEDIO") b.medio++;
+            else if (r === "ALTO") b.alto++;
+            break;
+          }
+        }
+      });
 
-      Plotly.newPlot('grafico-streaks', traces, layout, { responsive: true, displayModeBar: false });
+      function getMedian(arr) {
+        if (arr.length === 0) return 0;
+        arr.sort((a,b) => a-b);
+        const mid = Math.floor(arr.length / 2);
+        return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+      }
+      
+      const medBajo = getMedian(d_bajo);
+      const medMedio = getMedian(d_medio);
+      const medAlto = getMedian(d_alto);
+
+      let tableHtml = `
+        <style>
+          .streak-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 5px; }
+          .streak-table th { background: #f8fafc; color: #475569; padding: 12px 10px; text-align: left; border-bottom: 2px solid #cbd5e1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+          .streak-table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+          .streak-table tr:hover td { background: #f1f5f9; }
+          .streak-table tr:last-child td { border-bottom: none; }
+          .streak-table th:first-child, .streak-table td:first-child { width: 40%; }
+          .streak-table th:not(:first-child), .streak-table td:not(:first-child) { width: 20%; text-align: center; }
+          .streak-val-bajo { color: #16a34a; font-weight: 700; text-align: center; }
+          .streak-val-medio { color: #eab308; font-weight: 700; text-align: center; }
+          .streak-val-alto { color: #dc2626; font-weight: 700; text-align: center; }
+        </style>
+        <div style="padding-bottom: 10px;">
+        <table class="streak-table">
+          <thead>
+            <tr>
+              <th>Duración de la Racha</th>
+              <th style="text-align: center;">BAJO</th>
+              <th style="text-align: center;">MEDIO</th>
+              <th style="text-align: center;">ALTO</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      let totalBajo = 0, totalMedio = 0, totalAlto = 0;
+      bins.forEach(b => {
+        totalBajo += b.bajo;
+        totalMedio += b.medio;
+        totalAlto += b.alto;
+        tableHtml += `
+          <tr>
+            <td style="font-weight: 600; color: #334155;">${b.label}</td>
+            <td class="streak-val-bajo">${b.bajo}</td>
+            <td class="streak-val-medio">${b.medio}</td>
+            <td class="streak-val-alto">${b.alto}</td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #cbd5e1;">
+            <td style="color: #0f172a;">TOTAL HISTÓRICO (N_OBS)</td>
+            <td class="streak-val-bajo">${totalBajo}</td>
+            <td class="streak-val-medio">${totalMedio}</td>
+            <td class="streak-val-alto">${totalAlto}</td>
+          </tr>
+          <tr style="background: #f8fafc; font-weight: 700; border-top: 1px solid #cbd5e1;">
+            <td style="color: #0f172a;">MEDIANA (DÍAS)</td>
+            <td class="streak-val-bajo">${medBajo}</td>
+            <td class="streak-val-medio">${medMedio}</td>
+            <td class="streak-val-alto">${medAlto}</td>
+          </tr>
+        </tbody></table>
+        </div>
+      `;
+
+      container.style.height = "auto";
+      container.style.padding = "0 10px 10px 10px";
+      container.innerHTML = tableHtml;
     }
-    
     // Función global para cerrar el Modal Agentico
     window.closeAgentModal = function() {
         document.getElementById("agent-backdrop").classList.remove("visible");
@@ -3968,7 +4366,7 @@
         if (!global3DSurfaceXGrid || !global3DSurfaceYGrid || !global3DSurfaceZMatrix) return;
         
         document.getElementById("loading-spinner").style.display = "inline";
-        document.getElementById("loading-spinner").textContent = "AGENT RECONNING SURFACE...";
+        document.getElementById("loading-spinner").textContent = "AGENTE ANALIZANDO SUPERFICIE...";
         
         const progressContainer = document.getElementById("agent-progress-container");
         const progressBar = document.getElementById("agent-progress-bar");
@@ -4056,7 +4454,7 @@
             setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
         } finally {
             document.getElementById("loading-spinner").style.display = "none";
-            document.getElementById("loading-spinner").textContent = "SYNCING...";
+            document.getElementById("loading-spinner").textContent = "SINCRONIZANDO...";
         }
     };
 
@@ -4065,7 +4463,7 @@
         if (!globalSelectedFilter || globalFilteredGapsPoints.length === 0) return;
         
         document.getElementById("loading-spinner").style.display = "inline";
-        document.getElementById("loading-spinner").textContent = "AGENT COMPUTING STATS...";
+        document.getElementById("loading-spinner").textContent = "AGENTE CALCULANDO ESTADÍSTICAS...";
         
         const progressContainer = document.getElementById("agent-progress-container");
         const progressBar = document.getElementById("agent-progress-bar");
@@ -4117,7 +4515,7 @@
             setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
         } finally {
             document.getElementById("loading-spinner").style.display = "none";
-            document.getElementById("loading-spinner").textContent = "SYNCING...";
+            document.getElementById("loading-spinner").textContent = "SINCRONIZANDO...";
         }
     };
 
@@ -4126,7 +4524,7 @@
         if(clickedPointsList.length === 0) return;
         
         document.getElementById("loading-spinner").style.display = "inline";
-        document.getElementById("loading-spinner").textContent = "AGENT THINKING...";
+        document.getElementById("loading-spinner").textContent = "AGENTE PENSANDO...";
         
         const progressContainer = document.getElementById("agent-progress-container");
         const progressBar = document.getElementById("agent-progress-bar");
@@ -4171,7 +4569,7 @@
             setTimeout(() => { progressContainer.style.display = "none"; }, 1000);
         } finally {
             document.getElementById("loading-spinner").style.display = "none";
-            document.getElementById("loading-spinner").textContent = "SYNCING...";
+            document.getElementById("loading-spinner").textContent = "SINCRONIZANDO...";
         }
     };
 
@@ -4395,7 +4793,7 @@
         mode: 'markers',
         name: 'Llenados (SDF)',
         marker: { color: '#4a6984', size: 5, opacity: 0.75, line: { color: '#ffffff', width: 0.3 } },
-        text: filledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Fill Depth: ${(p.fill_depth * 100).toFixed(1)}% | Drift: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
+        text: filledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Profundidad de Cierre: ${(p.fill_depth * 100).toFixed(1)}% | Deriva Neta: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
         hovertemplate: '%{text}<br>NATR: %{y}%<extra></extra>'
       };
       
@@ -4403,9 +4801,9 @@
         x: unfilledPoints.map(p => p.gap_size_atr),
         y: unfilledPoints.map(p => p.natr),
         mode: 'markers',
-        name: 'No Llenados (Open)',
+        name: 'No Llenados (Abiertos)',
         marker: { color: '#883030', size: 5, opacity: 0.75, line: { color: '#ffffff', width: 0.3 } },
-        text: unfilledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Fill Depth: ${(p.fill_depth * 100).toFixed(1)}% | Drift: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
+        text: unfilledPoints.map(p => `Fecha: ${p.date}<br>Gap: ${p.gap_size_pct}% (${p.gap_size_atr} ATR)<br>Régimen: ${p.regime} | Estado: ${p.state}<br>Profundidad de Cierre: ${(p.fill_depth * 100).toFixed(1)}% | Deriva Neta: ${p.net_drift > 0 ? '+' : ''}${p.net_drift} ATR | ICR: ${p.icr > 0 ? '+' : ''}${p.icr}`),
         hovertemplate: '%{text}<br>NATR: %{y}%<extra></extra>'
       };
       
@@ -5311,6 +5709,432 @@
       document.getElementById("agent-backdrop").classList.add("visible");
       document.getElementById("agent-modal").classList.add("visible");
     }
+    let pilar1Rendered = false;
+
+    function onStructuralSectionToggle(event) {
+      if (event.target.open && !pilar1Rendered && globalPilar1Data) {
+        renderizarPanelD_P105();
+        renderizarPanelE_P106_107();
+        renderizarPanelA_P102();
+        renderizarPanelB_P103_108();
+        renderizarPanelC_P104();
+        pilar1Rendered = true;
+      }
+    }
+
+    function renderizarPanelD_P105() {
+      const data = globalPilar1Data.P1_05_dependencia_ejes;
+      if (!data || !data.reparto) return;
+      
+      const badge = document.getElementById("badge-p105-valida");
+      if (data.celdas_validas) {
+        badge.textContent = "VÁLIDO";
+        badge.className = "structural-badge";
+        badge.style.background = "#dcfce7";
+        badge.style.color = "#166534";
+      } else {
+        badge.textContent = "INVÁLIDO";
+        badge.className = "structural-badge";
+        badge.style.background = "#fee2e2";
+        badge.style.color = "#991b1b";
+      }
+
+      const zValues = [];
+      const textValues = [];
+      const yLabels = ["BAJO", "MEDIO", "ALTO"];
+      const xLabels = ["CONTRACCIÓN", "EXPANSIÓN"];
+      
+      yLabels.forEach(reg => {
+        const row = data.reparto.find(r => r.regimen === reg);
+        if (row) {
+          zValues.push([row["CONTRACCIÓN"], row["EXPANSIÓN"]]);
+          textValues.push([
+            `${row["CONTRACCIÓN"].toFixed(1)}%<br>n=${Math.round(row["CONTRACCIÓN"] * row.n / 100)}`,
+            `${row["EXPANSIÓN"].toFixed(1)}%<br>n=${Math.round(row["EXPANSIÓN"] * row.n / 100)}`
+          ]);
+        } else {
+          zValues.push([0, 0]);
+          textValues.push(["", ""]);
+        }
+      });
+
+      const trace = {
+        z: zValues,
+        x: xLabels,
+        y: yLabels,
+        type: 'heatmap',
+        colorscale: 'Viridis',
+        showscale: true,
+        text: textValues,
+        texttemplate: "%{text}",
+        hoverinfo: "text"
+      };
+
+      const layout = {
+        margin: { l: 60, r: 20, t: 30, b: 40 },
+        font: { family: 'Inter, sans-serif' },
+        plot_bgcolor: '#f8fafc',
+        paper_bgcolor: '#ffffff'
+      };
+
+      Plotly.newPlot("grafico-p105", [trace], layout, { displayModeBar: false, responsive: true });
+    }
+
+    function renderizarPanelE_P106_107() {
+      const p101 = globalPilar1Data.P1_01_umbrales_regimen;
+      const p106 = globalPilar1Data.P1_06_parkinson;
+      const p107 = globalPilar1Data.P1_07_descomposicion_sesion;
+      if (!p106 || !p107 || !p101) return;
+
+      const stripContainer = document.getElementById("strip-p106-p107");
+      const chartContainer = document.getElementById("grafico-p106-p107");
+      
+      let n3Display = `<div class="kpi-value">${(p107.n3.share_pct || 0).toFixed(1)}%</div>`;
+      if (!p107.n3.disponible) {
+        const razon = p107.n3.motivo || (p107.n3.motivos_rechazo ? p107.n3.motivos_rechazo.join(", ") : "Dato N3 no confiable");
+        n3Display = `<div class="kpi-value" style="font-size: 0.75rem; color: #ef4444; line-height: 1.1;">${razon}</div>`;
+      }
+
+      stripContainer.innerHTML = `
+        <div class="kpi-cell">
+          <div class="kpi-label">SIGMA TOTAL (N1)</div>
+          <div class="kpi-value">${(p107.sigma_total_pct || 0).toFixed(2)}%</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">SIGMA INTRADÍA (PARKINSON)</div>
+          <div class="kpi-value">${(p106.sigma_diaria_pct).toFixed(2)}%</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">O/N RISK (N2)</div>
+          <div class="kpi-value">${p107.share_n2_pct.toFixed(1)}%</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">O/N RISK (N3 APERTURA)</div>
+          ${n3Display}
+        </div>
+      `;
+      
+      const valIntradia = 100 - p107.share_n2_pct;
+      const valON = p107.share_n2_pct;
+      
+      const traceIntradia = {
+        x: [valIntradia],
+        y: ["Riesgo Diario"],
+        name: "Intradía",
+        type: "bar",
+        orientation: "h",
+        marker: { color: "#3b82f6" },
+        text: [`${valIntradia.toFixed(1)}% Intradía`],
+        textposition: "inside",
+        insidetextfont: { color: "#ffffff" }
+      };
+      
+      const traceON = {
+        x: [valON],
+        y: ["Riesgo Diario"],
+        name: "Overnight",
+        type: "bar",
+        orientation: "h",
+        marker: { color: "#1e3a8a" },
+        text: [`${valON.toFixed(1)}% O/N`],
+        textposition: "inside",
+        insidetextfont: { color: "#ffffff" }
+      };
+
+      const layout = {
+        barmode: 'stack',
+        margin: { l: 80, r: 20, t: 20, b: 20 },
+        xaxis: { visible: false, range: [0, 100] },
+        yaxis: { visible: false },
+        showlegend: false,
+        height: 100,
+        plot_bgcolor: 'transparent',
+        paper_bgcolor: 'transparent'
+      };
+
+      Plotly.newPlot(chartContainer, [traceIntradia, traceON], layout, { displayModeBar: false, responsive: true });
+    }
+
+    function renderizarPanelA_P102() {
+      const data = globalPilar1Data.P1_02_reparto_por_epoca;
+      if (!data || data.length === 0) return;
+
+      const colorBajo = "#22c55e"; 
+      const colorMedio = "#eab308"; 
+      const colorAlto = "#ef4444"; 
+      
+      const epocas = [];
+      const bajos = [];
+      const medios = [];
+      const altos = [];
+      const hoverBajos = [];
+      const hoverMedios = [];
+      const hoverAltos = [];
+
+      data.bloques.forEach(d => {
+        epocas.push(d.bloque);
+        bajos.push(d.bajo_pct);
+        medios.push(d.medio_pct);
+        altos.push(d.alto_pct);
+        hoverBajos.push(`BAJO: ${d.bajo_pct.toFixed(1)}%`);
+        hoverMedios.push(`MEDIO: ${d.medio_pct.toFixed(1)}%`);
+        hoverAltos.push(`ALTO: ${d.alto_pct.toFixed(1)}%`);
+      });
+
+      const traceBajo = {
+        y: epocas,
+        x: bajos,
+        name: "BAJO",
+        type: "bar",
+        orientation: "h",
+        marker: { color: colorBajo },
+        hovertext: hoverBajos,
+        hoverinfo: "text",
+        textposition: "none"
+      };
+
+      const traceMedio = {
+        y: epocas,
+        x: medios,
+        name: "MEDIO",
+        type: "bar",
+        orientation: "h",
+        marker: { color: colorMedio },
+        hovertext: hoverMedios,
+        hoverinfo: "text",
+        textposition: "none"
+      };
+
+      const traceAlto = {
+        y: epocas,
+        x: altos,
+        name: "ALTO",
+        type: "bar",
+        orientation: "h",
+        marker: { color: colorAlto },
+        hovertext: hoverAltos,
+        hoverinfo: "text",
+        textposition: "none"
+      };
+
+      const layout = {
+        barmode: "stack",
+        margin: { l: 80, r: 20, t: 30, b: 30 },
+        font: { family: 'Inter, sans-serif' },
+        plot_bgcolor: '#f8fafc',
+        paper_bgcolor: '#ffffff',
+        showlegend: true,
+        legend: { orientation: "h", y: -0.2 }
+      };
+
+      Plotly.newPlot("grafico-p102", [traceBajo, traceMedio, traceAlto], layout, { displayModeBar: false, responsive: true });
+    }
+
+    function renderizarPanelB_P103_108() {
+      const p103 = globalPilar1Data.P1_03_razon_direccion;
+      const p108 = globalPilar1Data.P1_08_vrr;
+      if (!p103 || !p108) return;
+
+      const hist = p103.histograma;
+      if (hist) {
+        const binCenters = [];
+        for (let i = 0; i < hist.counts.length; i++) {
+          binCenters.push((hist.edges[i] + hist.edges[i+1]) / 2);
+        }
+        
+        const countsContraccion = [];
+        const binsContraccion = [];
+        const countsExpansion = [];
+        const binsExpansion = [];
+
+        for (let i = 0; i < binCenters.length; i++) {
+          if (binCenters[i] <= 1.0) {
+            countsContraccion.push(hist.counts[i]);
+            binsContraccion.push(binCenters[i]);
+          } else {
+            countsExpansion.push(hist.counts[i]);
+            binsExpansion.push(binCenters[i]);
+          }
+        }
+
+        const traceContraccion = {
+          x: binsContraccion,
+          y: countsContraccion,
+          name: "Contracción (<= 1.0)",
+          type: "bar",
+          marker: { color: "#3b82f6" } 
+        };
+
+        const traceExpansion = {
+          x: binsExpansion,
+          y: countsExpansion,
+          name: "Expansión (> 1.0)",
+          type: "bar",
+          marker: { color: "#f97316" } 
+        };
+
+        const layoutP103 = {
+          margin: { l: 40, r: 20, t: 30, b: 40 },
+          font: { family: 'Inter, sans-serif' },
+          plot_bgcolor: '#f8fafc',
+          paper_bgcolor: '#ffffff',
+          showlegend: true,
+          legend: { orientation: "h", y: -0.2 },
+          bargap: 0,
+          shapes: [
+            {
+              type: "line",
+              x0: 1.0,
+              x1: 1.0,
+              y0: 0,
+              y1: 1,
+              yref: "paper",
+              line: { color: "#1e293b", width: 2, dash: "dot" }
+            }
+          ],
+          annotations: [
+            {
+              x: p103.mediana,
+              y: Math.max(...hist.counts),
+              text: `Mediana: ${p103.mediana.toFixed(2)}`,
+              showarrow: true,
+              arrowhead: 2,
+              ax: 0,
+              ay: -30
+            }
+          ]
+        };
+
+        Plotly.newPlot("grafico-p103", [traceContraccion, traceExpansion], layoutP103, { displayModeBar: false, responsive: true });
+      }
+
+      if (p108) {
+        const traceP108 = {
+          type: "indicator",
+          mode: "number+gauge",
+          value: p108.actual,
+          number: { suffix: " VRR", font: { size: 14 } },
+          gauge: {
+            shape: "bullet",
+            axis: { range: [0, 2] },
+            threshold: {
+              line: { color: "#0f172a", width: 3 },
+              thickness: 0.75,
+              value: p108.actual
+            },
+            steps: [
+              { range: [0, p108.umbrales.compresion], color: "#bfdbfe" },
+              { range: [p108.umbrales.compresion, p108.umbrales.expansion], color: "#f1f5f9" },
+              { range: [p108.umbrales.expansion, 2], color: "#fed7aa" }
+            ],
+            bar: { color: "transparent" }
+          }
+        };
+
+        const layoutP108 = {
+          margin: { l: 20, r: 40, t: 20, b: 20 },
+          font: { family: 'Inter, sans-serif' },
+          paper_bgcolor: 'transparent'
+        };
+
+        Plotly.newPlot("grafico-p108", [traceP108], layoutP108, { displayModeBar: false, responsive: true });
+      }
+    }
+
+    function renderizarPanelC_P104() {
+      const data = globalPilar1Data.P1_04_persistencia_estado;
+      if (!data) return;
+
+      const bins = [
+        { label: "1 a 3 días (Ruido)", min: 1, max: 3, cont: 0, exp: 0, desc: "Cambios erráticos. Difícil de operar." },
+        { label: "4 a 7 días (La Norma)", min: 4, max: 7, cont: 0, exp: 0, desc: "Mediana. Direccionalidad saludable." },
+        { label: "8 a 14 días (Tensión)", min: 8, max: 14, cont: 0, exp: 0, desc: "Estiramiento. Preparar reversión." },
+        { label: "15 a 30 días (Anomalía)", min: 15, max: 30, cont: 0, exp: 0, desc: "Inusual. Quiebre violento inminente." },
+        { label: "Más de 30 días (Extremo)", min: 31, max: 9999, cont: 0, exp: 0, desc: "Eventos estadísticamente extremos." }
+      ];
+
+      function aggregate(hist, key) {
+        if (!hist) return;
+        for (let i = 0; i < hist.counts.length; i++) {
+          const edge = hist.edges[i];
+          const count = hist.counts[i];
+          if (count === 0) continue;
+          for (let b of bins) {
+            if (edge >= b.min && edge <= b.max + 0.99) {
+              b[key] += count;
+              break;
+            }
+          }
+        }
+      }
+
+      if (data["CONTRACCIÓN"]) aggregate(data["CONTRACCIÓN"].histograma, 'cont');
+      if (data["EXPANSIÓN"]) aggregate(data["EXPANSIÓN"].histograma, 'exp');
+
+      let tableHtml = `
+        <style>
+          .p104-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 5px; }
+          .p104-table th { background: #f8fafc; color: #475569; padding: 12px 10px; text-align: left; border-bottom: 2px solid #cbd5e1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+          .p104-table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+          .p104-table tr:hover td { background: #f1f5f9; }
+          .p104-table tr:last-child td { border-bottom: none; }
+          .p104-table th:first-child, .p104-table td:first-child { width: 40%; }
+          .p104-table th:not(:first-child), .p104-table td:not(:first-child) { width: 30%; text-align: center; }
+          .p104-val-cont { color: #3b82f6; font-weight: 700; text-align: center; }
+          .p104-val-exp { color: #f97316; font-weight: 700; text-align: center; }
+        </style>
+        <div style="padding-bottom: 10px;">
+        <table class="p104-table">
+          <thead>
+            <tr>
+              <th>Duración de la Racha</th>
+              <th style="text-align: center;">Contracción</th>
+              <th style="text-align: center;">Expansión</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      let totalCont = 0;
+      let totalExp = 0;
+
+      bins.forEach(b => {
+        totalCont += b.cont;
+        totalExp += b.exp;
+        tableHtml += `
+          <tr>
+            <td style="font-weight: 600; color: #334155;">${b.label}</td>
+            <td class="p104-val-cont">${b.cont}</td>
+            <td class="p104-val-exp">${b.exp}</td>
+            
+          </tr>
+        `;
+      });
+
+      const medCont = data["CONTRACCIÓN"] ? data["CONTRACCIÓN"].mediana : 0;
+      const medExp = data["EXPANSIÓN"] ? data["EXPANSIÓN"].mediana : 0;
+
+      tableHtml += `
+          <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #cbd5e1;">
+            <td style="color: #0f172a;">TOTAL HISTÓRICO (N_OBS)</td>
+            <td class="p104-val-cont" style="color: #1d4ed8;">${totalCont}</td>
+            <td class="p104-val-exp" style="color: #c2410c;">${totalExp}</td>
+          </tr>
+          <tr style="background: #f8fafc; font-weight: 700; border-top: 1px solid #cbd5e1;">
+            <td style="color: #0f172a;">MEDIANA (DÍAS)</td>
+            <td class="p104-val-cont" style="color: #1d4ed8;">${medCont}</td>
+            <td class="p104-val-exp" style="color: #c2410c;">${medExp}</td>
+          </tr>
+        </tbody></table>
+        </div>
+      `;
+
+      const container = document.getElementById("grafico-p104");
+      container.style.height = "auto";
+      container.style.padding = "0 10px 10px 10px";
+      container.innerHTML = tableHtml;
+    }
+
   </script>
 </body>
 </html>

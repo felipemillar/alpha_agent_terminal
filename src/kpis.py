@@ -69,65 +69,35 @@ def calculate_kaufman_efficiency_ratio(df, window=10):
     # Evitar división por cero
     return np.where(sum_changes > 0, net_change / sum_changes, 0)
 
-def get_streak_metrics(df, regime_col='Regime', target_regime='BAJO'):
+def get_streak_metrics(df, regime_col='Regime', target_regime='ALL'):
     """
     Analiza y retorna un listado detallado de todas las rachas consecutivas 
-    de un régimen de volatilidad específico dentro del DataFrame histórico.
-    Calcula además el máximo downswing y upswing en el periodo de cada racha.
+    de un régimen de volatilidad específico dentro del DataFrame histórico, 
+    o de TODOS los regímenes si target_regime = 'ALL'.
     """
     streaks = []
-    current_streak = 0
-    start_idx = None
     
     # Asegurarse de que esté ordenado y con índice limpio
     df_sorted = df.sort_values('Date').reset_index(drop=True)
     
-    for idx, row in df_sorted.iterrows():
-        if row[regime_col] == target_regime:
-            if current_streak == 0:
-                start_idx = idx
-            current_streak += 1
-        else:
-            if current_streak > 0:
-                end_idx = idx - 1
-                start_date = df_sorted.loc[start_idx, 'Date']
-                end_date = df_sorted.loc[end_idx, 'Date']
-                start_close = df_sorted.loc[start_idx, 'Close']
-                end_close = df_sorted.loc[end_idx, 'Close']
-                pct_change = ((end_close - start_close) / start_close) * 100
-                
-                # Extraer sub-dataframe de la racha para upswing/downswing
-                df_streak = df_sorted.loc[start_idx:end_idx]
-                max_high = df_streak['High'].max()
-                min_low = df_streak['Low'].min()
-                
-                upswing = ((max_high - start_close) / start_close) * 100
-                downswing = ((min_low - start_close) / start_close) * 100
-                
-                streaks.append({
-                    "duration": current_streak,
-                    "start_date": start_date if isinstance(start_date, str) else start_date.strftime("%Y-%m-%d"),
-                    "end_date": end_date if isinstance(end_date, str) else end_date.strftime("%Y-%m-%d"),
-                    "start_price": float(start_close),
-                    "end_price": float(end_close),
-                    "change": float(pct_change),
-                    "upswing": float(upswing),
-                    "downswing": float(downswing)
-                })
-                current_streak = 0
-                start_idx = None
-                
-    # Procesar última si quedó abierta al final
-    if current_streak > 0:
-        end_idx = len(df_sorted) - 1
-        start_date = df_sorted.loc[start_idx, 'Date']
-        end_date = df_sorted.loc[end_idx, 'Date']
-        start_close = df_sorted.loc[start_idx, 'Close']
-        end_close = df_sorted.loc[end_idx, 'Close']
+    if len(df_sorted) == 0:
+        return pd.DataFrame(streaks)
+        
+    start_idx = 0
+    current_regime = df_sorted.loc[0, regime_col]
+    
+    def append_streak(s_idx, e_idx, regime_name):
+        if target_regime != 'ALL' and regime_name != target_regime:
+            return
+            
+        start_date = df_sorted.loc[s_idx, 'Date']
+        end_date = df_sorted.loc[e_idx, 'Date']
+        start_close = df_sorted.loc[s_idx, 'Close']
+        end_close = df_sorted.loc[e_idx, 'Close']
         pct_change = ((end_close - start_close) / start_close) * 100
         
-        # Extraer sub-dataframe de la racha
-        df_streak = df_sorted.loc[start_idx:end_idx]
+        # Extraer sub-dataframe de la racha para upswing/downswing
+        df_streak = df_sorted.loc[s_idx:e_idx]
         max_high = df_streak['High'].max()
         min_low = df_streak['Low'].min()
         
@@ -135,7 +105,8 @@ def get_streak_metrics(df, regime_col='Regime', target_regime='BAJO'):
         downswing = ((min_low - start_close) / start_close) * 100
         
         streaks.append({
-            "duration": current_streak,
+            "duration": (e_idx - s_idx) + 1,
+            "regime": regime_name,
             "start_date": start_date if isinstance(start_date, str) else start_date.strftime("%Y-%m-%d"),
             "end_date": end_date if isinstance(end_date, str) else end_date.strftime("%Y-%m-%d"),
             "start_price": float(start_close),
@@ -144,7 +115,16 @@ def get_streak_metrics(df, regime_col='Regime', target_regime='BAJO'):
             "upswing": float(upswing),
             "downswing": float(downswing)
         })
-        
+
+    for idx in range(1, len(df_sorted)):
+        if df_sorted.loc[idx, regime_col] != current_regime:
+            append_streak(start_idx, idx - 1, current_regime)
+            current_regime = df_sorted.loc[idx, regime_col]
+            start_idx = idx
+            
+    # Procesar última si quedó abierta al final
+    append_streak(start_idx, len(df_sorted) - 1, current_regime)
+    
     return pd.DataFrame(streaks)
 
 def calculate_expansion_contraction(df):

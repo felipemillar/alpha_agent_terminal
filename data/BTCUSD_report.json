@@ -1,0 +1,29 @@
+{
+    "ticker": "BTC-USD",
+    "period": null,
+    "interval": "1d",
+    "auto_adjust": true,
+    "timestamp_utc": "2026-08-04T00:26:10.495565+00:00",
+    "versions": {
+        "yfinance": "1.5.2",
+        "pandas": "3.0.3",
+        "skill_version": "2.1.2",
+        "schema_version": "2.1.0"
+    },
+    "status": "success",
+    "output_path": "/Users/fmillar/Proyectos_Desarrollo/alpha_agent_terminal/data/BTCUSD.csv",
+    "initial_records": 4339,
+    "final_records": 4338,
+    "dropped_records": 1,
+    "diagnostics": {
+        "duplicates_detected": 0,
+        "null_rows_detected": 0,
+        "invalid_prices_detected": 1,
+        "extreme_outliers_detected": 0
+    },
+    "clean_mode": "strict",
+    "date_range_start": "2014-09-17T00:00:00",
+    "date_range_end": "2026-08-02T00:00:00",
+    "schema_version": "2.1.0",
+    "file_hash": "adce277ead5bbe71920ad86044bb8d6bc98ef745c21a0703a99ce4a9905c98ab"
+}

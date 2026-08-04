@@ -16,6 +16,7 @@ import subprocess
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import engine
 import kpis
+import adn
 import config
 import textwrap
 
@@ -144,6 +145,58 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 traceback.print_exc()
                 self.send_error_response(500, f"Error obteniendo activos: {type(e).__name__}")
 
+        # Endpoint ADN: Pilar 1 — caracterización estructural del instrumento
+        # Ver docs/CATALOGO_KPIS_ADN.md (indicadores P1.01 a P1.08)
+        elif path == "/api/adn/pilar1":
+            asset_name = query_params.get("asset", [None])[0]
+            if not asset_name:
+                self.send_error_response(400, "Falta el parametro 'asset'")
+                return
+            try:
+                assets = {a["name"]: a["path"] for a in engine.get_available_assets()}
+                if asset_name not in assets:
+                    self.send_error_response(404, f"Activo no encontrado: {asset_name}")
+                    return
+
+                resultado = adn.caracterizar_pilar1(engine.fetch_data(assets[asset_name]))
+                resultado["activo"] = asset_name
+                resultado["calculado"] = datetime.datetime.now().isoformat()
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps(resultado, ensure_ascii=False).encode("utf-8"))
+            except Exception as e:
+                traceback.print_exc()
+                self.send_error_response(500, f"Error calculando ADN Pilar 1: {type(e).__name__}")
+
+
+        elif path == "/api/adn/pilar2":
+            asset_name = query_params.get("asset", [None])[0]
+            if not asset_name:
+                self.send_error_response(400, "Falta el parametro 'asset'")
+                return
+            try:
+                assets = {a["name"]: a["path"] for a in engine.get_available_assets()}
+                if asset_name not in assets:
+                    self.send_error_response(404, f"Activo no encontrado: {asset_name}")
+                    return
+
+                resultado = adn.caracterizar_pilar2(engine.fetch_data(assets[asset_name]))
+                if "error" not in resultado:
+                    resultado["activo"] = asset_name
+                    resultado["calculado"] = datetime.datetime.now().isoformat()
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps(resultado, ensure_ascii=False).encode("utf-8"))
+            except Exception as e:
+                traceback.print_exc()
+                self.send_error_response(500, f"Error calculando ADN Pilar 2: {type(e).__name__} (detalles omitidos por seguridad)")
+
         # Endpoint 3: Obtener datos de volatilidad y gráficos para un activo
         elif path == "/api/volatility":
             asset_name = query_params.get("asset", [None])[0]
@@ -176,14 +229,10 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 df['Return'] = ((df['Close'] - df['Prev_Close']) / df['Prev_Close']) * 100
                 df = df.dropna(subset=['ATR', 'NATR', 'Return']).reset_index(drop=True)
                 
-                # Filtrar los últimos 5 años de datos históricos para el gráfico
-                max_date = df['Date'].max()
-                limit_date = max_date - pd.DateOffset(years=5)
-                df_chart = df[df['Date'] >= limit_date].copy()
-
-                # Clasificar regímenes para todo el historial usando kpis.py
+                # Usar el dataframe completo para las gráficas y clasificar regímenes
                 df['Regime'], df['Color'] = kpis.classify_regimes_full(df)
-                df_chart = df[df['Date'] >= limit_date].copy()
+                df['Estado'] = kpis.calculate_expansion_contraction(df)
+                df_chart = df.copy()
 
                 # Estructurar la data de las series de tiempo para Plotly.js en el frontend
                 chart_data = {
@@ -193,6 +242,7 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                     "natr": df_chart['NATR'].tolist(),
                     "return": df_chart['Return'].tolist(),
                     "regimes": df_chart['Regime'].tolist(),
+                    "states": df_chart['Estado'].tolist(),
                     "colors": df_chart['Color'].tolist()
                 }
 
@@ -212,7 +262,7 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 self.send_error_response(500, f"Error analizando volatilidad: {type(e).__name__}")
         elif path == "/api/streaks":
             asset_name = query_params.get("asset", [None])[0]
-            regime = query_params.get("regime", ["BAJO"])[0]
+            regime = query_params.get("regime", ["ALL"])[0]
             if not asset_name:
                 self.send_error_response(400, "Falta el parámetro 'asset'")
                 return
