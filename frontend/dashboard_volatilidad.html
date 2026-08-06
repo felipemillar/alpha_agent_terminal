@@ -1085,7 +1085,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
         <div class="main-nav-tabs" style="margin-bottom: 0;">
           <button id="btn-desk-volatilidad" class="main-nav-tab-button active" onclick="cambiarEscritorio('volatilidad')">Volatility Analysis</button>
-          <button id="btn-desk-gaps" class="main-nav-tab-button" onclick="cambiarEscritorio('gaps')">Opening Gaps</button>
+          <!-- <button id="btn-desk-gaps" class="main-nav-tab-button" onclick="cambiarEscritorio('gaps')">Opening Gaps</button> -->
         </div>
 
         <!-- Filtros Globales de Regímenes y Estados -->
@@ -1379,7 +1379,7 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
         <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
-          // DIAGNÓSTICO ECONOMÉTRICO DE MEMORIA POR RÉGIMEN-ESTADO Y DIRECCIÓN (HURST H)
+          // EVALUACIÓN DE PERSISTENCIA Y REVERSIÓN A LA MEDIA (HURST H)
         </div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
           <button id="btn-toggle-hurst-heatmap" class="tab-button" onclick="toggleHurstHeatmap()" style="padding: 2px 8px; font-size: 9px; font-weight: 700; background: #f1f5f9; color: #1e293b; border-color: #cbd5e1;">
@@ -1445,7 +1445,7 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
         <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
-          // DIAGNÓSTICO ECONOMÉTRICO DE EFICIENCIA ESTRUCTURAL (KAUFMAN ER)
+          // CALIDAD DE LA TENDENCIA Y NIVEL DE RUIDO (KAUFMAN ER)
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <div style="display: flex; gap: 3px; align-items: center;">
@@ -5847,12 +5847,6 @@
       const stripContainer = document.getElementById("strip-p106-p107");
       const chartContainer = document.getElementById("grafico-p106-p107");
       
-      let n3Display = `<div class="kpi-value">${(p107.n3.share_pct || 0).toFixed(1)}%</div>`;
-      if (!p107.n3.disponible) {
-        const razon = p107.n3.motivo || (p107.n3.motivos_rechazo ? p107.n3.motivos_rechazo.join(", ") : "Dato N3 no confiable");
-        n3Display = `<div class="kpi-value" style="font-size: 0.75rem; color: #ef4444; line-height: 1.1;">${razon}</div>`;
-      }
-
       stripContainer.innerHTML = `
         <div class="kpi-cell">
           <div class="kpi-tooltip">
@@ -5885,17 +5879,6 @@
           <div class="kpi-label">RIESGO OVERNIGHT <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
           <div class="kpi-sublabel">(Peso de Brecha · N2)</div>
           <div class="kpi-value">${p107.share_n2_pct.toFixed(1)}%</div>
-        </div>
-
-        <div class="kpi-cell">
-          <div class="kpi-tooltip">
-            <strong>Brecha de Apertura (N3):</strong><br>
-            Contribución porcentual del cambio exacto entre Cierre previo y la Apertura oficial.<br>
-            <span style="color:#94a3b8;">• Intensidad del salto inicial de negociación.</span>
-          </div>
-          <div class="kpi-label">BRECHA APERTURA <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
-          <div class="kpi-sublabel">(Salto de Sesión · N3)</div>
-          ${n3Display}
         </div>
       `;
       
