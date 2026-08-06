@@ -870,17 +870,49 @@
     .kpi-cell {
       flex: 1;
       text-align: center;
-      padding: 12px 10px;
+      padding: 10px 8px;
       border-right: 1px solid #eaecef;
       position: relative;
       cursor: help;
       transition: background-color 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .kpi-cell:last-child {
       border-right: none;
     }
     .kpi-cell:hover {
       background-color: #f8fafc !important;
+    }
+    .kpi-cell .kpi-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+    .kpi-cell .kpi-sublabel {
+      font-size: 0.62rem;
+      color: #64748b;
+      font-weight: 500;
+      line-height: 1.1;
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+    .kpi-cell .kpi-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.1;
     }
     .kpi-cell .kpi-tooltip {
       visibility: hidden;
@@ -973,6 +1005,18 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
+    .btn-primary {
+      background-color: #005cff;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0, 92, 255, 0.2);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn-primary:hover {
+      background-color: #0046cc;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 
@@ -1001,7 +1045,7 @@
       <div id="modal-chart-usdclp" style="width: 100%; height: 260px; display: none; background: #f7f7f7; border: 1px solid #dddddd; border-radius: 0px;"></div>
     </div>
     <div style="text-align: right; display: flex; justify-content: space-between; border-top: 1px solid #eaecef; padding-top: 15px;">
-      <button class="agent-modal-close" style="background: #eaeaea; color: #1a1a1a;" onclick="syncAntigravity()">Leer respuesta de Antigravity</button>
+
       <button class="agent-modal-close" style="background: #1a1a1a; color: #ffffff;" onclick="closeAgentModal()">Cerrar</button>
     </div>
   </div>
@@ -1020,7 +1064,7 @@
           </div>
         </div>
         <div class="controls-container">
-          <button id="btn-generar-informe" class="tab-button" style="background: #005cff; color: white; padding: 6px 12px; margin-right: 15px; border-radius: 4px;" onclick="generarInformeExperto()">GENERAR INFORME IA</button>
+
           
           <div class="time-filter-group" style="display: flex; gap: 4px; margin-right: 15px; background: #e2e8f0; padding: 2px; border-radius: 6px;">
             <button class="time-filter-btn active" onclick="aplicarFiltroTemporal('1Y')" data-range="1Y">1Y</button>
@@ -1097,10 +1141,13 @@
     <div id="desk-volatilidad">
 
     <!-- SECCIÓN ESTRUCTURAL PILAR 1 -->
-    <details id="structural-details" class="structural-section" ontoggle="onStructuralSectionToggle(event)">
-      <summary class="structural-summary">
-        Caracterización Estructural del Instrumento 
-        <span class="structural-badge">Lectura Estructural (Exenta de filtros)</span>
+    <details id="structural-details" class="structural-section" open ontoggle="onStructuralSectionToggle(event)">
+      <summary class="structural-summary" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          Caracterización Estructural del Instrumento 
+          <span class="structural-badge">Lectura Estructural (Exenta de filtros)</span>
+        </div>
+        <button id="btn-informe-1" class="btn-primary" style="display: none; padding: 4px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; transition: opacity 0.3s;" onclick="abrirInformeNLG(1, event)">Informe Agente</button>
       </summary>
       
       <div class="dashboard-grid" style="margin-top: 16px;">
@@ -1173,15 +1220,27 @@
 
     </details>
 
+    <!-- SECCIÓN 2: MAGNITUD Y DISTRIBUCIÓN DE VOLATILIDAD -->
+    <details id="magnitude-details" class="structural-section" open>
+      <summary class="structural-summary" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          Magnitud y Distribución de Volatilidad
+          <span class="structural-badge">Filtrado Dinámico (Línea de Tiempo, Histograma y Riesgo de Cola)</span>
+        </div>
+      </summary>
+
         <!-- Cuadrícula 2x2 (Bloomberg Light) -->
     <div class="dashboard-grid" style="grid-template-columns: 3fr 2fr;">
       <!-- C1: Evolución Temporal del ATR -->
       <div class="grid-panel">
-        <div class="panel-header">
+        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
           <h4 class="panel-title">LÍNEA DE TIEMPO DE VOLATILIDAD</h4>
-          <div class="tab-container">
-            <button id="tab-nominal" class="tab-button active" onclick="cambiarMetricaATR('nominal')">NOM</button>
-            <button id="tab-porcentual" class="tab-button" onclick="cambiarMetricaATR('porcentual')">NORM (%)</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="btn-informe-2" class="btn-primary" style="display: none; padding: 4px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; transition: opacity 0.3s;" onclick="abrirInformeNLG(2, event)">Informe Agente</button>
+            <div class="tab-container">
+              <button id="tab-nominal" class="tab-button active" onclick="cambiarMetricaATR('nominal')">NOM</button>
+              <button id="tab-porcentual" class="tab-button" onclick="cambiarMetricaATR('porcentual')">NORM (%)</button>
+            </div>
           </div>
         </div>
         <div id="grafico-atr" class="chart-container"></div>
@@ -1201,6 +1260,7 @@
         <div class="panel-header">
           <h4 class="panel-title">DISPERSIÓN DE RETORNOS DIARIOS</h4>
           <div class="tab-container" style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-informe-3" class="btn-primary" style="display: none; padding: 4px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; transition: opacity 0.3s;" onclick="abrirInformeNLG(3, event)">Informe Agente</button>
             <button id="btn-analizar-clicks" class="tab-button" style="background-color: #28a745; color: white; display: none; border-color: #28a745;" onclick="analizarPuntosClickeados()">Analizar Selección (0)</button>
             <button id="tab-disp-direccional" class="tab-button active" onclick="cambiarModoDispersion('direccional')">DIR</button>
             <button id="tab-disp-absoluto" class="tab-button" onclick="cambiarModoDispersion('absoluto')">ABS (|X|)</button>
@@ -1302,61 +1362,16 @@
       <div style="margin-top: 10px; font-size: 10px; color: #64748b; font-style: italic; text-align: center;">
         *Expected Shortfall (CVaR) al 5%. Representa el valor promedio de la pérdida si se supera el umbral extremo.
       </div>
-    </div>
+    </details>
 
-        <!-- MÓDULO B: MAPA DE SÍNTESIS 2D (PLANOS DE CUADRANTES HURST H VS. KAUFMAN ER) -->
-    <div class="scatter2d-card-container" style="margin-top: 15px; margin-bottom: 25px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">
-          // MAPA DE SÍNTESIS 2D: MEMORIA (HURST H) VS. EFICIENCIA (KAUFMAN ER)
+    <!-- SECCIÓN 3: DIAGNÓSTICO ECONOMÉTRICO DE MEMORIA (HURST H & KAUFMAN ER) -->
+    <details id="econometric-details" class="structural-section" open>
+      <summary class="structural-summary" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          Diagnóstico Econométrico de Memoria y Eficiencia
+          <span class="structural-badge">Exponente de Hurst (H) y Eficiencia Kaufman (ER)</span>
         </div>
-        <div style="font-size: 10px; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-          <span>HORIZONTE DE MEMORIA:</span>
-          <div style="display: flex; background: #e2e8f0; border-radius: 4px; padding: 2px;">
-            <button onclick="cambiarVentanaHurst('5d')" id="btn-window-5d" style="background: transparent; border: none; font-size: 10px; font-weight: 700; color: #64748b; padding: 2px 8px; border-radius: 3px; cursor: pointer; transition: all 0.2s;">5D</button>
-            <button onclick="cambiarVentanaHurst('14d')" id="btn-window-14d" style="background: transparent; border: none; font-size: 10px; font-weight: 700; color: #64748b; padding: 2px 8px; border-radius: 3px; cursor: pointer; transition: all 0.2s;">14D</button>
-            <button onclick="cambiarVentanaHurst('30d')" id="btn-window-30d" style="background: #ffffff; border: none; font-size: 10px; font-weight: 700; color: #0f172a; padding: 2px 8px; border-radius: 3px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">30D</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; gap: 20px; align-items: center;">
-          <div id="scatter2d-coords-display" style="font-size: 18px; font-weight: 700; color: #1e293b;">
-            H: - | ER: -
-          </div>
-        </div>
-        <div id="scatter2d-quadrant-badge" style="font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 4px; color: #fff; background: #64748b;">
-          -
-        </div>
-      </div>
-
-      <!-- Barra de Estado de la Constelación Histórica Completa -->
-      <div style="display: flex; justify-content: space-between; align-items: center; background: #eef2f6; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 4px; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span style="background: #4a6984; color: #ffffff; padding: 3px 10px; border-radius: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;">MATRIZ DE FASE COMPLETA (~3,600 DÍAS)</span>
-          <span style="font-size: 10px; font-weight: 600; color: #64748b;">DISPERSIÓN BIVARIADA: HURST (H) × KAUFMAN (ER)</span>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span id="scatter2d-slider-label" style="font-size: 9px; font-weight: 700; color: #475569;">FILTRADO ACTIVO EN TIEMPO REAL VÍA BARRA GLOBAL (RÉGIMEN / ESTADO)</span>
-        </div>
-      </div>
-
-
-
-
-      <!-- Contenedor del Gráfico Plotly 2D Scatter + Capa Canvas Overlay de Luz -->
-      <div style="position: relative; width: 100%; height: 320px; margin-bottom: 8px;">
-        <div id="scatter2d-chart-container" style="width: 100%; height: 320px; background: transparent;"></div>
-        <canvas id="scatter2d-canvas-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 320px; pointer-events: none; z-index: 10;"></canvas>
-      </div>
-
-
-      <div id="scatter2d-description" style="font-size: 12px; color: #475569; line-height: 1.5; font-style: italic;">
-        Awaiting econometric trajectory calculation...
-      </div>
-    </div>
+      </summary>
 
     <!-- Diagnóstico Econométrico de Memoria (Exponente de Hurst H Jerárquico 7x3) -->
     <div class="hurst-card-container" style="margin-top: 15px; margin-bottom: 25px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
@@ -1367,22 +1382,6 @@
           // DIAGNÓSTICO ECONOMÉTRICO DE MEMORIA POR RÉGIMEN-ESTADO Y DIRECCIÓN (HURST H)
         </div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-          <div style="display: flex; gap: 3px; align-items: center; flex-wrap: wrap;">
-            <span style="font-size: 10px; color: #94a3b8; font-weight: 600; margin-right: 2px;">RÉGIMEN-ESTADO:</span>
-            <button id="hurst-regime-global" class="tab-button active" onclick="seleccionarHurstFiltro('regime', 'global')" style="padding: 2px 5px; font-size: 9px;">GLOBAL</button>
-            <button id="hurst-regime-BAJO_EXPANSION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'BAJO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">BAJO-EXP</button>
-            <button id="hurst-regime-BAJO_CONTRACCION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'BAJO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">BAJO-CON</button>
-            <button id="hurst-regime-MEDIO_EXPANSION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'MEDIO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">MEDIO-EXP</button>
-            <button id="hurst-regime-MEDIO_CONTRACCION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'MEDIO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">MEDIO-CON</button>
-            <button id="hurst-regime-ALTO_EXPANSION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'ALTO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">ALTO-EXP</button>
-            <button id="hurst-regime-ALTO_CONTRACCION" class="tab-button" onclick="seleccionarHurstFiltro('regime', 'ALTO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">ALTO-CON</button>
-          </div>
-          <div style="display: flex; gap: 3px; align-items: center;">
-            <span style="font-size: 10px; color: #94a3b8; font-weight: 600; margin-right: 2px;">DIRECCIÓN:</span>
-            <button id="hurst-dir-global" class="tab-button active" onclick="seleccionarHurstFiltro('dir', 'global')" style="padding: 2px 6px; font-size: 9px;">GLOBAL</button>
-            <button id="hurst-dir-alcista" class="tab-button" onclick="seleccionarHurstFiltro('dir', 'alcista')" style="padding: 2px 6px; font-size: 9px;">ALCISTA</button>
-            <button id="hurst-dir-bajista" class="tab-button" onclick="seleccionarHurstFiltro('dir', 'bajista')" style="padding: 2px 6px; font-size: 9px;">BAJISTA</button>
-          </div>
           <button id="btn-toggle-hurst-heatmap" class="tab-button" onclick="toggleHurstHeatmap()" style="padding: 2px 8px; font-size: 9px; font-weight: 700; background: #f1f5f9; color: #1e293b; border-color: #cbd5e1;">
             VISTA MATRIZ HEATMAP 7X3
           </button>
@@ -1455,22 +1454,6 @@
             <button id="kaufman-tab-20d" class="tab-button" onclick="seleccionarKaufmanFiltro('period', '20d')" style="padding: 2px 6px; font-size: 9px;">20D</button>
             <button id="kaufman-tab-50d" class="tab-button" onclick="seleccionarKaufmanFiltro('period', '50d')" style="padding: 2px 6px; font-size: 9px;">50D</button>
           </div>
-          <div style="display: flex; gap: 3px; align-items: center; flex-wrap: wrap;">
-            <span style="font-size: 10px; color: #94a3b8; font-weight: 600; margin-right: 2px;">RÉGIMEN-ESTADO:</span>
-            <button id="kaufman-regime-global" class="tab-button active" onclick="seleccionarKaufmanFiltro('regime', 'global')" style="padding: 2px 5px; font-size: 9px;">GLOBAL</button>
-            <button id="kaufman-regime-BAJO_EXPANSION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'BAJO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">BAJO-EXP</button>
-            <button id="kaufman-regime-BAJO_CONTRACCION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'BAJO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">BAJO-CON</button>
-            <button id="kaufman-regime-MEDIO_EXPANSION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'MEDIO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">MEDIO-EXP</button>
-            <button id="kaufman-regime-MEDIO_CONTRACCION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'MEDIO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">MEDIO-CON</button>
-            <button id="kaufman-regime-ALTO_EXPANSION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'ALTO_EXPANSION')" style="padding: 2px 5px; font-size: 9px;">ALTO-EXP</button>
-            <button id="kaufman-regime-ALTO_CONTRACCION" class="tab-button" onclick="seleccionarKaufmanFiltro('regime', 'ALTO_CONTRACCION')" style="padding: 2px 5px; font-size: 9px;">ALTO-CON</button>
-          </div>
-          <div style="display: flex; gap: 3px; align-items: center;">
-            <span style="font-size: 10px; color: #94a3b8; font-weight: 600; margin-right: 2px;">DIRECCIÓN:</span>
-            <button id="kaufman-dir-global" class="tab-button active" onclick="seleccionarKaufmanFiltro('dir', 'global')" style="padding: 2px 6px; font-size: 9px;">GLOBAL</button>
-            <button id="kaufman-dir-alcista" class="tab-button" onclick="seleccionarKaufmanFiltro('dir', 'alcista')" style="padding: 2px 6px; font-size: 9px;">ALCISTA</button>
-            <button id="kaufman-dir-bajista" class="tab-button" onclick="seleccionarKaufmanFiltro('dir', 'bajista')" style="padding: 2px 6px; font-size: 9px;">BAJISTA</button>
-          </div>
           <button id="btn-toggle-kaufman-heatmap" class="tab-button" onclick="toggleKaufmanHeatmap()" style="padding: 2px 8px; font-size: 9px; font-weight: 700; background: #f1f5f9; color: #1e293b; border-color: #cbd5e1;">
             VISTA MATRIZ HEATMAP 7X3
           </button>
@@ -1533,6 +1516,7 @@
         </div>
       </div>
     </div>
+    </details>
 
 
 
@@ -2921,6 +2905,15 @@
           btn.textContent = "Analizar Selección (0)";
       }
 
+      // Reiniciar informes NLG
+      window.informe1HTML = null;
+      window.informe2HTML = null;
+      window.informe3HTML = null;
+      if(document.getElementById("btn-informe-1")) document.getElementById("btn-informe-1").style.display = "none";
+      if(document.getElementById("btn-informe-2")) document.getElementById("btn-informe-2").style.display = "none";
+      if(document.getElementById("btn-informe-3")) document.getElementById("btn-informe-3").style.display = "none";
+      if(window.reportPollingInterval) clearInterval(window.reportPollingInterval);
+
       const spinner = document.getElementById("loading-spinner");
       spinner.style.display = "inline";
       
@@ -2948,6 +2941,58 @@
         globalAssetName = assetName;
         globalMarkovData = markovRes;
         globalStreaksData = streaksRes;
+
+        // Iniciar polling de informes NLG pre-calculados
+        window.reportPollingInterval = setInterval(async () => {
+            if (!window.informe1HTML) {
+                try {
+                    let r1 = await fetch(`${API_BASE}/reports?asset=${assetName}&type=1`);
+                    if (r1.ok) {
+                        let d1 = await r1.json();
+                        window.informe1HTML = d1.html;
+                        let btn1 = document.getElementById("btn-informe-1");
+                        if (btn1) {
+                            btn1.style.display = "inline-block";
+                            btn1.style.opacity = "0";
+                            setTimeout(() => btn1.style.opacity = "1", 50);
+                        }
+                    }
+                } catch (e) {}
+            }
+            if (!window.informe2HTML) {
+                try {
+                    let r2 = await fetch(`${API_BASE}/reports?asset=${assetName}&type=2`);
+                    if (r2.ok) {
+                        let d2 = await r2.json();
+                        window.informe2HTML = d2.html;
+                        let btn2 = document.getElementById("btn-informe-2");
+                        if (btn2) {
+                            btn2.style.display = "inline-block";
+                            btn2.style.opacity = "0";
+                            setTimeout(() => btn2.style.opacity = "1", 50);
+                        }
+                    }
+                } catch (e) {}
+            }
+            if (!window.informe3HTML) {
+                try {
+                    let r3 = await fetch(`${API_BASE}/reports?asset=${assetName}&type=3`);
+                    if (r3.ok) {
+                        let d3 = await r3.json();
+                        window.informe3HTML = d3.html;
+                        let btn3 = document.getElementById("btn-informe-3");
+                        if (btn3) {
+                            btn3.style.display = "inline-block";
+                            btn3.style.opacity = "0";
+                            setTimeout(() => btn3.style.opacity = "1", 50);
+                        }
+                    }
+                } catch (e) {}
+            }
+            if (window.informe1HTML && window.informe2HTML && window.informe3HTML) {
+                clearInterval(window.reportPollingInterval);
+            }
+        }, 2000);
         globalGapsData = gapsRes;
         globalPilar1Data = pilar1Res;
         globalPilar2Data = pilar2Res;
@@ -5709,6 +5754,19 @@
       document.getElementById("agent-backdrop").classList.add("visible");
       document.getElementById("agent-modal").classList.add("visible");
     }
+
+    window.abrirInformeNLG = function(type, event) {
+        if (event) event.stopPropagation();
+        const html = type === 1 ? window.informe1HTML : type === 2 ? window.informe2HTML : window.informe3HTML;
+        if (!html) return;
+        
+        let title = type === 1 ? "CARACTERIZACIÓN ESTRUCTURAL (ADN)" : type === 2 ? "MAGNITUD DE VOLATILIDAD" : "DISTRIBUCIÓN DE RETORNOS";
+        document.getElementById("agent-modal-stats").innerHTML = `<b>ACTIVO:</b> ${globalAssetName} &nbsp;|&nbsp; <b>${title}</b>`;
+        document.getElementById("agent-modal-body").innerHTML = html;
+        
+        document.getElementById("agent-backdrop").classList.add("visible");
+        document.getElementById("agent-modal").classList.add("visible");
+    };
     let pilar1Rendered = false;
 
     function onStructuralSectionToggle(event) {
@@ -5797,19 +5855,46 @@
 
       stripContainer.innerHTML = `
         <div class="kpi-cell">
-          <div class="kpi-label">SIGMA TOTAL (N1)</div>
+          <div class="kpi-tooltip">
+            <strong>Volatilidad Total Diaria (N1):</strong><br>
+            Mide la variación porcentual acumulada de cierre a cierre (Close-to-Close) en 24 horas.<br>
+            <span style="color:#94a3b8;">• Riesgo completo acumulado de un día a otro.</span>
+          </div>
+          <div class="kpi-label">VOLATILIDAD TOTAL <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
+          <div class="kpi-sublabel">(Close-to-Close · N1)</div>
           <div class="kpi-value">${(p107.sigma_total_pct || 0).toFixed(2)}%</div>
         </div>
+
         <div class="kpi-cell">
-          <div class="kpi-label">SIGMA INTRADÍA (PARKINSON)</div>
+          <div class="kpi-tooltip">
+            <strong>Amplitud Intradía (Parkinson):</strong><br>
+            Mide la volatilidad en la sesión según la extensión entre Máximo y Mínimo (High-Low).<br>
+            <span style="color:#94a3b8;">• Excluye saltos u Overnight Gaps fuera de rueda.</span>
+          </div>
+          <div class="kpi-label">AMPLITUD INTRADÍA <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
+          <div class="kpi-sublabel">(Parkinson · High-Low)</div>
           <div class="kpi-value">${(p106.sigma_diaria_pct).toFixed(2)}%</div>
         </div>
+
         <div class="kpi-cell">
-          <div class="kpi-label">O/N RISK (N2)</div>
+          <div class="kpi-tooltip">
+            <strong>Riesgo Overnight (N2):</strong><br>
+            Porcentaje de la volatilidad diaria total generada mientras el mercado estuvo cerrado.<br>
+            <span style="color:#94a3b8;">• Medición de exposición a noticias nocturnas.</span>
+          </div>
+          <div class="kpi-label">RIESGO OVERNIGHT <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
+          <div class="kpi-sublabel">(Peso de Brecha · N2)</div>
           <div class="kpi-value">${p107.share_n2_pct.toFixed(1)}%</div>
         </div>
+
         <div class="kpi-cell">
-          <div class="kpi-label">O/N RISK (N3 APERTURA)</div>
+          <div class="kpi-tooltip">
+            <strong>Brecha de Apertura (N3):</strong><br>
+            Contribución porcentual del cambio exacto entre Cierre previo y la Apertura oficial.<br>
+            <span style="color:#94a3b8;">• Intensidad del salto inicial de negociación.</span>
+          </div>
+          <div class="kpi-label">BRECHA APERTURA <span style="color:#94a3b8; font-size: 0.72rem;">ⓘ</span></div>
+          <div class="kpi-sublabel">(Salto de Sesión · N3)</div>
           ${n3Display}
         </div>
       `;

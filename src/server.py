@@ -18,7 +18,41 @@ import engine
 import kpis
 import adn
 import config
+import report_engine
 import textwrap
+
+def generate_and_cache_reports(asset_name, df_for_p1, chart_data):
+    try:
+        reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "reports")
+        os.makedirs(reports_dir, exist_ok=True)
+        
+        # Informe 1
+        try:
+            p1_data = adn.caracterizar_pilar1(df_for_p1)
+            r1 = report_engine.generate_informe1(asset_name, p1_data)
+            with open(os.path.join(reports_dir, f"{asset_name}_informe1.json"), "w", encoding="utf-8") as f:
+                json.dump(r1, f, ensure_ascii=False)
+        except Exception as e:
+            traceback.print_exc()
+
+        # Informe 2
+        try:
+            r2 = report_engine.generate_informe2(asset_name, chart_data)
+            with open(os.path.join(reports_dir, f"{asset_name}_informe2.json"), "w", encoding="utf-8") as f:
+                json.dump(r2, f, ensure_ascii=False)
+        except Exception as e:
+            traceback.print_exc()
+
+        # Informe 3
+        try:
+            r3 = report_engine.generate_informe3(asset_name, df_for_p1)
+            with open(os.path.join(reports_dir, f"{asset_name}_informe3.json"), "w", encoding="utf-8") as f:
+                json.dump(r3, f, ensure_ascii=False)
+        except Exception as e:
+            traceback.print_exc()
+            
+    except Exception as e:
+        traceback.print_exc()
 
 import google.generativeai as genai
 
@@ -145,6 +179,28 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 traceback.print_exc()
                 self.send_error_response(500, f"Error obteniendo activos: {type(e).__name__}")
 
+        # Endpoint Reportes: Obtener informe generado en background
+        elif path == "/api/reports":
+            asset_name = query_params.get("asset", [None])[0]
+            report_type = query_params.get("type", [None])[0]
+            if not asset_name or not report_type:
+                self.send_error_response(400, "Faltan parametros 'asset' o 'type'")
+                return
+            
+            reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "reports")
+            report_path = os.path.join(reports_dir, f"{asset_name}_informe{report_type}.json")
+            
+            if os.path.exists(report_path):
+                with open(report_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(content.encode("utf-8"))
+            else:
+                self.send_error_response(404, "Reporte no encontrado o aun generandose")
+
         # Endpoint ADN: Pilar 1 — caracterización estructural del instrumento
         # Ver docs/CATALOGO_KPIS_ADN.md (indicadores P1.01 a P1.08)
         elif path == "/api/adn/pilar1":
@@ -250,6 +306,12 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                     "metrics": result,
                     "chart_data": chart_data
                 }
+
+                # Trigger report generation in background
+                chart_data_for_report = [{"date": d, "natr": n} for d,n in zip(chart_data["dates"], chart_data["natr"])]
+                t = threading.Thread(target=generate_and_cache_reports, args=(asset_name, df.copy(), chart_data_for_report))
+                t.daemon = True
+                t.start()
 
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
@@ -815,7 +877,7 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                 elif "XAUUSD" in asset_name:
                     operar_desc = "Gaps pequeños (±0.4 ATR) en cualquier dirección. El oro tiende a ser altamente reversionista en micro-rangos."
                     evitar_desc = "Operar en contra de gaps expansivos mayores a ±1.5 ATR cuando el NATR supera el 3.5%, ya que la volatilidad extrema fomenta continuaciones violentas."
-                    plain_desc = "En el Oro, la reversión es extremadamente eficiente en rangos normales de volatilidad. Sin embargo, en picos de pánico o euforia, los gaps grandes inician tendencias intradía fuertes."
+                    plain_desc = "En el Oro, la reversión es extremadamente eficiente en rangos normales de volatilidad. Sin embargo, en peaks de pánico o euforia, los gaps grandes inician tendencias intradía fuertes."
                 else: # Por defecto (QQQ, acciones)
                     if pos_mean > neg_mean + 5:
                         plain_desc = f"En {asset_name}, existe un sesgo alcista estructural claro. Las aperturas alcistas se venden con alta probabilidad de retorno a la media (promedio {pos_mean:.1f}%), mientras que las aperturas bajistas muestran mayor convicción de continuación."

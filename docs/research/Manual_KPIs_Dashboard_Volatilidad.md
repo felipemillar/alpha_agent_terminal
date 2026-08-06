@@ -59,7 +59,7 @@ activo se mueve el doble (en %) que uno de 1%, sea EURUSD u ORO. Es la métrica 
 comprimiendo? Compresión suele preceder rupturas; expansión indica régimen de estrés en curso.
 
 **Semáforo QRT.** Sintetiza régimen + estado en un veredicto legible con mandato operativo (qué favorece
-/ qué evitar). Es el "titular" que resume las cinco tarjetas.
+/ qué evitar). Es el "titular" que resume las cuatro tarjetas.
 
 ---
 

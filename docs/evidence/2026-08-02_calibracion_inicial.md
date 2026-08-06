@@ -205,8 +205,8 @@ Conservadas por valor metodológico. **No reproducibles** con el estado actual d
 ### Relación entre pérdida esperada y su umbral
 
 Medida sobre cinco instrumentos (XAUUSD, USDCLP, Nasdaq, S&P 500, BTCUSD), con muestras de 4.200 a
-16.100 sesiones: la pérdida media del 5% de sesiones más adversas resultó **1,50 a 1,56 veces** el
-umbral que la define, con notable estabilidad entre instrumentos.
+16.100 sesiones: a nivel **global** (sin condicionar por régimen), la pérdida media del 5% de sesiones más adversas resultó **1,50 a 1,56 veces** el
+umbral que la define, con notable estabilidad entre instrumentos. Esta constante desciende significativamente al condicionar por régimen alto.
 
 ### Tiempo de normalización
 

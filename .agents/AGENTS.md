@@ -146,3 +146,12 @@ El dashboard puede emitir tres (3) tipos de solicitudes distintas a través de `
 2. **EXCEPCIÓN ÚNICA:** El agente solo podrá ejecutar un comando que afecte a GitHub si el usuario lo solicita explícita y textualmente en su mensaje de instrucción (ej. "sube los cambios a git", "haz push", "actualiza el repo remoto").
 3. **COMPORTAMIENTO ESPERADO:** Al completar cualquier refactorización o cambio de código local, el agente debe limitarse a confirmar los cambios de forma local y dejar la sincronización remota bajo el control del usuario.
 
+---
+
+## Regla: Terminología Financiera (Uso de "peaks")
+
+**OBLIGATORIO:** Al redactar informes, análisis estadísticos o comentarios relacionados con extremos superiores de volatilidad o precio, el agente **DEBE** utilizar exclusivamente el término en inglés **"peaks"** o **"peak"** en lugar de la palabra "picos".
+
+- **Incorrecto:** "La volatilidad alcanzó picos históricos en 2020."
+- **Correcto:** "La volatilidad alcanzó peaks históricos en 2020."
+
