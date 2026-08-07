@@ -499,7 +499,7 @@ class VolatilityAPIHandler(http.server.BaseHTTPRequestHandler):
                     # 3. Lanzamos el generador
                     gen_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "generate_analysis.py")
                     try:
-                        subprocess.run(["python3", gen_script], check=True)
+                        subprocess.run([sys.executable, gen_script], check=True)
                         print("Análisis autónomo generado con éxito.")
                     except Exception as e:
                         print(f"Error generando análisis autónomo: {e}")
